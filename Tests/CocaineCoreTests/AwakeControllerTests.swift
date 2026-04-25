@@ -38,9 +38,73 @@ final class AwakeControllerTests: XCTestCase {
         let client = FakePowerAssertionClient()
         let controller = AwakeController(client: client)
 
-        try controller.enable()
+        try controller.enable(preventDisplaySleep: true)
 
         XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testEnableWithoutDisplayFlagCreatesOnlyNoIdleAssertion() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: false)
+
+        XCTAssertEqual(client.createdReasons, ["Cocaine is active"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testEnableWithDisplayFlagCreatesBothAssertions() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: true)
+
+        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testSetPreventDisplaySleepReleasesDisplayAssertionWhenTurnedOff() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: true)
+        try controller.setPreventDisplaySleep(false)
+
+        XCTAssertEqual(client.releasedIDs, [43])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testSetPreventDisplaySleepCreatesDisplayAssertionWhenTurnedOn() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: false)
+        try controller.setPreventDisplaySleep(true)
+
+        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testSetPreventDisplaySleepIsNoopWhenDisabled() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.setPreventDisplaySleep(true)
+
+        XCTAssertTrue(client.createdReasons.isEmpty)
+        XCTAssertFalse(controller.isEnabled)
+    }
+
+    func testSetPreventDisplaySleepRevertsOnDisplayCreationFailure() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+        try controller.enable(preventDisplaySleep: false)
+
+        client.displayCreateError = TestError(errorDescription: "display failed")
+        XCTAssertThrowsError(try controller.setPreventDisplaySleep(true))
+
+        XCTAssertEqual(client.createdReasons, ["Cocaine is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -51,7 +115,7 @@ final class AwakeControllerTests: XCTestCase {
         try controller.enable()
         controller.disable()
 
-        XCTAssertEqual(client.releasedIDs, [42, 43])
+        XCTAssertEqual(client.releasedIDs, [43, 42])
         XCTAssertFalse(controller.isEnabled)
     }
 
