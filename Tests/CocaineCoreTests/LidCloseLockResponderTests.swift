@@ -116,4 +116,22 @@ final class LidCloseLockResponderTests: XCTestCase {
         XCTAssertNil(state.lastErrorMessage)
         _ = responder
     }
+
+    func testExistingLidStateCallbackIsPreservedBeforeResponderLocks() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let locker = FakeScreenLocker()
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        prefs.lockScreenOnLidClose = true
+        var forwardedStates: [LidState] = []
+        monitor.onLidStateChange = { forwardedStates.append($0) }
+        let responder = LidCloseLockResponder(state: state, monitor: monitor, screenLocker: locker, preferences: prefs)
+
+        monitor.emit(.closed)
+
+        XCTAssertEqual(forwardedStates, [.closed])
+        XCTAssertEqual(locker.lockCallCount, 1)
+        _ = responder
+    }
 }
