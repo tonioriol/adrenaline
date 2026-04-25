@@ -40,7 +40,7 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — Lid Event Sound Policy
+**Cursor:** Task 2 — Passive IOKit Lid State Monitor
 
 **Status:** in_progress
 
@@ -80,3 +80,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: The approved spec requires a task-by-task implementation path with tests, app wiring, documentation, and verification.
 - How: Added `plan.md` with five tasks: sound policy, passive IOKit monitor, AppKit sound playback/wiring, README update, and final verification/manual validation notes.
 - Decision: Execute with task-level TDD and keep the privileged helper unchanged.
+
+### 2026-04-25 22:50 — Task 1 lid event sound policy
+
+- Why: Add the testable core policy that starts passive lid monitoring only when Cocaine is active and maps lid-close/open events to the selected built-in sounds without changing activation state.
+- How: Added `Sources/CocaineCore/LidEventSoundController.swift` with `LidState`, `LidStateMonitoring`, `LidSoundPlaying`, active-state monitoring lifecycle, duplicate suppression, and silent monitor-start failure handling; added `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` covering activation start, close/open sounds, inactive silence, duplicate suppression, deactivation reset, and start failure state preservation. Evidence: `swift test --filter LidEventSoundControllerTests` failed before implementation due to missing policy symbols, then `swift test --filter LidEventSoundControllerTests && swift test` passed with 7 filtered tests and 40 total XCTest tests. Commit: `f9753e7`.
+- Decision: Main-actor-isolated the monitor and sound-player protocols because the controller, app state observation, and planned AppKit sound playback are main-actor UI-adjacent concerns and this avoids Swift concurrency conformance warnings.

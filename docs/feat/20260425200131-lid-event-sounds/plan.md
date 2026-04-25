@@ -28,7 +28,7 @@
 - Create: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
 - Create: `Sources/CocaineCore/LidEventSoundController.swift`
 
-- [ ] **Step 1: Write failing policy tests**
+- [x] **Step 1: Write failing policy tests**
 
 Create `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`:
 
@@ -181,7 +181,7 @@ final class LidEventSoundControllerTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run policy tests to verify they fail**
+- [x] **Step 2: Run policy tests to verify they fail**
 
 Run:
 
@@ -191,7 +191,7 @@ swift test --filter LidEventSoundControllerTests
 
 Expected: FAIL because `LidStateMonitoring`, `LidState`, `LidSoundPlaying`, and `LidEventSoundController` do not exist.
 
-- [ ] **Step 3: Implement lid event sound policy**
+- [x] **Step 3: Implement lid event sound policy**
 
 Create `Sources/CocaineCore/LidEventSoundController.swift`:
 
@@ -277,7 +277,7 @@ public final class LidEventSoundController {
 }
 ```
 
-- [ ] **Step 4: Run policy tests to verify they pass**
+- [x] **Step 4: Run policy tests to verify they pass**
 
 Run:
 
@@ -287,7 +287,7 @@ swift test --filter LidEventSoundControllerTests
 
 Expected: PASS.
 
-- [ ] **Step 5: Run the full test suite**
+- [x] **Step 5: Run the full test suite**
 
 Run:
 
@@ -297,7 +297,7 @@ swift test
 
 Expected: PASS for all existing and new tests.
 
-- [ ] **Step 6: Commit policy layer**
+- [x] **Step 6: Commit policy layer**
 
 Run:
 
