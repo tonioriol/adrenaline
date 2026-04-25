@@ -52,48 +52,88 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     }
 
     public func readLidClosePreventionStatus() async throws -> Bool {
-        try await callBooleanCommand { helper, reply in
+        try await callBooleanCommand({ helper, reply in
             helper.readLidClosePreventionStatus(reply: reply)
-        }
+        }, requiresSuccess: false)
     }
 
     private func helperVersion() async throws -> Int {
-        let helper = try makeRemoteHelperProxy()
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withHelperConnection { helper, complete in
             helper.helperVersion { version in
-                continuation.resume(returning: version.intValue)
+                complete(.success(version.intValue))
             }
         }
     }
 
     private func callBooleanCommand(
-        _ command: @escaping (CocaineHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void
+        _ command: @escaping (CocaineHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void,
+        requiresSuccess: Bool = true
     ) async throws -> Bool {
-        let helper = try makeRemoteHelperProxy()
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withHelperConnection { helper, complete in
             command(helper) { value, errorMessage in
-                if let errorMessage {
-                    continuation.resume(throwing: PrivilegedHelperClientError.helperReturnedError(errorMessage as String))
-                } else {
-                    continuation.resume(returning: value.boolValue)
-                }
+                complete(Result {
+                    try Self.decodeBooleanReply(value, errorMessage: errorMessage, requiresSuccess: requiresSuccess)
+                })
             }
         }
     }
 
-    private func makeRemoteHelperProxy() throws -> CocaineHelperProtocol {
-        let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
-        connection.remoteObjectInterface = NSXPCInterface(with: CocaineHelperProtocol.self)
-        connection.resume()
+    private func withHelperConnection<T>(
+        _ body: @escaping (CocaineHelperProtocol, @escaping (Result<T, Error>) -> Void) -> Void
+    ) async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
+            let lock = NSLock()
+            var didComplete = false
 
-        guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
-            NSLog("Cocaine helper XPC error: \(error.localizedDescription)")
-        }) as? CocaineHelperProtocol else {
-            connection.invalidate()
-            throw PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")
+            let complete: (Result<T, Error>) -> Void = { result in
+                lock.lock()
+                guard !didComplete else {
+                    lock.unlock()
+                    return
+                }
+                didComplete = true
+                lock.unlock()
+
+                connection.invalidate()
+                continuation.resume(with: result)
+            }
+
+            connection.remoteObjectInterface = NSXPCInterface(with: CocaineHelperProtocol.self)
+            connection.interruptionHandler = {
+                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection interrupted")))
+            }
+            connection.invalidationHandler = {
+                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection invalidated")))
+            }
+            connection.resume()
+
+            guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
+                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed(error.localizedDescription)))
+            }) as? CocaineHelperProtocol else {
+                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")))
+                return
+            }
+
+            body(proxy, complete)
+        }
+    }
+
+    internal static func decodeBooleanReply(
+        _ value: NSNumber,
+        errorMessage: NSString?,
+        requiresSuccess: Bool
+    ) throws -> Bool {
+        if let errorMessage {
+            throw PrivilegedHelperClientError.helperReturnedError(errorMessage as String)
         }
 
-        return proxy
+        let boolValue = value.boolValue
+        if requiresSuccess, !boolValue {
+            throw PrivilegedHelperClientError.invalidReply
+        }
+
+        return boolValue
     }
 
     private func blessHelper() throws {
@@ -110,6 +150,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
         guard authStatus == errAuthorizationSuccess, let authRef else {
             throw PrivilegedHelperClientError.authorizationFailed(authStatus)
         }
+        defer { AuthorizationFree(authRef, []) }
 
         var unmanagedError: Unmanaged<CFError>?
         let blessed = SMJobBless(kSMDomainSystemLaunchd, helperIdentifier as CFString, authRef, &unmanagedError)
