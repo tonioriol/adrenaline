@@ -182,3 +182,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Add the executable menu bar UI for the one-toggle keep-awake app after core coordination, helper, and packaging tasks were complete.
 - How: Replaced `Sources/Cocaine/main.swift` with the AppKit app entry point, added `Sources/Cocaine/AppDelegate.swift` to wire `AppState`, `AwakeController`, `LidCloseController`, and `AppCoordinator`, and added `Sources/Cocaine/MenuBarController.swift` for status-item rendering, one-click toggle, contextual menu, about panel, helper repair action, and quit behavior. Verified with `make app` passing after the pragmatic compile fix of isolating only AppDelegate lifecycle methods on `@MainActor`. Committed code as `a565332`.
 - Decision: Kept top-level app entry code from the task plan and moved `@MainActor` isolation from the entire delegate type to its AppKit lifecycle methods because SwiftPM top-level executable code cannot synchronously instantiate a globally main-actor-isolated delegate.
+
+### 2026-04-25 13:07 — Task 7 shutdown cleanup fix
+
+- Why: Code quality review found quitting during an in-flight toggle could bypass cleanup because the normal turn-off path returned early when busy.
+- How: Added a shutdown-safe coordinator cleanup path, updated app termination to use it, added regression coverage, verified with `swift test --filter AppCoordinatorTests && make test && make app`, commit a1f27b1.
