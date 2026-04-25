@@ -12,9 +12,9 @@ created: 2026-04-25
 
 **Goal:** Design and implement audible feedback for lid-close and lid-open events while Cocaine is preventing sleep, so the user can tell the app was left enabled and the Mac remained awake.
 
-The user wants one sound when the lid closes and another sound when the lid opens. The close sound should confirm lid-close prevention is enabled before leaving the Mac closed; the open sound should confirm the computer stayed awake while closed.
+The approved design uses passive app-side lid observation with built-in macOS sounds: Hero when the lid closes, Basso when the lid opens. Sounds are auxiliary feedback and must not change sleep-prevention activation, rollback, or cleanup behavior.
 
-**Done when:** The approved design is specified, an implementation plan exists, and the app can audibly signal close/open lid events only under the intended keep-awake conditions.
+**Done when:** The app passively monitors lid events while active, plays Hero on close and Basso on open, suppresses duplicate state notifications, remains silent while inactive, and passes automated verification plus manual MacBook validation.
 
 ## SPEC
 
@@ -33,9 +33,9 @@ The user wants one sound when the lid closes and another sound when the lid open
 
 ## PLAN
 
-**Plan:** Not written yet — spec approval pending.
+**Plan:** Not written yet — implementation planning next.
 
-**Cursor:** Brainstorming — exploring current lid-close architecture
+**Cursor:** Writing implementation plan
 
 **Status:** in_progress
 
@@ -63,3 +63,9 @@ The user wants one sound when the lid closes and another sound when the lid open
 - Why: The app-side passive observer design was approved section by section and needed to be captured before implementation planning.
 - How: Added `spec.md` covering goals, behavior, architecture, component responsibilities, data flow, error handling, testing, risks, and rejected alternatives.
 - Decision: Keep sounds auxiliary: monitoring or playback failures must not affect sleep-prevention activation or helper cleanup.
+
+### 2026-04-25 22:39 — Spec approved
+
+- Why: The user approved the written design and asked to proceed without further approval gates.
+- How: Marked the task framing and cursor for implementation planning based on the approved spec.
+- Decision: Proceed to the implementation plan for the passive app-side observer design.
