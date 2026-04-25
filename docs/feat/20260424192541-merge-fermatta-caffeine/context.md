@@ -114,3 +114,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Add the central orchestration point for the app’s single on/off action so ordinary awake prevention and lid-close prevention are enabled and disabled together.
 - How: Added `Sources/CocaineCore/AppCoordinator.swift` with controller protocols, status validation, rollback, and AppState error recording; added `Tests/CocaineCoreTests/AppCoordinatorTests.swift` covering on, off, enable failure rollback, and false status rollback. TDD evidence: `swift test --filter AppCoordinatorTests` failed before implementation because coordinator/protocol symbols were missing, then `swift test --filter AppCoordinatorTests && make test` passed with 11 total XCTest tests. Commit: `517addd`.
 - Decision: Let `AppState.recordError(_:)` own failure-state normalization so coordinator rollback records only the user-visible localized error after disabling any partially enabled controllers.
+
+### 2026-04-25 09:55 — Task 2 quality fixes
+
+- Why: Code quality review found missing busy-guard coverage and ambiguous post-disable status handling.
+- How: Added busy-guard/error-state tests, treated active status after disable as a coordinator error, verified with `swift test --filter AppCoordinatorTests` and `make test`, commit `313ed13`.
