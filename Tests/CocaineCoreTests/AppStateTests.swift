@@ -44,6 +44,16 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(state.helperState, .failed(message: "helper failed"))
     }
 
+    func testRecordErrorWhileActiveKeepsActiveButSetsErrorAndHelperFailed() {
+        let state = AppState(isActive: true, isBusy: true)
+        state.recordErrorWhileActive("display assertion failed")
+
+        XCTAssertTrue(state.isActive)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertEqual(state.lastErrorMessage, "display assertion failed")
+        XCTAssertEqual(state.helperState, .failed(message: "display assertion failed"))
+    }
+
     func testSettingHelperFailedSynchronizesVisibleErrorAndDeactivates() {
         let state = AppState(isActive: true, isBusy: true)
 

@@ -58,6 +58,12 @@ public final class AppState: ObservableObject {
         helperState = .failed(message: message)
     }
 
+    public func recordErrorWhileActive(_ message: String) {
+        isBusy = false
+        lastErrorMessage = message
+        helperState = .failed(message: message)
+    }
+
     public func clearError() {
         lastErrorMessage = nil
         if case .failed = helperState {
