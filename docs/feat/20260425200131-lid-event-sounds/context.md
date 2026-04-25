@@ -18,7 +18,7 @@ The user wants one sound when the lid closes and another sound when the lid open
 
 ## SPEC
 
-Spec not written yet — design approval pending.
+[spec.md](./spec.md) — passive app-side lid observer with Hero on close and Basso on open, pending written review.
 
 ## FILES
 
@@ -57,3 +57,9 @@ Spec not written yet — design approval pending.
 - Why: The feature should provide distinct audible confirmation for close and open without bundling custom assets.
 - How: Auditioned installed macOS system sounds from `/System/Library/Sounds` with `afplay`; the user selected Hero for lid close and Basso for lid open.
 - Decision: Use built-in macOS sounds initially: close = Hero, open = Basso.
+
+### 2026-04-25 22:37 — Spec written
+
+- Why: The app-side passive observer design was approved section by section and needed to be captured before implementation planning.
+- How: Added `spec.md` covering goals, behavior, architecture, component responsibilities, data flow, error handling, testing, risks, and rejected alternatives.
+- Decision: Keep sounds auxiliary: monitoring or playback failures must not affect sleep-prevention activation or helper cleanup.
