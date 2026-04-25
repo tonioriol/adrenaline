@@ -27,15 +27,20 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - `Sources/CocaineCore/LidCloseController.swift` — current lid-close prevention boundary
 - `Sources/Cocaine/AppDelegate.swift` — app lifecycle wiring for controllers
 - `Sources/Cocaine/MenuBarController.swift` — current menu bar UI and user actions
+- `Sources/Cocaine/SystemSoundPlayer.swift` — planned AppKit built-in sound wrapper
+- `Sources/CocaineCore/LidEventSoundController.swift` — planned lid sound policy coordinator
+- `Sources/CocaineCore/LidStateMonitor.swift` — planned passive IOKit lid state monitor
 - `Package.swift` — SwiftPM targets and framework links
 - `Makefile` — app bundle construction and signing
 - `README.md` — user-facing behavior and safety notes
+- `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` — planned policy tests
+- `Tests/CocaineCoreTests/LidStateMonitorTests.swift` — planned monitor decoding tests
 
 ## PLAN
 
-**Plan:** Not written yet — implementation planning next.
+**Plan:** [plan.md](./plan.md)
 
-**Cursor:** Writing implementation plan
+**Cursor:** Task 1 — Lid Event Sound Policy
 
 **Status:** in_progress
 
@@ -69,3 +74,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: The user approved the written design and asked to proceed without further approval gates.
 - How: Marked the task framing and cursor for implementation planning based on the approved spec.
 - Decision: Proceed to the implementation plan for the passive app-side observer design.
+
+### 2026-04-25 22:47 — Implementation plan generated
+
+- Why: The approved spec requires a task-by-task implementation path with tests, app wiring, documentation, and verification.
+- How: Added `plan.md` with five tasks: sound policy, passive IOKit monitor, AppKit sound playback/wiring, README update, and final verification/manual validation notes.
+- Decision: Execute with task-level TDD and keep the privileged helper unchanged.
