@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 8 — README updates for new behavior, defaults, upgrade note
+**Cursor:** Task 9 — Final verification (clean build, full tests, smoke launch)
 
 **Status:** in_progress
 
@@ -126,3 +126,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Accepted code-quality review fixes for the combined Task 6/7 app wiring + menu UI change: `MenuBarController.bindState()` now re-renders when `preventLidCloseSleep` changes so the active tooltip stays in sync, and `togglePreventLidCloseSleep()` clears `lidClosePreventionConfirmed` if a live enable attempt rolls `preventLidCloseSleep` back to false.
 - Verification passed: `swift build 2>&1 | tail -20` passed; `make app 2>&1 | tail -10` passed; `swift test 2>&1 | tail -10` executed 73 tests with 0 failures.
 - Committed the MenuBarController-only fix as `a100841` (`fix: keep lid-close warning and tooltip in sync`).
+
+### 2026-04-26 01:55 — Task 8 README behavior documentation
+
+- Why: The new settings model changes user-visible defaults and separates lid-close prevention from the main on/off toggle, so the README needed to describe the new behavior and upgrade impact.
+- How: Replaced `README.md` with updated Safety, Run, Behavior, preference defaults, helper authorization, repair/install helper, and upgrade-note text. Verification: `git diff -- README.md | head -80` showed the expected README rewrite before commit.
+- Commit: `44a94e3` (`docs: describe lid-close behavior preferences`).

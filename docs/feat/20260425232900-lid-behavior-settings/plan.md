@@ -2091,7 +2091,7 @@ git -c commit.gpgsign=false commit -m "feat: surface preference checkboxes in me
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Replace README behavior section**
+- [x] **Step 1: Replace README behavior section**
 
 Replace `README.md` with:
 
@@ -2142,12 +2142,12 @@ The first time you enable **Prevent sleep with lid closed**, macOS asks for admi
 Earlier versions enabled lid-close sleep prevention as part of the single on/off toggle. This version makes lid-close prevention an explicit opt-in — its default after upgrade is **off**. To restore the old behavior, right-click the menu bar icon and check **Prevent sleep with lid closed** once.
 ```
 
-- [ ] **Step 2: Verify README is internally consistent**
+- [x] **Step 2: Verify README is internally consistent**
 
 Run: `git diff -- README.md | head -80`
 Expected: shows the rewrite. No build/test step needed for docs.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add README.md
