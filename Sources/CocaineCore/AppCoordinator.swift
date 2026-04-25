@@ -72,7 +72,15 @@ public final class AppCoordinator {
     }
 
     public func turnOff() async {
-        guard !state.isBusy else { return }
+        await performTurnOff(force: false)
+    }
+
+    public func shutdownCleanup() async {
+        await performTurnOff(force: true)
+    }
+
+    private func performTurnOff(force: Bool) async {
+        guard force || !state.isBusy else { return }
         state.setBusy(true)
         awakeController.disable()
 
