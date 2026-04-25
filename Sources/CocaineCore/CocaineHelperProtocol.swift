@@ -8,9 +8,20 @@ public enum CocaineHelperConstants {
 
 @objc(CocaineHelperProtocol)
 public protocol CocaineHelperProtocol {
+    /// Enables lid-close sleep prevention. Reply values are `(success, errorMessage)`;
+    /// `errorMessage == nil` means success, while non-nil contains the helper-reported failure.
     func enableLidClosePrevention(reply: @escaping (NSNumber, NSString?) -> Void)
+
+    /// Disables lid-close sleep prevention. Reply values are `(success, errorMessage)`;
+    /// `errorMessage == nil` means success, while non-nil contains the helper-reported failure.
     func disableLidClosePrevention(reply: @escaping (NSNumber, NSString?) -> Void)
+
+    /// Reads the actual lid-close prevention status. Reply values are `(enabled, errorMessage)`;
+    /// `errorMessage == nil` means the first value is the current enabled status, while non-nil
+    /// contains the helper-reported failure.
     func readLidClosePreventionStatus(reply: @escaping (NSNumber, NSString?) -> Void)
+
+    /// Returns the helper contract version.
     func helperVersion(reply: @escaping (NSNumber) -> Void)
 }
 

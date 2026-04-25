@@ -36,6 +36,10 @@ private final class FakePrivilegedHelperClient: PrivilegedHelperClientProtocol {
     }
 }
 
+private struct TestError: Error, LocalizedError {
+    let errorDescription: String?
+}
+
 @MainActor
 final class LidCloseControllerTests: XCTestCase {
     func testEnableInstallsHelperThenEnablesLidClosePrevention() async throws {
@@ -46,6 +50,42 @@ final class LidCloseControllerTests: XCTestCase {
 
         XCTAssertTrue(helper.installed)
         XCTAssertTrue(helper.enabled)
+        XCTAssertEqual(helper.installCallCount, 1)
+        XCTAssertEqual(helper.enableCallCount, 1)
+    }
+
+    func testEnableDoesNotEnableWhenInstallFails() async {
+        let helper = FakePrivilegedHelperClient()
+        helper.installError = TestError(errorDescription: "install failed")
+        let controller = LidCloseController(helperClient: helper)
+
+        do {
+            try await controller.enable()
+            XCTFail("Expected enable to throw when helper installation fails")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "install failed")
+        }
+
+        XCTAssertFalse(helper.installed)
+        XCTAssertFalse(helper.enabled)
+        XCTAssertEqual(helper.installCallCount, 1)
+        XCTAssertEqual(helper.enableCallCount, 0)
+    }
+
+    func testEnablePropagatesEnableFailureAfterInstall() async {
+        let helper = FakePrivilegedHelperClient()
+        helper.enableError = TestError(errorDescription: "enable failed")
+        let controller = LidCloseController(helperClient: helper)
+
+        do {
+            try await controller.enable()
+            XCTFail("Expected enable to throw when helper enable fails")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "enable failed")
+        }
+
+        XCTAssertTrue(helper.installed)
+        XCTAssertFalse(helper.enabled)
         XCTAssertEqual(helper.installCallCount, 1)
         XCTAssertEqual(helper.enableCallCount, 1)
     }

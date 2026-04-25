@@ -2,11 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
     <key>CFBundleIdentifier</key>
-    <string>dev.local.CocaineHelper</string>
+    <string>com.tr0n.Cocaine.Helper</string>
     <key>CFBundleName</key>
     <string>CocaineHelper</string>
     <key>CFBundleVersion</key>
     <string>1</string>
+    <key>SMAuthorizedClients</key>
+    <array>
+        <string>identifier com.tr0n.Cocaine</string>
+    </array>
 </dict>
 </plist>
