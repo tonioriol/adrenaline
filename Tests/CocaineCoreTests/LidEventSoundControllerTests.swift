@@ -1,0 +1,146 @@
+import XCTest
+@testable import CocaineCore
+
+@MainActor
+private final class FakeLidStateMonitor: LidStateMonitoring {
+    var onLidStateChange: (@MainActor (LidState) -> Void)?
+    private(set) var isMonitoring = false
+    var startCallCount = 0
+    var stopCallCount = 0
+    var startError: Error?
+
+    func start() throws {
+        startCallCount += 1
+        if let startError { throw startError }
+        isMonitoring = true
+    }
+
+    func stop() {
+        stopCallCount += 1
+        isMonitoring = false
+    }
+
+    func emit(_ lidState: LidState) {
+        onLidStateChange?(lidState)
+    }
+}
+
+private final class FakeLidSoundPlayer: LidSoundPlaying {
+    private(set) var playedSoundNames: [String] = []
+
+    func play(named soundName: String) {
+        playedSoundNames.append(soundName)
+    }
+}
+
+private struct TestError: Error, LocalizedError {
+    let errorDescription: String?
+}
+
+@MainActor
+final class LidEventSoundControllerTests: XCTestCase {
+    func testBecomingActiveStartsMonitoring() {
+        let state = AppState()
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        state.setActive(true)
+
+        XCTAssertTrue(monitor.isMonitoring)
+        XCTAssertEqual(monitor.startCallCount, 1)
+        XCTAssertTrue(player.playedSoundNames.isEmpty)
+        _ = controller
+    }
+
+    func testCloseEventWhileActivePlaysHero() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        monitor.emit(.closed)
+
+        XCTAssertEqual(player.playedSoundNames, ["Hero"])
+        _ = controller
+    }
+
+    func testOpenEventWhileActivePlaysBasso() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        monitor.emit(.open)
+
+        XCTAssertEqual(player.playedSoundNames, ["Basso"])
+        _ = controller
+    }
+
+    func testLidEventsWhileInactivePlayNoSounds() {
+        let state = AppState()
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        monitor.emit(.closed)
+        monitor.emit(.open)
+
+        XCTAssertTrue(player.playedSoundNames.isEmpty)
+        XCTAssertFalse(monitor.isMonitoring)
+        _ = controller
+    }
+
+    func testDuplicateLidStatesDoNotReplaySounds() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        monitor.emit(.closed)
+        monitor.emit(.closed)
+        monitor.emit(.open)
+        monitor.emit(.open)
+        monitor.emit(.closed)
+
+        XCTAssertEqual(player.playedSoundNames, ["Hero", "Basso", "Hero"])
+        _ = controller
+    }
+
+    func testDeactivationStopsMonitoringAndClearsDuplicateState() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        monitor.emit(.closed)
+        state.setActive(false)
+        XCTAssertFalse(monitor.isMonitoring)
+
+        state.setActive(true)
+        monitor.emit(.closed)
+
+        XCTAssertTrue(monitor.isMonitoring)
+        XCTAssertEqual(player.playedSoundNames, ["Hero", "Hero"])
+        _ = controller
+    }
+
+    func testMonitorStartFailureDoesNotChangeAppStateOrPlaySounds() {
+        let state = AppState()
+        let monitor = FakeLidStateMonitor()
+        monitor.startError = TestError(errorDescription: "monitor unavailable")
+        let player = FakeLidSoundPlayer()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+
+        state.setActive(true)
+        monitor.emit(.closed)
+
+        XCTAssertTrue(state.isActive)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertNil(state.lastErrorMessage)
+        XCTAssertEqual(state.helperState, .unknown)
+        XCTAssertFalse(monitor.isMonitoring)
+        XCTAssertTrue(player.playedSoundNames.isEmpty)
+        _ = controller
+    }
+}
