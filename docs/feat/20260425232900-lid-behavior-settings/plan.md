@@ -1187,7 +1187,7 @@ git -c commit.gpgsign=false commit -m "feat: drive AppCoordinator from Preferenc
 - Modify: `Sources/CocaineCore/LidEventSoundController.swift`
 - Modify: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Append the `FakePreferencesStore` definition (same shape as in Task 3) to `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`. Add `import Combine` to the top if missing.
 
@@ -1254,12 +1254,12 @@ Append new tests inside the existing `final class LidEventSoundControllerTests`:
 
 Update every existing test that constructs `LidEventSoundController(state:monitor:soundPlayer:)` to pass `preferences: FakePreferencesStore()`.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `swift test --filter LidEventSoundControllerTests 2>&1 | tail -20`
 Expected: FAIL — `extra argument 'preferences' in call`.
 
-- [ ] **Step 3: Update the source**
+- [x] **Step 3: Update the source**
 
 Replace `Sources/CocaineCore/LidEventSoundController.swift` with:
 
@@ -1353,17 +1353,17 @@ public final class LidEventSoundController {
 
 Note: `lastHandledState` is updated **before** the preference check, so a duplicate event after toggling sounds back on still suppresses correctly (matches existing duplicate-suppression test).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `swift test --filter LidEventSoundControllerTests 2>&1 | tail -20`
-Expected: PASS — 9 tests (7 original + 2 new).
+Expected: PASS — 9 tests (7 original + 2 new). _Plus a follow-up muted-duplicate regression test added in commit `07327cd`, bringing the total to 10._
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 Run: `swift test 2>&1 | tail -10`
-Expected: PASS — 63 total.
+Expected: PASS — 63 total. _Actual after follow-up: 66._
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Sources/CocaineCore/LidEventSoundController.swift Tests/CocaineCoreTests/LidEventSoundControllerTests.swift
@@ -1679,10 +1679,11 @@ git -c commit.gpgsign=false commit -m "feat: add ScreenLocker and LidCloseLockRe
 **Files:**
 - Modify: `Sources/Cocaine/AppDelegate.swift`
 - Modify: `Sources/CocaineCore/AppCoordinator.swift` (remove the transitional 3-arg convenience init added in Task 3)
+- Modify: `Sources/CocaineCore/LidEventSoundController.swift` (remove the transitional 3-arg convenience init added in Task 4)
 
 > **Construction order matters.** [`LidCloseLockResponder`](Sources/CocaineCore/LidCloseLockResponder.swift:1) chains itself onto the existing `monitor.onLidStateChange` closure inside its initializer, so the sound controller (which sets the first closure) MUST be constructed before the lock responder (which wraps it). The replacement file below already orders the two correctly.
 
-> **Cleanup obligation:** Task 3 added a `public convenience init(state:awakeController:lidCloseController:)` to `AppCoordinator` (~lines 52–63 of `Sources/CocaineCore/AppCoordinator.swift`) so the executable target kept compiling while the app delegate still used the old signature. **This task must remove that convenience init** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit 4-arg init. Verify with `grep -n "convenience init" Sources/CocaineCore/AppCoordinator.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/CocaineCore/AppCoordinator.swift` along with `Sources/Cocaine/AppDelegate.swift`.
+> **Cleanup obligation:** Tasks 3 and 4 added transitional `public convenience init` overloads on `AppCoordinator` (~lines 52–63 of `Sources/CocaineCore/AppCoordinator.swift`) and `LidEventSoundController` (~lines 57–68 of `Sources/CocaineCore/LidEventSoundController.swift`) so the executable target kept compiling while the app delegate still used the old signatures. **This task must remove both convenience inits** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit primary inits everywhere. Verify with `grep -n "convenience init" Sources/CocaineCore/*.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/CocaineCore/AppCoordinator.swift` and `Sources/CocaineCore/LidEventSoundController.swift` along with `Sources/Cocaine/AppDelegate.swift`.
 
 - [ ] **Step 1: Replace AppDelegate**
 

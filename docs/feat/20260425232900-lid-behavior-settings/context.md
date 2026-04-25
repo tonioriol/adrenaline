@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 4 — LidEventSoundController gates sounds on preferences
+**Cursor:** Task 5 — ScreenLocker protocol + LidCloseLockResponder
 
 **Status:** in_progress
 
@@ -90,3 +90,15 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: Make activation honor persisted display/lid-close preferences and keep the app visibly active when only a live reconciliation path fails.
 - How: Added `AppState.recordErrorWhileActive(_:)` in `Sources/CocaineCore/AppState.swift` with coverage in `Tests/CocaineCoreTests/AppStateTests.swift`; widened `AwakeControlling`, injected `PreferencesProviding`, made lid-close engagement conditional/session-scoped, added `setPreventDisplaySleep(_:)` and `setPreventLidCloseSleep(_:)`, and expanded `Tests/CocaineCoreTests/AppCoordinatorTests.swift` with fake preferences plus preference/reconciliation coverage. Evidence: `swift test --filter AppStateTests 2>&1 | tail -20` passed 8 tests; `swift test --filter AppCoordinatorTests 2>&1 | tail -20` passed 18 tests; `swift test 2>&1 | tail -10` passed 63 tests. Commits: `bfecf32`, `93fcabe`.
 - Decision: Added a temporary backward-compatible coordinator convenience initializer using `PreferencesStore()` so the app target keeps building until the planned app wiring task injects the shared store.
+
+### 2026-04-26 01:02 — Task 4 LidEventSoundController preference gate
+
+- Why: Let the persisted sound preference silence lid-close/open feedback while preserving active-state monitoring and duplicate suppression.
+- How: Updated Sources/CocaineCore/LidEventSoundController.swift to accept PreferencesProviding, gate playback on playLidEventSounds after recording lastHandledState, and keep a three-argument convenience initializer for existing app wiring; extended Tests/CocaineCoreTests/LidEventSoundControllerTests.swift with FakePreferencesStore and sound-preference gating coverage while injecting preferences into all existing controller constructions. Evidence: swift test --filter LidEventSoundControllerTests 2>&1 | tail -20 first failed with extra argument 'preferences' in call, then passed 9 tests; swift test 2>&1 | tail -10 passed 65 tests. Commit: 858ef15.
+- Decision: Added a transitional convenience initializer backed by PreferencesStore() so the executable target keeps building until the planned app wiring task injects the shared preferences store and removes the shim.
+
+## LOG: Task 4 review fix — muted-duplicate regression test
+
+- Added `testMutedDuplicateLidStateDoesNotReplayAfterSoundsReenabled` to cover the muted duplicate lid-state semantic: a lid state handled while sounds are disabled must not replay when sounds are re-enabled and the same state is emitted again.
+- Verification passed: `swift test --filter LidEventSoundControllerTests 2>&1 | tail -20` executed 10 tests with 0 failures; `swift test 2>&1 | tail -10` executed 66 tests with 0 failures.
+- Committed the test-only fix as `07327cd` (`test: cover muted-duplicate suppression in lid sound controller`).
