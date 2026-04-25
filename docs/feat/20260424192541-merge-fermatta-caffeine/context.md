@@ -156,3 +156,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Replaced the placeholder privileged-helper path with concrete installation, XPC, and IOKit power-setting behavior so lid-close prevention can be managed by the helper executable.
 - How: Implemented SMJobBless/XPC client behavior in Sources/CocaineCore/PrivilegedHelperClient.swift, added SleepDisabled bridge in Sources/CocaineHelper/ApplePowerSettings.swift, replaced the helper placeholder with an NSXPC mach-service listener in Sources/CocaineHelper/main.swift, verified existing helper plists remained aligned, ran `swift build` and `swift test` successfully, and committed f952950.
 - Decision: Kept SMJobBless despite the macOS 13 deprecation warning because Task 5 explicitly requires the SMJobBless-based privileged helper implementation; fixed temporary-pointer warnings in AuthorizationCreate while preserving the requested behavior.
+
+### 2026-04-25 12:08 — Task 5 quality fixes
+
+- Why: Code quality review found the privileged helper client could hang on connection errors and the helper accepted overly broad clients.
+- How: Added per-call XPC connection lifetime/error handling, enforced runtime code-signing requirement on the helper listener, tightened mutating reply handling, verified with `swift build` and `swift test`, commit `f13af6c`.
