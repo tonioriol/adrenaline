@@ -46,6 +46,6 @@ final class HelperDelegate: NSObject, NSXPCListenerDelegate, CocaineHelperProtoc
 let delegate = HelperDelegate()
 let listener = NSXPCListener(machServiceName: CocaineHelperConstants.helperBundleIdentifier)
 listener.delegate = delegate
-listener.setConnectionCodeSigningRequirement("identifier \(CocaineHelperConstants.appBundleIdentifier)")
+listener.setConnectionCodeSigningRequirement(CocaineHelperConstants.appCodeSigningRequirement)
 listener.resume()
 RunLoop.current.run()
