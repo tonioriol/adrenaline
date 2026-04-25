@@ -2160,32 +2160,32 @@ git -c commit.gpgsign=false commit -m "docs: describe lid-close behavior prefere
 
 **Files:** none modified — verification only.
 
-- [ ] **Step 1: Clean build + full test run**
+- [x] **Step 1: Clean build + full test run**
 
 Run: `make clean && make test 2>&1 | tail -20`
 Expected: PASS — at least 69 XCTest tests.
 
-- [ ] **Step 2: App bundle build**
+- [x] **Step 2: App bundle build**
 
 Run: `make app 2>&1 | tail -10`
 Expected: PASS — `build/Cocaine.app` created and signed.
 
-- [ ] **Step 3: Smoke-launch the bundle**
+- [x] **Step 3: Smoke-launch the bundle**
 
 Run: `open build/Cocaine.app && sleep 2 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine`
 Expected: PID printed.
 
-- [ ] **Step 4: Quit cleanly**
+- [x] **Step 4: Quit cleanly**
 
 Run: `pkill -f 'Cocaine.app/Contents/MacOS/Cocaine' && sleep 1 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine ; echo "exit=$?"`
 Expected: `exit=1` (no process — pgrep prints nothing and exits 1).
 
-- [ ] **Step 5: Confirm no lingering Cocaine power assertions**
+- [x] **Step 5: Confirm no lingering Cocaine power assertions**
 
 Run: `pmset -g assertions | grep -i cocaine ; echo "exit=$?"`
 Expected: `exit=1` (no Cocaine-named assertion remains).
 
-- [ ] **Step 6: Print the manual validation checklist**
+- [x] **Step 6: Print the manual validation checklist**
 
 Print to the conversation (do not commit):
 
@@ -2201,6 +2201,6 @@ Manual validation steps requiring physical hardware (out of scope for automated 
 7. Cocaine on with lid-close off, close lid → Mac sleeps normally (no sounds, no lock).
 ```
 
-- [ ] **Step 7: No commit needed for verification-only task**
+- [x] **Step 7: No commit needed for verification-only task**
 
 This task ends without a commit. The previous tasks left the repo in a final, working state.

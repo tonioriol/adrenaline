@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 9 — Final verification (clean build, full tests, smoke launch)
+**Cursor:** all tasks complete
 
 **Status:** in_progress
 
@@ -132,3 +132,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: The new settings model changes user-visible defaults and separates lid-close prevention from the main on/off toggle, so the README needed to describe the new behavior and upgrade impact.
 - How: Replaced `README.md` with updated Safety, Run, Behavior, preference defaults, helper authorization, repair/install helper, and upgrade-note text. Verification: `git diff -- README.md | head -80` showed the expected README rewrite before commit.
 - Commit: `44a94e3` (`docs: describe lid-close behavior preferences`).
+
+### 2026-04-26 01:57 — Task 9 final verification
+
+- Why: Confirm the completed lid-behavior settings work builds, tests, launches, and cleans up before leaving only hardware-dependent manual checks.
+- How: Ran `make clean && make test 2>&1 | tail -20` (73 XCTest tests, 0 failures), `make app 2>&1 | tail -10` (app bundle copied and signed), `open build/Cocaine.app && sleep 2 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine` (smoke launch printed PIDs including `build/Cocaine.app/Contents/MacOS/Cocaine`), `pkill -f 'Cocaine.app/Contents/MacOS/Cocaine' && sleep 1 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine ; echo "exit=$?"` (`exit=1`, no matching process), and `pmset -g assertions | grep -i cocaine ; echo "exit=$?"` (`exit=1`, no Cocaine-named assertion).
+- Decision: Automated verification is complete; manual physical-hardware validation remains pending for right-click menu defaults, confirmation-alert behavior, lid-close lock/unlock behavior, SleepDisabled transitions, relaunch semantics, and normal sleep when lid-close prevention is off.
