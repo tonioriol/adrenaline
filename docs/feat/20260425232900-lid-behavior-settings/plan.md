@@ -42,7 +42,7 @@
 - Create: `Sources/CocaineCore/PreferencesStore.swift`
 - Test: `Tests/CocaineCoreTests/PreferencesStoreTests.swift`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `Tests/CocaineCoreTests/PreferencesStoreTests.swift`:
 
@@ -125,12 +125,12 @@ final class PreferencesStoreTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --filter PreferencesStoreTests 2>&1 | tail -30`
 Expected: FAIL — `cannot find 'PreferencesStore' in scope`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `Sources/CocaineCore/PreferencesStore.swift`:
 
@@ -245,17 +245,17 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --filter PreferencesStoreTests 2>&1 | tail -20`
 Expected: PASS — 4 tests.
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 Run: `swift test 2>&1 | tail -10`
 Expected: PASS — existing tests still green (44 + 4 = 48).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Sources/CocaineCore/PreferencesStore.swift Tests/CocaineCoreTests/PreferencesStoreTests.swift

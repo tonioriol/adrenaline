@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — PreferencesStore
+**Cursor:** Task 2 — AwakeController display flag and live reconciliation
 
 **Status:** in_progress
 
@@ -73,3 +73,8 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: Spec approved and ready for executable bite-sized tasks.
 - How: Wrote `plan.md` with 9 tasks covering `PreferencesStore`, `AwakeController` refactor, `AppState.recordErrorWhileActive`, `AppCoordinator` reconciliation, `LidEventSoundController` gating, `ScreenLocker` + `LidCloseLockResponder`, `AppDelegate` wiring, `MenuBarController` checkbox menu + confirmation alert, README docs, and final verification. Self-reviewed against the spec, fixed three issues inline (dead code in screen-locker fallback, ambiguous live-reconciliation isActive handling, missing construction-order note for the lid-event consumers).
 - Decision: Use `dlopen`/`dlsym` for `SACLockScreenImmediate` with a `CGSession -suspend` fallback to keep `Package.swift` free of private framework links.
+
+### 2026-04-26 00:08 — Task 1 PreferencesStore foundation
+
+- Why: Add the persisted preferences seam needed by later settings tasks while keeping current consumers untouched until their planned updates.
+- How: Added `Sources/CocaineCore/PreferencesStore.swift` with `PreferencesSnapshot`, `PreferencesProviding`, and a `UserDefaults`-backed observable `PreferencesStore`; added `Tests/CocaineCoreTests/PreferencesStoreTests.swift` for spec defaults, round-tripping, snapshots, and Combine publishing. TDD evidence: `swift test --filter PreferencesStoreTests 2>&1 | tail -30` failed first because `PreferencesStore` was missing, then `swift test --filter PreferencesStoreTests 2>&1 | tail -20` passed 4 tests, and `swift test 2>&1 | tail -10` passed 48 tests. Commit: `ff0fa8c`.
