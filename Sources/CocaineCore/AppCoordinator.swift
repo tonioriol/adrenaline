@@ -13,11 +13,14 @@ public protocol LidCloseControlling: AnyObject {
 
 public enum AppCoordinatorError: Error, LocalizedError, Equatable {
     case lidCloseStatusDidNotBecomeActive
+    case lidCloseStatusRemainedActiveAfterDisable
 
     public var errorDescription: String? {
         switch self {
         case .lidCloseStatusDidNotBecomeActive:
             return "Lid-close prevention did not become active"
+        case .lidCloseStatusRemainedActiveAfterDisable:
+            return "Lid-close prevention remained active after disable"
         }
     }
 }
@@ -75,9 +78,12 @@ public final class AppCoordinator {
 
         do {
             try await lidCloseController.disable()
-            _ = try? await lidCloseController.status()
             state.setActive(false)
             state.setBusy(false)
+
+            if try await lidCloseController.status() {
+                throw AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable
+            }
         } catch {
             state.setActive(false)
             state.setBusy(false)
