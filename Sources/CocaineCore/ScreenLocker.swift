@@ -26,6 +26,22 @@ public final class LoginFrameworkScreenLocker: ScreenLocking {
     private static let frameworkPath =
         "/System/Library/PrivateFrameworks/login.framework/Versions/A/login"
 
+    private struct FallbackCommand {
+        let executablePath: String
+        let arguments: [String]
+    }
+
+    private static let fallbackCommands = [
+        FallbackCommand(
+            executablePath: "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession",
+            arguments: ["-suspend"]
+        ),
+        FallbackCommand(
+            executablePath: "/usr/bin/osascript",
+            arguments: ["-e", "tell application \"loginwindow\" to «event aevtrlck»"]
+        ),
+    ]
+
     private let lockSymbol: (@convention(c) () -> Int32)?
 
     public init() {
@@ -34,8 +50,10 @@ public final class LoginFrameworkScreenLocker: ScreenLocking {
 
     public func lock() throws {
         if let lockSymbol {
-            _ = lockSymbol()
-            return
+            let status = lockSymbol()
+            if status == 0 {
+                return
+            }
         }
 
         try Self.invokeLoginwindowFallback()
@@ -57,6 +75,10 @@ public final class LoginFrameworkScreenLocker: ScreenLocking {
         }
 
         guard let symbol = dlsym(handle, "SACLockScreenImmediate") else {
+            os_log("SACLockScreenImmediate symbol unavailable",
+                   log: log,
+                   type: .info)
+            dlclose(handle)
             return nil
         }
 
@@ -64,23 +86,33 @@ public final class LoginFrameworkScreenLocker: ScreenLocking {
     }
 
     private static func invokeLoginwindowFallback() throws {
-        // CGSession -suspend is the documented public command-line lock-session
-        // technique on macOS and is preferred over AppleScript automation
-        // (which would require an Automation permission grant).
-        let process = Process()
-        process.launchPath = "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession"
-        process.arguments = ["-suspend"]
+        var attemptedFallback = false
+        var lastStatus: Int32?
 
-        do {
-            try process.run()
-            process.waitUntilExit()
-            if process.terminationStatus != 0 {
-                throw ScreenLockerError.fallbackFailed(process.terminationStatus)
+        for command in fallbackCommands {
+            guard FileManager.default.isExecutableFile(atPath: command.executablePath) else { continue }
+            attemptedFallback = true
+
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: command.executablePath)
+            process.arguments = command.arguments
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+                if process.terminationStatus == 0 {
+                    return
+                }
+                lastStatus = process.terminationStatus
+            } catch {
+                lastStatus = -1
             }
-        } catch let error as ScreenLockerError {
-            throw error
-        } catch {
-            throw ScreenLockerError.symbolUnavailable
         }
+
+        if attemptedFallback, let lastStatus {
+            throw ScreenLockerError.fallbackFailed(lastStatus)
+        }
+
+        throw ScreenLockerError.symbolUnavailable
     }
 }
