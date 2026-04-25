@@ -42,6 +42,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Sources/CocaineHelper/ApplePowerSettings.swift` — helper-side SleepDisabled bridge
 - `Sources/CocaineHelper/main.swift` — helper mach-service listener
 - `Resources/Cocaine/Info.plist` — app bundle metadata
+- `Sources/Cocaine/AppDelegate.swift` — app lifecycle wiring
+- `Sources/Cocaine/MenuBarController.swift` — status item UI and menu actions
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
 - `Tests/CocaineCoreTests/AwakeControllerTests.swift` — ordinary assertion controller tests
@@ -53,7 +55,7 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 7 — Menu Bar App UI
+**Cursor:** Task 8 — Documentation, Attribution, and Manual Verification
 
 **Status:** ready
 
@@ -192,3 +194,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found the first shutdown fix bypassed the busy guard but still allowed a suspended turn-on path to resume and reactivate state after shutdown cleanup.
 - How: Serialized shutdown against in-flight transitions, added a real suspended-enable regression test, verified with `swift test --filter AppCoordinatorTests && make test && make app`, commit bd8d939.
+
+### 2026-04-25 13:27 — Implementation verified
+
+- Why: The app now implements the approved one-toggle keep-awake behavior.
+- How: `make clean && make test && make app` passed with 31 XCTest tests and a signed app bundle. `make run` launched a background-only menu bar process with no windows, and quitting left no Cocaine process or Cocaine power assertions. Full interactive activation/deactivation was not directly verified because the native menu bar item could not be conclusively driven from the available automation.
+- Decision: The initial version excludes durations, app rules, and advanced controls as intended.
