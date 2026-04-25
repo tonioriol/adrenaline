@@ -50,7 +50,7 @@ private struct TestError: Error, LocalizedError {
 
 @MainActor
 final class AppCoordinatorTests: XCTestCase {
-    func testToggleOnEnablesAwakeAndLidCloseBeforeMarkingActive() async {
+    func testToggleOnEnablesAwakeAndLidCloseAndMarksActive() async {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -65,6 +65,22 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(awake.enableCallCount, 1)
         XCTAssertEqual(lid.enableCallCount, 1)
         XCTAssertNil(state.lastErrorMessage)
+    }
+
+    func testToggleDoesNothingWhenStateIsBusy() async {
+        let state = AppState(isBusy: true)
+        let awake = FakeAwakeController()
+        let lid = FakeLidCloseController()
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid)
+
+        await coordinator.toggle()
+
+        XCTAssertFalse(state.isActive)
+        XCTAssertTrue(state.isBusy)
+        XCTAssertEqual(awake.enableCallCount, 0)
+        XCTAssertEqual(awake.disableCallCount, 0)
+        XCTAssertEqual(lid.enableCallCount, 0)
+        XCTAssertEqual(lid.disableCallCount, 0)
     }
 
     func testToggleOffDisablesAwakeAndLidClose() async {
@@ -84,6 +100,24 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
+    func testToggleOffRecordsErrorWhenLidCloseRemainsActiveAfterDisable() async {
+        let state = AppState(isActive: true)
+        let awake = FakeAwakeController()
+        awake.isEnabled = true
+        let lid = FakeLidCloseController()
+        lid.isEnabled = true
+        lid.statusValue = true
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid)
+
+        await coordinator.toggle()
+
+        XCTAssertFalse(state.isActive)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertEqual(state.lastErrorMessage, "Lid-close prevention remained active after disable")
+        XCTAssertFalse(awake.isEnabled)
+        XCTAssertEqual(lid.disableCallCount, 1)
+    }
+
     func testLidCloseFailureRollsBackAwakeAndLeavesStateOff() async {
         let state = AppState()
         let awake = FakeAwakeController()
@@ -94,10 +128,12 @@ final class AppCoordinatorTests: XCTestCase {
         await coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
+        XCTAssertFalse(state.isBusy)
         XCTAssertFalse(awake.isEnabled)
         XCTAssertEqual(awake.disableCallCount, 1)
         XCTAssertEqual(lid.disableCallCount, 1)
         XCTAssertEqual(state.lastErrorMessage, "helper refused")
+        XCTAssertEqual(state.helperState, .failed(message: "helper refused"))
     }
 
     func testFalseStatusAfterEnableRollsBack() async {
@@ -110,7 +146,9 @@ final class AppCoordinatorTests: XCTestCase {
         await coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
+        XCTAssertFalse(state.isBusy)
         XCTAssertFalse(awake.isEnabled)
         XCTAssertEqual(state.lastErrorMessage, "Lid-close prevention did not become active")
+        XCTAssertEqual(state.helperState, .failed(message: "Lid-close prevention did not become active"))
     }
 }
