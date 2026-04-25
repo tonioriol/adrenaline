@@ -36,6 +36,24 @@ public final class LidStateMonitor: LidStateMonitoring {
 
     public init() {}
 
+    deinit {
+        if let source = runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
+        }
+
+        if notifier != 0 {
+            IOObjectRelease(notifier)
+        }
+
+        if rootDomain != 0 {
+            IOObjectRelease(rootDomain)
+        }
+
+        if let notificationPort {
+            IONotificationPortDestroy(notificationPort)
+        }
+    }
+
     public func start() throws {
         guard !isMonitoring else { return }
 
