@@ -36,11 +36,19 @@ public final class AppState: ObservableObject {
         isActive = value
         if value {
             lastErrorMessage = nil
+            if case .failed = helperState {
+                helperState = .unknown
+            }
         }
     }
 
     public func setHelperState(_ value: HelperState) {
         helperState = value
+        if case let .failed(message) = value {
+            isActive = false
+            isBusy = false
+            lastErrorMessage = message
+        }
     }
 
     public func recordError(_ message: String) {
@@ -52,5 +60,8 @@ public final class AppState: ObservableObject {
 
     public func clearError() {
         lastErrorMessage = nil
+        if case .failed = helperState {
+            helperState = .unknown
+        }
     }
 }
