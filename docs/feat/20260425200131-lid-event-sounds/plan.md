@@ -562,7 +562,7 @@ Expected: commit succeeds.
 - Create: `Sources/Cocaine/SystemSoundPlayer.swift`
 - Modify: `Sources/Cocaine/AppDelegate.swift`
 
-- [ ] **Step 1: Wire lid sounds in the app delegate before adding the sound player**
+- [x] **Step 1: Wire lid sounds in the app delegate before adding the sound player**
 
 Modify `Sources/Cocaine/AppDelegate.swift` to this exact content:
 
@@ -605,7 +605,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
-- [ ] **Step 2: Run app build to verify the missing sound player failure**
+- [x] **Step 2: Run app build to verify the missing sound player failure**
 
 Run:
 
@@ -615,7 +615,7 @@ swift build
 
 Expected: FAIL because `SystemSoundPlayer` does not exist.
 
-- [ ] **Step 3: Add the AppKit sound player wrapper**
+- [x] **Step 3: Add the AppKit sound player wrapper**
 
 Create `Sources/Cocaine/SystemSoundPlayer.swift`:
 
@@ -630,7 +630,7 @@ final class SystemSoundPlayer: LidSoundPlaying {
 }
 ```
 
-- [ ] **Step 4: Run app build to verify wiring compiles**
+- [x] **Step 4: Run app build to verify wiring compiles**
 
 Run:
 
@@ -640,7 +640,7 @@ swift build
 
 Expected: PASS.
 
-- [ ] **Step 5: Run full automated tests**
+- [x] **Step 5: Run full automated tests**
 
 Run:
 
@@ -650,7 +650,7 @@ swift test
 
 Expected: PASS.
 
-- [ ] **Step 6: Build the signed app bundle**
+- [x] **Step 6: Build the signed app bundle**
 
 Run:
 
@@ -660,7 +660,7 @@ make app
 
 Expected: PASS and `build/Cocaine.app` is created.
 
-- [ ] **Step 7: Commit app wiring**
+- [x] **Step 7: Commit app wiring**
 
 Run:
 

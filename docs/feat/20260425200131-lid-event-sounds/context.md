@@ -40,7 +40,7 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — AppKit Sound Playback and App Wiring
+**Cursor:** Task 4 — User-Facing Documentation
 
 **Status:** in_progress
 
@@ -98,3 +98,8 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: Code quality review found the monitor should defensively unregister external IOKit resources if it is deallocated while monitoring is still active.
 - How: Added deinitialization cleanup in `Sources/CocaineCore/LidStateMonitor.swift` for the run-loop source, notifier, root domain object, and notification port. Verified with `swift test --filter LidStateMonitorTests && swift test`. Commit: `3a87f11`.
 - Decision: Kept `stop()` as the normal lifecycle path and added `deinit` as a defensive resource-owner safety net.
+
+### 2026-04-25 23:04 — Task 3 app sound wiring
+
+- Why: The app needed to retain the lid event sound policy for the application lifetime and provide the AppKit playback boundary for the selected built-in macOS sounds.
+- How: Updated `Sources/Cocaine/AppDelegate.swift` to instantiate `LidStateMonitor`, `SystemSoundPlayer`, and retain `LidEventSoundController`; added `Sources/Cocaine/SystemSoundPlayer.swift` as the `NSSound` wrapper. Evidence: `swift build` failed before the wrapper because `SystemSoundPlayer` was missing, then `swift build`, `swift test`, and `make app` passed; `build/Cocaine.app` was created. Commit: `fb84e13`.
