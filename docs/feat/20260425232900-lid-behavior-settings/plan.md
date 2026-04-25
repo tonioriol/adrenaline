@@ -270,7 +270,7 @@ git -c commit.gpgsign=false commit -m "feat: add PreferencesStore for Cocaine se
 - Modify: `Sources/CocaineCore/AwakeController.swift`
 - Modify: `Tests/CocaineCoreTests/AwakeControllerTests.swift`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final class AwakeControllerTests`):
 
@@ -342,12 +342,12 @@ Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final cla
 
 Also adjust the existing `testEnableCreatesSystemAndDisplayAssertions` test caller (and any test that calls `controller.enable()`) so they pass through the new default — see Step 3 for the source change which keeps `enable()` available without a parameter.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `swift test --filter AwakeControllerTests 2>&1 | tail -30`
 Expected: FAIL — `cannot find 'enable(preventDisplaySleep:)' in scope` and `cannot find 'setPreventDisplaySleep' in scope`.
 
-- [ ] **Step 3: Replace the implementation**
+- [x] **Step 3: Replace the implementation**
 
 Replace `Sources/CocaineCore/AwakeController.swift` with:
 
@@ -422,17 +422,17 @@ public final class AwakeController: AwakeControlling {
 
 Note: the protocol `AwakeControlling` (defined in [`AppCoordinator.swift`](Sources/CocaineCore/AppCoordinator.swift:3)) only requires `enable()` and `disable()`. `enable(preventDisplaySleep:)` and `setPreventDisplaySleep(_:)` are public extensions on the concrete class. The protocol is widened in Task 3.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `swift test --filter AwakeControllerTests 2>&1 | tail -20`
 Expected: PASS — 10 tests (4 original + 6 new).
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 Run: `swift test 2>&1 | tail -10`
 Expected: PASS — 54 total.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add Sources/CocaineCore/AwakeController.swift Tests/CocaineCoreTests/AwakeControllerTests.swift

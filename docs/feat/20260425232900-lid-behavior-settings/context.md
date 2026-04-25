@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — AwakeController display flag and live reconciliation
+**Cursor:** Task 3 — AppCoordinator: read prefs, conditional helper, live reconciliation (incl. AppState.recordErrorWhileActive)
 
 **Status:** in_progress
 
@@ -78,3 +78,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 - Why: Add the persisted preferences seam needed by later settings tasks while keeping current consumers untouched until their planned updates.
 - How: Added `Sources/CocaineCore/PreferencesStore.swift` with `PreferencesSnapshot`, `PreferencesProviding`, and a `UserDefaults`-backed observable `PreferencesStore`; added `Tests/CocaineCoreTests/PreferencesStoreTests.swift` for spec defaults, round-tripping, snapshots, and Combine publishing. TDD evidence: `swift test --filter PreferencesStoreTests 2>&1 | tail -30` failed first because `PreferencesStore` was missing, then `swift test --filter PreferencesStoreTests 2>&1 | tail -20` passed 4 tests, and `swift test 2>&1 | tail -10` passed 48 tests. Commit: `ff0fa8c`.
+
+### 2026-04-26 00:18 — Task 2 AwakeController display flag and live reconciliation
+
+- Why: Split ordinary no-idle assertion handling from optional display-sleep prevention so future preference changes can be applied while Cocaine remains active.
+- How: Updated Sources/CocaineCore/AwakeController.swift with system/display assertion IDs, enable(preventDisplaySleep:), rollback on partial enable failure, and setPreventDisplaySleep(_:) reconciliation; extended Tests/CocaineCoreTests/AwakeControllerTests.swift with 6 display-flag/reconciliation tests and adapted the existing release-order expectation to the new display-first disable path. TDD evidence: swift test --filter AwakeControllerTests 2>&1 | tail -30 failed first on missing enable(preventDisplaySleep:) and setPreventDisplaySleep(_:), then swift test --filter AwakeControllerTests 2>&1 | tail -20 passed 10 tests, and swift test 2>&1 | tail -10 passed 54 tests. Commit: 7690d06.
+- Decision: Release the display assertion before the no-idle assertion during disable so live display toggling and full disable share the same display-first cleanup order.
