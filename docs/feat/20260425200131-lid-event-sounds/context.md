@@ -40,7 +40,7 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — Passive IOKit Lid State Monitor
+**Cursor:** Task 3 — AppKit Sound Playback and App Wiring
 
 **Status:** in_progress
 

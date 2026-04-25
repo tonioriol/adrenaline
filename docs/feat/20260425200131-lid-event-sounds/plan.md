@@ -316,7 +316,7 @@ Expected: commit succeeds.
 - Create: `Tests/CocaineCoreTests/LidStateMonitorTests.swift`
 - Create: `Sources/CocaineCore/LidStateMonitor.swift`
 
-- [ ] **Step 1: Write failing lid monitor decoding tests**
+- [x] **Step 1: Write failing lid monitor decoding tests**
 
 Create `Tests/CocaineCoreTests/LidStateMonitorTests.swift`:
 
@@ -366,7 +366,7 @@ final class LidStateMonitorTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run lid monitor tests to verify they fail**
+- [x] **Step 2: Run lid monitor tests to verify they fail**
 
 Run:
 
@@ -376,7 +376,7 @@ swift test --filter LidStateMonitorTests
 
 Expected: FAIL because `LidStateMonitor` does not exist.
 
-- [ ] **Step 3: Implement passive IOKit monitor**
+- [x] **Step 3: Implement passive IOKit monitor**
 
 Create `Sources/CocaineCore/LidStateMonitor.swift`:
 
@@ -513,7 +513,7 @@ public final class LidStateMonitor: LidStateMonitoring {
 }
 ```
 
-- [ ] **Step 4: Run lid monitor tests to verify they pass**
+- [x] **Step 4: Run lid monitor tests to verify they pass**
 
 Run:
 
@@ -523,7 +523,7 @@ swift test --filter LidStateMonitorTests
 
 Expected: PASS.
 
-- [ ] **Step 5: Run policy and monitor tests together**
+- [x] **Step 5: Run policy and monitor tests together**
 
 Run:
 
@@ -533,7 +533,7 @@ swift test --filter 'Lid(EventSoundController|StateMonitor)Tests'
 
 Expected: PASS for both lid sound test suites.
 
-- [ ] **Step 6: Run the full test suite**
+- [x] **Step 6: Run the full test suite**
 
 Run:
 
@@ -543,7 +543,7 @@ swift test
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit passive lid monitor**
+- [x] **Step 7: Commit passive lid monitor**
 
 Run:
 
