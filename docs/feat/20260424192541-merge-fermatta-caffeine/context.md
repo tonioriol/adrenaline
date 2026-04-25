@@ -161,3 +161,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found the privileged helper client could hang on connection errors and the helper accepted overly broad clients.
 - How: Added per-call XPC connection lifetime/error handling, enforced runtime code-signing requirement on the helper listener, tightened mutating reply handling, verified with `swift build` and `swift test`, commit `f13af6c`.
+
+### 2026-04-25 12:19 — Task 5 signing requirement fixes
+
+- Why: Code quality review found the privileged helper trust boundary still relied on identifier-only checks.
+- How: Added canonical signing requirement strings using Team ID A79T83GM42, applied them to the runtime listener gate and helper authorized clients, verified with `swift build && swift test && plutil -p Resources/CocaineHelper/Info.plist`, commit 166677c.
