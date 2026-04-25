@@ -15,13 +15,20 @@ public final class AwakeController: AwakeControlling {
     public func enable() throws {
         guard !isEnabled else { return }
 
+        var createdIDs: [UInt32] = []
         do {
             let systemID = try client.createNoIdleSleepAssertion(reason: "Cocaine is active")
+            createdIDs.append(systemID)
             let displayID = try client.createDisplaySleepAssertion(reason: "Cocaine is active")
-            assertionIDs = [systemID, displayID]
+            createdIDs.append(displayID)
+            assertionIDs = createdIDs
             isEnabled = true
         } catch {
-            releaseAllAssertions()
+            for id in createdIDs {
+                client.releaseAssertion(id: id)
+            }
+            assertionIDs.removeAll()
+            isEnabled = false
             throw error
         }
     }
