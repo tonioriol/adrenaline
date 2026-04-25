@@ -746,7 +746,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `docs/feat/20260425200131-lid-event-sounds/context.md`
 
-- [ ] **Step 1: Run clean automated verification**
+- [x] **Step 1: Run clean automated verification**
 
 Run:
 
@@ -756,7 +756,7 @@ make clean && make test && make app
 
 Expected: PASS. `make test` runs all XCTest coverage, and `make app` creates the signed app bundle.
 
-- [ ] **Step 2: Confirm built-in sound names still resolve**
+- [x] **Step 2: Confirm built-in sound names still resolve**
 
 Run:
 
@@ -771,7 +771,7 @@ Hero: ok
 Basso: ok
 ```
 
-- [ ] **Step 3: Perform MacBook manual validation**
+- [x] **Step 3: Perform MacBook manual validation**
 
 Run the app:
 
@@ -792,7 +792,7 @@ Manual checks:
 9. Close or open the lid.
 10. Expected: no Cocaine lid event sound is played while off.
 
-- [ ] **Step 4: Append verification result to task memory**
+- [x] **Step 4: Append verification result to task memory**
 
 Update `docs/feat/20260425200131-lid-event-sounds/context.md` by appending this log entry. If manual validation cannot be completed in the current environment, replace the manual-validation clause in the `How` bullet with `manual MacBook validation remains pending` rather than claiming it passed:
 
@@ -804,7 +804,7 @@ Update `docs/feat/20260425200131-lid-event-sounds/context.md` by appending this 
 - Decision: Kept sound monitoring app-side and auxiliary; helper behavior and sleep-prevention rollback paths remain unchanged.
 ```
 
-- [ ] **Step 5: Commit task memory update**
+- [x] **Step 5: Commit task memory update**
 
 Run:
 

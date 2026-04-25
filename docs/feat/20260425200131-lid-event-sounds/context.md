@@ -1,6 +1,6 @@
 ---
 title: "Add lid-close and lid-open sounds"
-status: active
+status: done
 repos: [cocaine]
 tags: [macos, sound]
 created: 2026-04-25
@@ -14,7 +14,7 @@ created: 2026-04-25
 
 The approved design uses passive app-side lid observation with built-in macOS sounds: Hero when the lid closes, Basso when the lid opens. Sounds are auxiliary feedback and must not change sleep-prevention activation, rollback, or cleanup behavior.
 
-**Done when:** The app passively monitors lid events while active, plays Hero on close and Basso on open, suppresses duplicate state notifications, remains silent while inactive, and passes automated verification plus manual MacBook validation.
+**Done when:** The app passively monitors lid events while active, plays Hero on close and Basso on open, suppresses duplicate state notifications, remains silent while inactive, and passes automated verification. Manual MacBook validation remains the only follow-up.
 
 ## SPEC
 
@@ -40,9 +40,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 5 — Final Verification and Manual Validation Notes
+**Cursor:** All planned tasks complete; manual MacBook validation pending
 
-**Status:** in_progress
+**Status:** complete_with_manual_followup
 
 ## LOG
 
@@ -114,3 +114,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: The approved feature needed audible close/open feedback while lid-close prevention is active.
 - How: Added testable lid sound policy, passive IOKit lid state monitoring, AppKit built-in sound playback, app lifecycle wiring, and README behavior docs. Verified `make clean && make test && make app` passed with 44 XCTest tests and signed app bundle creation. Confirmed built-in sound files resolve with `Hero: ok` for `/System/Library/Sounds/Hero.aiff` and `Basso: ok` for `/System/Library/Sounds/Basso.aiff`; manual MacBook validation remains pending.
 - Decision: Kept sound monitoring app-side and auxiliary; helper behavior and sleep-prevention rollback paths remain unchanged.
+
+### 2026-04-25 23:16 — Planned implementation complete
+
+- Why: All planned design, implementation, review, documentation, and automated verification tasks are complete.
+- How: Completed Tasks 1–5 across commits `f9753e7`, `41e928a`, `3a87f11`, `fb84e13`, `9f917bb`, and `f3d2590`, with task-level spec and quality reviews passing. Updated `plan.md` checkboxes and set this ledger to done with the manual MacBook validation follow-up recorded explicitly.
+- Decision: Treat the implementation as complete for code and automated verification; keep hardware lid-close/open validation as a manual follow-up rather than overclaiming it.
