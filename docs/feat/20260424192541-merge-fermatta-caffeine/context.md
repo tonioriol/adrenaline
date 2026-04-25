@@ -214,3 +214,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Manual testing after installation exposed a remaining helper-install failure on the local machine and the menu bar icon was refined after visual feedback.
 - How: Diagnosed that the app was already launching as a UI element and that the helper bless path was failing due to packaging/signing requirement mismatches. Updated signing-related values in [`Makefile`](../Makefile:1), [`Resources/Cocaine/Info.plist`](../Resources/Cocaine/Info.plist:1), [`Resources/CocaineHelper/Info.plist`](../Resources/CocaineHelper/Info.plist:1), and [`Sources/CocaineCore/CocaineHelperProtocol.swift`](../Sources/CocaineCore/CocaineHelperProtocol.swift:3), expanded [`Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`](../Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift:1), rebuilt and reinstalled [`/Applications/Cocaine.app`](file:///Applications/Cocaine.app), and replaced the menu bar cup symbol with a vector-drawn diagonal split-pill icon in [`Sources/Cocaine/MenuBarController.swift`](../Sources/Cocaine/MenuBarController.swift:35).
 - Decision: Keep the app menu-bar-only, keep the new pharmaceutical pill metaphor for the status item, and use the local signed build as the test installation baseline.
+
+### 2026-04-25 20:40 — Final menu bar icon sizing tweak
+
+- Why: Visual review of the new diagonal split-pill icon showed the first enlarged version felt slightly too large in the menu bar.
+- How: Reduced the pill scale in [`Sources/Cocaine/MenuBarController.swift`](../Sources/Cocaine/MenuBarController.swift:59) from about `1.3x` to `1.2x`, rebuilt, re-signed, reinstalled, and relaunched [`/Applications/Cocaine.app`](file:///Applications/Cocaine.app).
+- Decision: Keep the 30° diagonal split-capsule concept, but use the slightly smaller 1.2× size as the baseline.
