@@ -678,7 +678,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Update README behavior text**
+- [x] **Step 1: Update README behavior text**
 
 Modify `README.md` to this exact content:
 
@@ -718,7 +718,7 @@ The first activation may request admin authorization to install the privileged h
 - Right-click menu: About, helper repair when needed, Quit.
 ```
 
-- [ ] **Step 2: Run documentation diff review**
+- [x] **Step 2: Run documentation diff review**
 
 Run:
 
@@ -728,7 +728,7 @@ git diff -- README.md
 
 Expected: diff only documents the new lid event sound behavior.
 
-- [ ] **Step 3: Commit README update**
+- [x] **Step 3: Commit README update**
 
 Run:
 

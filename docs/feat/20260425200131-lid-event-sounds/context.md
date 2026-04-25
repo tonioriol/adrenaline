@@ -40,7 +40,7 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 4 — User-Facing Documentation
+**Cursor:** Task 5 — Final Verification and Manual Validation Notes
 
 **Status:** in_progress
 
@@ -103,3 +103,8 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 - Why: The app needed to retain the lid event sound policy for the application lifetime and provide the AppKit playback boundary for the selected built-in macOS sounds.
 - How: Updated `Sources/Cocaine/AppDelegate.swift` to instantiate `LidStateMonitor`, `SystemSoundPlayer`, and retain `LidEventSoundController`; added `Sources/Cocaine/SystemSoundPlayer.swift` as the `NSSound` wrapper. Evidence: `swift build` failed before the wrapper because `SystemSoundPlayer` was missing, then `swift build`, `swift test`, and `make app` passed; `build/Cocaine.app` was created. Commit: `fb84e13`.
+
+### 2026-04-25 23:09 — Task 4 user-facing documentation
+
+- Why: The README needed to describe the new lid-close and lid-open sound behavior for users after the feature implementation.
+- How: Updated README.md behavior text to mention silent off-state behavior plus Hero-on-close and Basso-on-open while on; verified with `git diff -- README.md`; committed the documentation update as `9f917bb`.
