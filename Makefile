@@ -7,7 +7,8 @@ CONTENTS_DIR := $(APP_DIR)/Contents
 MACOS_DIR := $(CONTENTS_DIR)/MacOS
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 SWIFT_BIN_DIR := .build/$(CONFIGURATION)
-CODE_SIGN_IDENTITY ?= -
+TEAM_ID ?= A79T83GM42
+CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/A79T83GM42/ {print $$2; exit}')
 
 .PHONY: test build app sign run clean verify-helper-sections
 
@@ -26,6 +27,10 @@ app: build
 	$(MAKE) sign
 
 sign:
+	@if [ -z "$(CODE_SIGN_IDENTITY)" ]; then \
+		echo "No Apple Development codesigning identity found for Team ID $(TEAM_ID)"; \
+		exit 1; \
+	fi
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
 

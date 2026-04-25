@@ -12,7 +12,7 @@
     <string>1</string>
     <key>SMAuthorizedClients</key>
     <array>
-        <string>anchor apple generic and identifier "com.tr0n.Cocaine" and certificate leaf[subject.OU] = "A79T83GM42"</string>
+        <string>anchor apple generic and identifier "com.tr0n.Cocaine" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists</string>
     </array>
 </dict>
 </plist>

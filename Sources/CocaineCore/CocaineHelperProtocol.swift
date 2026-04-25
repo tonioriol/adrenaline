@@ -3,8 +3,8 @@ import Foundation
 public enum CocaineHelperConstants {
     public static let appBundleIdentifier = "com.tr0n.Cocaine"
     public static let helperBundleIdentifier = "com.tr0n.Cocaine.Helper"
-    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.OU] = \"A79T83GM42\""
-    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.OU] = \"A79T83GM42\""
+    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.CN] = \"Apple Development: tonioriol@me.com (A79T83GM42)\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists"
+    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.CN] = \"Apple Development: tonioriol@me.com (A79T83GM42)\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists"
     public static let helperVersion = 1
 }
 
