@@ -715,7 +715,7 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PowerAssertionClient.
 - Create: `Sources/CocaineCore/PrivilegedHelperClient.swift`
 - Create: `Tests/CocaineCoreTests/LidCloseControllerTests.swift`
 
-- [ ] **Step 1: Write failing lid-close controller tests**
+- [x] **Step 1: Write failing lid-close controller tests**
 
 Create `Tests/CocaineCoreTests/LidCloseControllerTests.swift`:
 
@@ -804,7 +804,7 @@ cd /Users/tr0n/Code/cocaine && swift test --filter LidCloseControllerTests
 
 Expected: FAIL because lid-close controller types do not exist.
 
-- [ ] **Step 2: Implement helper protocol constants and controller with stub client**
+- [x] **Step 2: Implement helper protocol constants and controller with stub client**
 
 Create `Sources/CocaineCore/CocaineHelperProtocol.swift`:
 
@@ -909,7 +909,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
 }
 ```
 
-- [ ] **Step 3: Run tests and commit**
+- [x] **Step 3: Run tests and commit**
 
 Run:
 

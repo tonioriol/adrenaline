@@ -35,17 +35,21 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Sources/CocaineCore/AppCoordinator.swift` — one-toggle coordinator and controller protocols
 - `Sources/CocaineCore/AppState.swift` — observable state model
 - `Sources/CocaineCore/AwakeController.swift` — ordinary sleep assertion controller
+- `Sources/CocaineCore/CocaineHelperProtocol.swift` — helper constants, XPC protocol, and helper client protocol
+- `Sources/CocaineCore/LidCloseController.swift` — lid-close controller contract adapter
 - `Sources/CocaineCore/PowerAssertionClient.swift` — fakeable IOKit assertion wrapper
+- `Sources/CocaineCore/PrivilegedHelperClient.swift` — privileged helper client stub
 - `Sources/CocaineHelper/main.swift` — helper executable placeholder
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
 - `Tests/CocaineCoreTests/AwakeControllerTests.swift` — ordinary assertion controller tests
+- `Tests/CocaineCoreTests/LidCloseControllerTests.swift` — lid-close controller contract tests
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 4 — Lid-Close Controller Contract
+**Cursor:** Task 5 — Privileged Helper Implementation
 
 **Status:** ready
 
@@ -146,3 +150,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found helper resource identifiers diverged from the canonical helper constants and controller error sequencing lacked tests.
 - How: Aligned helper plist/launchd identifiers, documented XPC reply semantics, added install/enable failure tests, verified with `swift test --filter LidCloseControllerTests`, `make test`, and `plutil -p Resources/CocaineHelper/Info.plist && plutil -p Resources/CocaineHelper/launchd.plist`, commit `3dd5564`.
+
+### 2026-04-25 10:31 — Task 5 privileged helper implementation
+
+- Why: Replaced the placeholder privileged-helper path with concrete installation, XPC, and IOKit power-setting behavior so lid-close prevention can be managed by the helper executable.
+- How: Implemented SMJobBless/XPC client behavior in Sources/CocaineCore/PrivilegedHelperClient.swift, added SleepDisabled bridge in Sources/CocaineHelper/ApplePowerSettings.swift, replaced the helper placeholder with an NSXPC mach-service listener in Sources/CocaineHelper/main.swift, verified existing helper plists remained aligned, ran `swift build` and `swift test` successfully, and committed f952950.
+- Decision: Kept SMJobBless despite the macOS 13 deprecation warning because Task 5 explicitly requires the SMJobBless-based privileged helper implementation; fixed temporary-pointer warnings in AuthorizationCreate while preserving the requested behavior.
