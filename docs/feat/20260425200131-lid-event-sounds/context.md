@@ -86,3 +86,15 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: Add the testable core policy that starts passive lid monitoring only when Cocaine is active and maps lid-close/open events to the selected built-in sounds without changing activation state.
 - How: Added `Sources/CocaineCore/LidEventSoundController.swift` with `LidState`, `LidStateMonitoring`, `LidSoundPlaying`, active-state monitoring lifecycle, duplicate suppression, and silent monitor-start failure handling; added `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` covering activation start, close/open sounds, inactive silence, duplicate suppression, deactivation reset, and start failure state preservation. Evidence: `swift test --filter LidEventSoundControllerTests` failed before implementation due to missing policy symbols, then `swift test --filter LidEventSoundControllerTests && swift test` passed with 7 filtered tests and 40 total XCTest tests. Commit: `f9753e7`.
 - Decision: Main-actor-isolated the monitor and sound-player protocols because the controller, app state observation, and planned AppKit sound playback are main-actor UI-adjacent concerns and this avoids Swift concurrency conformance warnings.
+
+### 2026-04-25 22:56 — Task 2 passive lid state monitor
+
+- Why: Add the concrete passive app-side IOKit observer that converts raw clamshell power-management notifications into normalized open/closed lid states for the existing sound policy.
+- How: Added `Sources/CocaineCore/LidStateMonitor.swift` with a `@MainActor` `LidStateMonitoring` implementation, IOPM root-domain interest notification registration, explicit start/stop resource management, IOKit error reporting, and deterministic clamshell argument decoding; added `Tests/CocaineCoreTests/LidStateMonitorTests.swift` covering state-bit decoding, sleep-bit ignoring, and the Swift-defined clamshell message constant. Evidence: `swift test --filter LidStateMonitorTests` failed before implementation because `LidStateMonitor` was missing, then `swift test --filter LidStateMonitorTests`, `swift test --filter 'Lid(EventSoundController|StateMonitor)Tests'`, and `swift test` passed with 4 monitor tests, 11 lid event tests, and 44 total XCTest tests. Commit: `41e928a`.
+- Decision: Omitted `deinit` cleanup to avoid calling actor-isolated `stop()` from a nonisolated deinitializer; lifecycle cleanup remains explicit through `stop()` as planned.
+
+### 2026-04-25 23:01 — Task 2 quality fix
+
+- Why: Code quality review found the monitor should defensively unregister external IOKit resources if it is deallocated while monitoring is still active.
+- How: Added deinitialization cleanup in `Sources/CocaineCore/LidStateMonitor.swift` for the run-loop source, notifier, root domain object, and notification port. Verified with `swift test --filter LidStateMonitorTests && swift test`. Commit: `3a87f11`.
+- Decision: Kept `stop()` as the normal lifecycle path and added `deinit` as a defensive resource-owner safety net.
