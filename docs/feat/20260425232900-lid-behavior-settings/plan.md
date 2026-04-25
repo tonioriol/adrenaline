@@ -1685,7 +1685,7 @@ git -c commit.gpgsign=false commit -m "feat: add ScreenLocker and LidCloseLockRe
 
 > **Cleanup obligation:** Tasks 3 and 4 added transitional `public convenience init` overloads on `AppCoordinator` (~lines 52–63 of `Sources/CocaineCore/AppCoordinator.swift`) and `LidEventSoundController` (~lines 57–68 of `Sources/CocaineCore/LidEventSoundController.swift`) so the executable target kept compiling while the app delegate still used the old signatures. **This task must remove both convenience inits** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit primary inits everywhere. Verify with `grep -n "convenience init" Sources/CocaineCore/*.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/CocaineCore/AppCoordinator.swift` and `Sources/CocaineCore/LidEventSoundController.swift` along with `Sources/Cocaine/AppDelegate.swift`.
 
-- [ ] **Step 1: Replace AppDelegate**
+- [x] **Step 1: Replace AppDelegate**
 
 Replace `Sources/Cocaine/AppDelegate.swift` with:
 
@@ -1752,10 +1752,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
-- [ ] **Step 2: Build to verify the wiring compiles**
+- [x] **Step 2: Build to verify the wiring compiles**
 
 Run: `swift build 2>&1 | tail -20`
-Expected: FAIL — `MenuBarController` does not yet accept a `preferences:` argument. Fix in Task 7.
+Expected: FAIL — `MenuBarController` does not yet accept a `preferences:` argument. Fix in Task 7. _Executed together with Task 7 so the executable target never sat in a broken state; the combined build passed._
 
 (Skip the run-the-full-suite step here since the next task touches MenuBarController and they need to commit together to keep the repo building.)
 
@@ -1768,7 +1768,7 @@ Expected: FAIL — `MenuBarController` does not yet accept a `preferences:` argu
 
 This task makes `swift build` green again after Task 6.
 
-- [ ] **Step 1: Replace MenuBarController**
+- [x] **Step 1: Replace MenuBarController**
 
 Replace `Sources/Cocaine/MenuBarController.swift` with:
 
@@ -2062,22 +2062,22 @@ final class MenuBarController: NSObject {
 }
 ```
 
-- [ ] **Step 2: Build the package**
+- [x] **Step 2: Build the package**
 
 Run: `swift build 2>&1 | tail -20`
 Expected: PASS.
 
-- [ ] **Step 3: Build the app bundle**
+- [x] **Step 3: Build the app bundle**
 
 Run: `make app 2>&1 | tail -10`
 Expected: PASS — `build/Cocaine.app` created.
 
-- [ ] **Step 4: Run the full test suite**
+- [x] **Step 4: Run the full test suite**
 
 Run: `swift test 2>&1 | tail -10`
 Expected: PASS — 69 total.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Sources/Cocaine/AppDelegate.swift Sources/Cocaine/MenuBarController.swift

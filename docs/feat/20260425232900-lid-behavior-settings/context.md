@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 6 — Wire prefs/screen locker/lock responder in AppDelegate (incl. removing transitional 3-arg AppCoordinator + LidEventSoundController inits)
+**Cursor:** Task 8 — README updates for new behavior, defaults, upgrade note
 
 **Status:** in_progress
 
@@ -114,3 +114,15 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Accepted review fixes for Task 5: hardened `LoginFrameworkScreenLocker` fallback execution to try executable `CGSession -suspend` first and `/usr/bin/osascript -e 'tell application "loginwindow" to «event aevtrlck»'` second; made `lock()` inspect `SACLockScreenImmediate` return status and fall back on nonzero status; added missing-symbol logging plus `dlclose(handle)` only on the missing-symbol branch; removed unused `Combine` import from `LidCloseLockResponder`; added callback chaining coverage verifying the prior lid-state callback receives `.closed` before the responder lock path runs.
 - Verification passed: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -20` executed 7 tests with 0 failures; `swift test 2>&1 | tail -10` executed 73 tests with 0 failures.
 - Committed the code/test fix as `38b5ac9` (`fix: harden screen locker fallback and callback coverage`).
+
+### 2026-04-26 01:36 — Task 6/7 app wiring and preference menu UI
+
+- Why: App wiring now injects one shared `PreferencesStore` and the menu bar exposes the new preference controls.
+- How: Updated `Sources/Cocaine/AppDelegate.swift`, `Sources/Cocaine/MenuBarController.swift`, `Sources/CocaineCore/AppCoordinator.swift`, and `Sources/CocaineCore/LidEventSoundController.swift` to wire shared preferences, screen locking, lock response, checkbox menu state, live preference routing, and the lid-close confirmation alert; removed the two transitional convenience initializers from `AppCoordinator` and `LidEventSoundController`. Verification: `grep -n "convenience init" Sources/CocaineCore/*.swift ; echo "exit=$?"` found no matches and printed `exit=1`; `swift build 2>&1 | tail -20` passed; `make app 2>&1 | tail -10` passed; `swift test 2>&1 | tail -10` passed with 73 tests and 0 failures. Commit: `2f6441b`.
+- Decision: Task 6 and Task 7 were executed together so the executable target never sat in a broken intermediate state.
+
+### 2026-04-26 01:51 — Task 6/7 review fix: menu tooltip and warning rollback
+
+- Accepted code-quality review fixes for the combined Task 6/7 app wiring + menu UI change: `MenuBarController.bindState()` now re-renders when `preventLidCloseSleep` changes so the active tooltip stays in sync, and `togglePreventLidCloseSleep()` clears `lidClosePreventionConfirmed` if a live enable attempt rolls `preventLidCloseSleep` back to false.
+- Verification passed: `swift build 2>&1 | tail -20` passed; `make app 2>&1 | tail -10` passed; `swift test 2>&1 | tail -10` executed 73 tests with 0 failures.
+- Committed the MenuBarController-only fix as `a100841` (`fix: keep lid-close warning and tooltip in sync`).
