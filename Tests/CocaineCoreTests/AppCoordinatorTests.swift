@@ -44,6 +44,42 @@ private final class FakeLidCloseController: LidCloseControlling {
     }
 }
 
+private final class SuspendedEnableLidCloseController: LidCloseControlling {
+    var isEnabled = false
+    var statusValue = true
+    var disableCallCount = 0
+    var events: [String] = []
+
+    let enableStarted = XCTestExpectation(description: "lid-close enable started")
+    private var enableContinuation: CheckedContinuation<Void, Never>?
+
+    func enable() async throws {
+        events.append("enable-start")
+        enableStarted.fulfill()
+        await withCheckedContinuation { continuation in
+            enableContinuation = continuation
+        }
+        events.append("enable-resume")
+        isEnabled = true
+    }
+
+    func resumeEnable() {
+        enableContinuation?.resume()
+        enableContinuation = nil
+    }
+
+    func disable() async throws {
+        events.append("disable")
+        disableCallCount += 1
+        isEnabled = false
+    }
+
+    func status() async throws -> Bool {
+        events.append("status")
+        return statusValue
+    }
+}
+
 private struct TestError: Error, LocalizedError {
     let errorDescription: String?
 }
@@ -174,6 +210,34 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertFalse(lid.isEnabled)
         XCTAssertEqual(awake.disableCallCount, 1)
         XCTAssertEqual(lid.disableCallCount, 1)
+    }
+
+    func testShutdownCleanupPreventsSuspendedTurnOnFromReactivating() async {
+        let state = AppState()
+        let awake = FakeAwakeController()
+        let lid = SuspendedEnableLidCloseController()
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid)
+
+        let turnOnTask = Task { await coordinator.turnOn() }
+        await fulfillment(of: [lid.enableStarted], timeout: 1)
+
+        let shutdownTask = Task { await coordinator.shutdownCleanup() }
+        await Task.yield()
+
+        lid.resumeEnable()
+        await turnOnTask.value
+        await shutdownTask.value
+
+        XCTAssertFalse(state.isActive)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertFalse(awake.isEnabled)
+        XCTAssertFalse(lid.isEnabled)
+        XCTAssertGreaterThanOrEqual(lid.disableCallCount, 1)
+        XCTAssertGreaterThan(
+            lid.events.lastIndex(of: "disable") ?? -1,
+            lid.events.lastIndex(of: "enable-resume") ?? -1,
+            "shutdown cleanup must perform final disable after suspended enable resumes"
+        )
     }
 
     func testLidCloseFailureRollsBackAwakeAndLeavesStateOff() async {

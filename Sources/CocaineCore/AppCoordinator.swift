@@ -30,6 +30,8 @@ public final class AppCoordinator {
     private let state: AppState
     private let awakeController: AwakeControlling
     private let lidCloseController: LidCloseControlling
+    private var shutdownRequested = false
+    private var currentTransitionTask: Task<Void, Never>?
 
     public init(
         state: AppState,
@@ -50,7 +52,12 @@ public final class AppCoordinator {
     }
 
     public func turnOn() async {
-        guard !state.isBusy else { return }
+        await runTransition {
+            await self.performTurnOn()
+        }
+    }
+
+    private func performTurnOn() async {
         state.setBusy(true)
         state.clearError()
 
@@ -58,8 +65,18 @@ public final class AppCoordinator {
             try awakeController.enable()
             try await lidCloseController.enable()
 
+            if shutdownRequested {
+                await rollbackForShutdown()
+                return
+            }
+
             guard try await lidCloseController.status() else {
                 throw AppCoordinatorError.lidCloseStatusDidNotBecomeActive
+            }
+
+            if shutdownRequested {
+                await rollbackForShutdown()
+                return
             }
 
             state.setActive(true)
@@ -72,11 +89,34 @@ public final class AppCoordinator {
     }
 
     public func turnOff() async {
-        await performTurnOff(force: false)
+        await runTransition {
+            await self.performTurnOff(force: false)
+        }
     }
 
     public func shutdownCleanup() async {
+        shutdownRequested = true
+        let inFlightTransition = currentTransitionTask
+        await inFlightTransition?.value
         await performTurnOff(force: true)
+    }
+
+    private func runTransition(_ operation: @escaping @MainActor () async -> Void) async {
+        guard !shutdownRequested, !state.isBusy, currentTransitionTask == nil else { return }
+
+        let task = Task { @MainActor in
+            await operation()
+        }
+        currentTransitionTask = task
+        await task.value
+        currentTransitionTask = nil
+    }
+
+    private func rollbackForShutdown() async {
+        awakeController.disable()
+        try? await lidCloseController.disable()
+        state.setActive(false)
+        state.setBusy(false)
     }
 
     private func performTurnOff(force: Bool) async {
