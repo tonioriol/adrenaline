@@ -120,3 +120,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 - Why: All planned design, implementation, review, documentation, and automated verification tasks are complete.
 - How: Completed Tasks 1–5 across commits `f9753e7`, `41e928a`, `3a87f11`, `fb84e13`, `9f917bb`, and `f3d2590`, with task-level spec and quality reviews passing. Updated `plan.md` checkboxes and set this ledger to done with the manual MacBook validation follow-up recorded explicitly.
 - Decision: Treat the implementation as complete for code and automated verification; keep hardware lid-close/open validation as a manual follow-up rather than overclaiming it.
+
+### 2026-04-25 23:23 — App reinstalled and relaunched
+
+- Why: The user wanted the updated build installed in Applications after the lid event sound feature was completed.
+- How: Rebuilt and signed the app bundle, replaced `/Applications/Cocaine.app`, relaunched it, and verified the running app process at `/Applications/Cocaine.app/Contents/MacOS/Cocaine`; the privileged helper process remained running at `/Library/PrivilegedHelperTools/com.tr0n.Cocaine.Helper`.
+- Decision: Leave manual physical lid-close/open validation as the remaining hardware check; installation and launch are verified.
