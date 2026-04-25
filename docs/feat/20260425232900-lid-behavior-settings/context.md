@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — AppCoordinator: read prefs, conditional helper, live reconciliation (incl. AppState.recordErrorWhileActive)
+**Cursor:** Task 4 — LidEventSoundController gates sounds on preferences
 
 **Status:** in_progress
 
@@ -84,3 +84,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: Split ordinary no-idle assertion handling from optional display-sleep prevention so future preference changes can be applied while Cocaine remains active.
 - How: Updated Sources/CocaineCore/AwakeController.swift with system/display assertion IDs, enable(preventDisplaySleep:), rollback on partial enable failure, and setPreventDisplaySleep(_:) reconciliation; extended Tests/CocaineCoreTests/AwakeControllerTests.swift with 6 display-flag/reconciliation tests and adapted the existing release-order expectation to the new display-first disable path. TDD evidence: swift test --filter AwakeControllerTests 2>&1 | tail -30 failed first on missing enable(preventDisplaySleep:) and setPreventDisplaySleep(_:), then swift test --filter AwakeControllerTests 2>&1 | tail -20 passed 10 tests, and swift test 2>&1 | tail -10 passed 54 tests. Commit: 7690d06.
 - Decision: Release the display assertion before the no-idle assertion during disable so live display toggling and full disable share the same display-first cleanup order.
+
+### 2026-04-26 00:44 — Task 3 AppCoordinator preferences and live reconciliation
+
+- Why: Make activation honor persisted display/lid-close preferences and keep the app visibly active when only a live reconciliation path fails.
+- How: Added `AppState.recordErrorWhileActive(_:)` in `Sources/CocaineCore/AppState.swift` with coverage in `Tests/CocaineCoreTests/AppStateTests.swift`; widened `AwakeControlling`, injected `PreferencesProviding`, made lid-close engagement conditional/session-scoped, added `setPreventDisplaySleep(_:)` and `setPreventLidCloseSleep(_:)`, and expanded `Tests/CocaineCoreTests/AppCoordinatorTests.swift` with fake preferences plus preference/reconciliation coverage. Evidence: `swift test --filter AppStateTests 2>&1 | tail -20` passed 8 tests; `swift test --filter AppCoordinatorTests 2>&1 | tail -20` passed 18 tests; `swift test 2>&1 | tail -10` passed 63 tests. Commits: `bfecf32`, `93fcabe`.
+- Decision: Added a temporary backward-compatible coordinator convenience initializer using `PreferencesStore()` so the app target keeps building until the planned app wiring task injects the shared store.

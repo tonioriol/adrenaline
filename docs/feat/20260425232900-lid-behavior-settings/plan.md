@@ -449,7 +449,7 @@ git -c commit.gpgsign=false commit -m "feat: add display-sleep flag and live rec
 - Modify: `Tests/CocaineCoreTests/AppStateTests.swift`
 - Modify: `Tests/CocaineCoreTests/AppCoordinatorTests.swift`
 
-- [ ] **Step 0: Add `recordErrorWhileActive(_:)` to `AppState`**
+- [x] **Step 0: Add `recordErrorWhileActive(_:)` to `AppState`**
 
 The existing [`AppState.recordError(_:)`](Sources/CocaineCore/AppState.swift:54) flips `isActive` to `false`, which is correct for full activation failures but wrong for live reconciliation failures where awake stays engaged. Add a sibling method that records the error message without disturbing `isActive`.
 
@@ -490,7 +490,7 @@ git add Sources/CocaineCore/AppState.swift Tests/CocaineCoreTests/AppStateTests.
 git -c commit.gpgsign=false commit -m "feat: add recordErrorWhileActive for live reconciliation failures"
 ```
 
-- [ ] **Step 1: Widen `AwakeControlling` protocol and add a fake-prefs helper to the existing tests**
+- [x] **Step 1: Widen `AwakeControlling` protocol and add a fake-prefs helper to the existing tests**
 
 In `Sources/CocaineCore/AppCoordinator.swift`, replace the `AwakeControlling` protocol declaration:
 
@@ -544,7 +544,7 @@ private final class FakeAwakeController: AwakeControlling {
 Run: `swift build 2>&1 | tail -10`
 Expected: build succeeds (test target builds with new fake conforming).
 
-- [ ] **Step 2: Add a `FakePreferencesStore` and write the failing prefs-aware tests**
+- [x] **Step 2: Add a `FakePreferencesStore` and write the failing prefs-aware tests**
 
 Append at the top of `Tests/CocaineCoreTests/AppCoordinatorTests.swift` (after the existing `SuspendedEnableLidCloseController` block, before `private struct TestError`):
 
@@ -916,12 +916,12 @@ Concrete edits to existing tests:
     }
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `swift test --filter AppCoordinatorTests 2>&1 | tail -30`
 Expected: FAIL — `extra argument 'preferences' in call`, `cannot find 'setPreventDisplaySleep'`, `cannot find 'setPreventLidCloseSleep'`.
 
-- [ ] **Step 4: Replace AppCoordinator implementation**
+- [x] **Step 4: Replace AppCoordinator implementation**
 
 Replace `Sources/CocaineCore/AppCoordinator.swift` with:
 
@@ -1162,17 +1162,17 @@ Note: live lid-close failures use `recordErrorWhileActive(_:)` (added in Step 0)
     }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `swift test --filter AppCoordinatorTests 2>&1 | tail -20`
-Expected: PASS — 17 tests (10 original adapted + 7 new).
+Expected: PASS — 17 tests (10 original adapted + 7 new). _Actual: 18 (8 new tests added; plan miscount; harmless)._
 
-- [ ] **Step 6: Run the full suite**
+- [x] **Step 6: Run the full suite**
 
 Run: `swift test 2>&1 | tail -10`
-Expected: PASS — 61 total.
+Expected: PASS — 61 total. _Actual: 63 (cascade from above)._
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add Sources/CocaineCore/AppCoordinator.swift Tests/CocaineCoreTests/AppCoordinatorTests.swift
@@ -1678,8 +1678,11 @@ git -c commit.gpgsign=false commit -m "feat: add ScreenLocker and LidCloseLockRe
 
 **Files:**
 - Modify: `Sources/Cocaine/AppDelegate.swift`
+- Modify: `Sources/CocaineCore/AppCoordinator.swift` (remove the transitional 3-arg convenience init added in Task 3)
 
 > **Construction order matters.** [`LidCloseLockResponder`](Sources/CocaineCore/LidCloseLockResponder.swift:1) chains itself onto the existing `monitor.onLidStateChange` closure inside its initializer, so the sound controller (which sets the first closure) MUST be constructed before the lock responder (which wraps it). The replacement file below already orders the two correctly.
+
+> **Cleanup obligation:** Task 3 added a `public convenience init(state:awakeController:lidCloseController:)` to `AppCoordinator` (~lines 52–63 of `Sources/CocaineCore/AppCoordinator.swift`) so the executable target kept compiling while the app delegate still used the old signature. **This task must remove that convenience init** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit 4-arg init. Verify with `grep -n "convenience init" Sources/CocaineCore/AppCoordinator.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/CocaineCore/AppCoordinator.swift` along with `Sources/Cocaine/AppDelegate.swift`.
 
 - [ ] **Step 1: Replace AppDelegate**
 
