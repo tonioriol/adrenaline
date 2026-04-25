@@ -34,15 +34,18 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Sources/Cocaine/main.swift` — app executable placeholder
 - `Sources/CocaineCore/AppCoordinator.swift` — one-toggle coordinator and controller protocols
 - `Sources/CocaineCore/AppState.swift` — observable state model
+- `Sources/CocaineCore/AwakeController.swift` — ordinary sleep assertion controller
+- `Sources/CocaineCore/PowerAssertionClient.swift` — fakeable IOKit assertion wrapper
 - `Sources/CocaineHelper/main.swift` — helper executable placeholder
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
+- `Tests/CocaineCoreTests/AwakeControllerTests.swift` — ordinary assertion controller tests
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — Ordinary Sleep Prevention
+**Cursor:** Task 4 — Lid-Close Controller Contract
 
 **Status:** ready
 
@@ -132,3 +135,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found `AwakeController.enable()` leaked a no-idle assertion if display assertion creation failed.
 - How: Released locally tracked partial assertion IDs on enable failure, added regression coverage, verified with `swift test --filter AwakeControllerTests` and `make test`, commit `f285edc`.
+
+### 2026-04-25 10:14 — Task 4 lid-close controller contract
+
+- Why: Add the tested public contract that lets the coordinator delegate lid-close prevention to a future privileged helper implementation without implementing SMJobBless/XPC behavior yet.
+- How: Added `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Sources/CocaineCore/LidCloseController.swift`, `Sources/CocaineCore/PrivilegedHelperClient.swift`, and `Tests/CocaineCoreTests/LidCloseControllerTests.swift`. TDD evidence: `swift test --filter LidCloseControllerTests` first failed because `PrivilegedHelperClientProtocol` and `LidCloseController` were missing, then `swift test --filter LidCloseControllerTests && make test` passed with 20 total XCTest tests. Commit: `3d29e44`.
+- Decision: Keep `PrivilegedHelperClient` as a throwing `.notImplemented` stub so Task 4 defines the controller/helper protocol boundary only; privileged installation, XPC connection, and power-setting mutation remain deferred to Task 5.

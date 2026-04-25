@@ -516,7 +516,7 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/AppCoordinator.swift 
 - Create: `Sources/CocaineCore/AwakeController.swift`
 - Create: `Tests/CocaineCoreTests/AwakeControllerTests.swift`
 
-- [ ] **Step 1: Write failing ordinary assertion tests**
+- [x] **Step 1: Write failing ordinary assertion tests**
 
 Create `Tests/CocaineCoreTests/AwakeControllerTests.swift`:
 
@@ -593,7 +593,7 @@ cd /Users/tr0n/Code/cocaine && swift test --filter AwakeControllerTests
 
 Expected: FAIL because `AwakeController` and `PowerAssertionClient` do not exist.
 
-- [ ] **Step 2: Implement IOKit assertion wrapper and awake controller**
+- [x] **Step 2: Implement IOKit assertion wrapper and awake controller**
 
 Create `Sources/CocaineCore/PowerAssertionClient.swift`:
 
@@ -689,7 +689,7 @@ public final class AwakeController: AwakeControlling {
 }
 ```
 
-- [ ] **Step 3: Run tests and commit**
+- [x] **Step 3: Run tests and commit**
 
 Run:
 
