@@ -54,19 +54,6 @@ public final class LidEventSoundController {
             }
     }
 
-    public convenience init(
-        state: AppState,
-        monitor: LidStateMonitoring,
-        soundPlayer: LidSoundPlaying
-    ) {
-        self.init(
-            state: state,
-            monitor: monitor,
-            soundPlayer: soundPlayer,
-            preferences: PreferencesStore()
-        )
-    }
-
     private func setMonitoringEnabled(_ enabled: Bool) {
         if enabled {
             do {

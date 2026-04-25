@@ -49,19 +49,6 @@ public final class AppCoordinator {
         self.preferences = preferences
     }
 
-    public convenience init(
-        state: AppState,
-        awakeController: AwakeControlling,
-        lidCloseController: LidCloseControlling
-    ) {
-        self.init(
-            state: state,
-            awakeController: awakeController,
-            lidCloseController: lidCloseController,
-            preferences: PreferencesStore()
-        )
-    }
-
     public func toggle() async {
         if state.isActive {
             await turnOff()
