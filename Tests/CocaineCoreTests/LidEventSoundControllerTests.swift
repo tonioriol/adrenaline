@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 @testable import CocaineCore
 
@@ -33,6 +34,29 @@ private final class FakeLidSoundPlayer: LidSoundPlaying {
     }
 }
 
+@MainActor
+private final class FakePreferencesStore: PreferencesProviding {
+    @Published var preventDisplaySleep: Bool = true
+    @Published var preventLidCloseSleep: Bool = false
+    @Published var lockScreenOnLidClose: Bool = true
+    @Published var playLidEventSounds: Bool = true
+    @Published var lidClosePreventionConfirmed: Bool = false
+
+    var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { $preventDisplaySleep.eraseToAnyPublisher() }
+    var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { $preventLidCloseSleep.eraseToAnyPublisher() }
+    var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> { $lockScreenOnLidClose.eraseToAnyPublisher() }
+    var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { $playLidEventSounds.eraseToAnyPublisher() }
+
+    func snapshot() -> PreferencesSnapshot {
+        PreferencesSnapshot(
+            preventDisplaySleep: preventDisplaySleep,
+            preventLidCloseSleep: preventLidCloseSleep,
+            lockScreenOnLidClose: lockScreenOnLidClose,
+            playLidEventSounds: playLidEventSounds
+        )
+    }
+}
+
 private struct TestError: Error, LocalizedError {
     let errorDescription: String?
 }
@@ -43,7 +67,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState()
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         state.setActive(true)
 
@@ -57,7 +81,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         monitor.emit(.closed)
 
@@ -69,7 +93,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         monitor.emit(.open)
 
@@ -81,7 +105,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState()
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         monitor.emit(.closed)
         monitor.emit(.open)
@@ -95,7 +119,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         monitor.emit(.closed)
         monitor.emit(.closed)
@@ -111,7 +135,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         monitor.emit(.closed)
         state.setActive(false)
@@ -130,7 +154,7 @@ final class LidEventSoundControllerTests: XCTestCase {
         let monitor = FakeLidStateMonitor()
         monitor.startError = TestError(errorDescription: "monitor unavailable")
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player)
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
 
         state.setActive(true)
         monitor.emit(.closed)
@@ -141,6 +165,38 @@ final class LidEventSoundControllerTests: XCTestCase {
         XCTAssertEqual(state.helperState, .unknown)
         XCTAssertFalse(monitor.isMonitoring)
         XCTAssertTrue(player.playedSoundNames.isEmpty)
+        _ = controller
+    }
+
+    func testPlayLidEventSoundsOffSilencesBothEvents() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        prefs.playLidEventSounds = false
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        monitor.emit(.closed)
+        monitor.emit(.open)
+
+        XCTAssertTrue(player.playedSoundNames.isEmpty)
+        _ = controller
+    }
+
+    func testTogglingPlayLidEventSoundsBetweenEventsAffectsOnlyNextEvent() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        monitor.emit(.closed)
+        prefs.playLidEventSounds = false
+        monitor.emit(.open)
+        prefs.playLidEventSounds = true
+        monitor.emit(.closed)
+
+        XCTAssertEqual(player.playedSoundNames, ["Hero", "Hero"])
         _ = controller
     }
 }

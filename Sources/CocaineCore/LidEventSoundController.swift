@@ -27,6 +27,7 @@ public final class LidEventSoundController {
     private let state: AppState
     private let monitor: LidStateMonitoring
     private let soundPlayer: LidSoundPlaying
+    private let preferences: PreferencesProviding
     private var cancellable: AnyCancellable?
     private var lastHandledState: LidState?
     private var monitoringStarted = false
@@ -34,11 +35,13 @@ public final class LidEventSoundController {
     public init(
         state: AppState,
         monitor: LidStateMonitoring,
-        soundPlayer: LidSoundPlaying
+        soundPlayer: LidSoundPlaying,
+        preferences: PreferencesProviding
     ) {
         self.state = state
         self.monitor = monitor
         self.soundPlayer = soundPlayer
+        self.preferences = preferences
 
         monitor.onLidStateChange = { [weak self] lidState in
             self?.handle(lidState)
@@ -49,6 +52,19 @@ public final class LidEventSoundController {
             .sink { [weak self] isActive in
                 self?.setMonitoringEnabled(isActive)
             }
+    }
+
+    public convenience init(
+        state: AppState,
+        monitor: LidStateMonitoring,
+        soundPlayer: LidSoundPlaying
+    ) {
+        self.init(
+            state: state,
+            monitor: monitor,
+            soundPlayer: soundPlayer,
+            preferences: PreferencesStore()
+        )
     }
 
     private func setMonitoringEnabled(_ enabled: Bool) {
@@ -68,6 +84,9 @@ public final class LidEventSoundController {
 
     private func handle(_ lidState: LidState) {
         guard state.isActive, monitoringStarted, lidState != lastHandledState else { return }
+        lastHandledState = lidState
+
+        guard preferences.playLidEventSounds else { return }
 
         switch lidState {
         case .closed:
@@ -75,7 +94,5 @@ public final class LidEventSoundController {
         case .open:
             soundPlayer.play(named: Self.openSoundName)
         }
-
-        lastHandledState = lidState
     }
 }
