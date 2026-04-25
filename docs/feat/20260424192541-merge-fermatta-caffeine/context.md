@@ -187,3 +187,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found quitting during an in-flight toggle could bypass cleanup because the normal turn-off path returned early when busy.
 - How: Added a shutdown-safe coordinator cleanup path, updated app termination to use it, added regression coverage, verified with `swift test --filter AppCoordinatorTests && make test && make app`, commit a1f27b1.
+
+### 2026-04-25 13:17 — Task 7 shutdown serialization fix
+
+- Why: Code quality review found the first shutdown fix bypassed the busy guard but still allowed a suspended turn-on path to resume and reactivate state after shutdown cleanup.
+- How: Serialized shutdown against in-flight transitions, added a real suspended-enable regression test, verified with `swift test --filter AppCoordinatorTests && make test && make app`, commit bd8d939.
