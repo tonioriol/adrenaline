@@ -32,15 +32,17 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Resources/CocaineHelper/Info.plist` — helper metadata placeholder required by linker flags
 - `Resources/CocaineHelper/launchd.plist` — helper launchd metadata placeholder required by linker flags
 - `Sources/Cocaine/main.swift` — app executable placeholder
+- `Sources/CocaineCore/AppCoordinator.swift` — one-toggle coordinator and controller protocols
 - `Sources/CocaineCore/AppState.swift` — observable state model
 - `Sources/CocaineHelper/main.swift` — helper executable placeholder
+- `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — One-Toggle Coordinator
+**Cursor:** Task 3 — Ordinary Sleep Prevention
 
 **Status:** ready
 
@@ -119,3 +121,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found missing busy-guard coverage and ambiguous post-disable status handling.
 - How: Added busy-guard/error-state tests, treated active status after disable as a coordinator error, verified with `swift test --filter AppCoordinatorTests` and `make test`, commit `313ed13`.
+
+### 2026-04-25 10:01 — Task 3 ordinary sleep prevention
+
+- Why: Add concrete ordinary idle/display sleep prevention behind the coordinator’s awake controller contract.
+- How: Added `Sources/CocaineCore/PowerAssertionClient.swift` with fakeable IOKit assertion creation/release, `Sources/CocaineCore/AwakeController.swift` with idempotent enable and release-on-disable behavior, and `Tests/CocaineCoreTests/AwakeControllerTests.swift` covering assertion creation, release, and idempotence. TDD evidence: `swift test --filter AwakeControllerTests` first failed because `PowerAssertionClient` and `AwakeController` were missing, then `swift test --filter AwakeControllerTests && make test` passed with 16 total XCTest tests. Commit: `ba1e5ab`.
+- Decision: Keep Task 3 limited to ordinary no-idle/display assertions via public IOKit APIs; lid-close/helper behavior remains deferred to the next task.

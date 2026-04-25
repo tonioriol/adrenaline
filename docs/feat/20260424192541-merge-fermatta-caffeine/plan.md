@@ -266,7 +266,7 @@ cd /Users/tr0n/Code/cocaine && git init && git add Package.swift Makefile Source
 - Create: `Sources/CocaineCore/AppCoordinator.swift`
 - Create: `Tests/CocaineCoreTests/AppCoordinatorTests.swift`
 
-- [ ] **Step 1: Write failing coordinator tests**
+- [x] **Step 1: Write failing coordinator tests**
 
 Create `Tests/CocaineCoreTests/AppCoordinatorTests.swift`:
 
@@ -397,7 +397,7 @@ cd /Users/tr0n/Code/cocaine && swift test --filter AppCoordinatorTests
 
 Expected: FAIL because coordinator and protocols do not exist.
 
-- [ ] **Step 2: Implement coordinator and protocols**
+- [x] **Step 2: Implement coordinator and protocols**
 
 Create `Sources/CocaineCore/AppCoordinator.swift`:
 
@@ -491,7 +491,7 @@ public final class AppCoordinator {
 }
 ```
 
-- [ ] **Step 3: Run coordinator tests and commit**
+- [x] **Step 3: Run coordinator tests and commit**
 
 Run:
 
