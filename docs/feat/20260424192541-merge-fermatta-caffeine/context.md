@@ -127,3 +127,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Add concrete ordinary idle/display sleep prevention behind the coordinator’s awake controller contract.
 - How: Added `Sources/CocaineCore/PowerAssertionClient.swift` with fakeable IOKit assertion creation/release, `Sources/CocaineCore/AwakeController.swift` with idempotent enable and release-on-disable behavior, and `Tests/CocaineCoreTests/AwakeControllerTests.swift` covering assertion creation, release, and idempotence. TDD evidence: `swift test --filter AwakeControllerTests` first failed because `PowerAssertionClient` and `AwakeController` were missing, then `swift test --filter AwakeControllerTests && make test` passed with 16 total XCTest tests. Commit: `ba1e5ab`.
 - Decision: Keep Task 3 limited to ordinary no-idle/display assertions via public IOKit APIs; lid-close/helper behavior remains deferred to the next task.
+
+### 2026-04-25 10:07 — Task 3 quality fixes
+
+- Why: Code quality review found `AwakeController.enable()` leaked a no-idle assertion if display assertion creation failed.
+- How: Released locally tracked partial assertion IDs on enable failure, added regression coverage, verified with `swift test --filter AwakeControllerTests` and `make test`, commit `f285edc`.
