@@ -29,9 +29,11 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `.gitignore` — generated output ignore rules
 - `Package.swift` — SwiftPM manifest
 - `Makefile` — build/test commands
+- `README.md` — user-facing build/run/safety documentation
+- `NOTICE.md` — upstream attribution notes
 - `Resources/CocaineHelper/Info.plist` — helper metadata placeholder required by linker flags
 - `Resources/CocaineHelper/launchd.plist` — helper launchd metadata placeholder required by linker flags
-- `Sources/Cocaine/main.swift` — app executable placeholder
+- `Sources/Cocaine/main.swift` — app executable entry point
 - `Sources/CocaineCore/AppCoordinator.swift` — one-toggle coordinator and controller protocols
 - `Sources/CocaineCore/AppState.swift` — observable state model
 - `Sources/CocaineCore/AwakeController.swift` — ordinary sleep assertion controller
@@ -55,9 +57,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 8 — Documentation, Attribution, and Manual Verification
+**Cursor:** all tasks complete
 
-**Status:** ready
+**Status:** complete
 
 ## LOG
 
@@ -200,3 +202,15 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: The app now implements the approved one-toggle keep-awake behavior.
 - How: `make clean && make test && make app` passed with 31 XCTest tests and a signed app bundle. `make run` launched a background-only menu bar process with no windows, and quitting left no Cocaine process or Cocaine power assertions. Full interactive activation/deactivation was not directly verified because the native menu bar item could not be conclusively driven from the available automation.
 - Decision: The initial version excludes durations, app rules, and advanced controls as intended.
+
+### 2026-04-25 13:35 — Implementation session complete
+
+- Why: All planned implementation tasks, review loops, and verification steps are complete for the initial Cocaine release.
+- How: Delivered Tasks 1-8 across the SwiftPM skeleton, one-toggle coordinator, ordinary IOKit assertions, lid-close controller contract, privileged helper implementation, app bundle packaging, menu bar UI, and project docs. Review/fix commits included `6705ae8`, `313ed13`, `f285edc`, `3dd5564`, `f13af6c`, `166677c`, `a1f27b1`, plus documentation/memory commits through `e9580a7`. Automated verification passed with `make clean && make test && make app`; best-effort manual verification confirmed the app launches as a background-only process and exits without lingering Cocaine assertions.
+- Decision: The remaining follow-up is higher-confidence native UI/manual activation verification, not additional implementation scope for the v1 feature set.
+
+### 2026-04-25 18:19 — Post-implementation local fix and icon refinement
+
+- Why: Manual testing after installation exposed a remaining helper-install failure on the local machine and the menu bar icon was refined after visual feedback.
+- How: Diagnosed that the app was already launching as a UI element and that the helper bless path was failing due to packaging/signing requirement mismatches. Updated signing-related values in [`Makefile`](../Makefile:1), [`Resources/Cocaine/Info.plist`](../Resources/Cocaine/Info.plist:1), [`Resources/CocaineHelper/Info.plist`](../Resources/CocaineHelper/Info.plist:1), and [`Sources/CocaineCore/CocaineHelperProtocol.swift`](../Sources/CocaineCore/CocaineHelperProtocol.swift:3), expanded [`Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`](../Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift:1), rebuilt and reinstalled [`/Applications/Cocaine.app`](file:///Applications/Cocaine.app), and replaced the menu bar cup symbol with a vector-drawn diagonal split-pill icon in [`Sources/Cocaine/MenuBarController.swift`](../Sources/Cocaine/MenuBarController.swift:35).
+- Decision: Keep the app menu-bar-only, keep the new pharmaceutical pill metaphor for the status item, and use the local signed build as the test installation baseline.

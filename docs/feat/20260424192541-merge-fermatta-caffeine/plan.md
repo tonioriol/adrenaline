@@ -1361,7 +1361,7 @@ cd /Users/tr0n/Code/cocaine && git add Makefile Resources/Cocaine/Info.plist && 
 - Create: `Sources/Cocaine/AppDelegate.swift`
 - Create: `Sources/Cocaine/MenuBarController.swift`
 
-- [ ] **Step 1: Implement app entry point**
+- [x] **Step 1: Implement app entry point**
 
 Create `Sources/Cocaine/main.swift`:
 
@@ -1375,7 +1375,7 @@ app.setActivationPolicy(.accessory)
 app.run()
 ```
 
-- [ ] **Step 2: Implement app delegate**
+- [x] **Step 2: Implement app delegate**
 
 Create `Sources/Cocaine/AppDelegate.swift`:
 
@@ -1409,7 +1409,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
-- [ ] **Step 3: Implement status item controller**
+- [x] **Step 3: Implement status item controller**
 
 Create `Sources/Cocaine/MenuBarController.swift`:
 
@@ -1539,7 +1539,7 @@ final class MenuBarController: NSObject {
 }
 ```
 
-- [ ] **Step 4: Build app bundle and commit UI**
+- [x] **Step 4: Build app bundle and commit UI**
 
 Run:
 
@@ -1564,7 +1564,7 @@ cd /Users/tr0n/Code/cocaine && git add Sources/Cocaine && git commit -m "feat: a
 - Create: `NOTICE.md`
 - Modify: `docs/feat/20260424192541-merge-fermatta-caffeine/context.md`
 
-- [ ] **Step 1: Add README**
+- [x] **Step 1: Add README**
 
 Create `README.md`:
 
@@ -1602,7 +1602,7 @@ The first activation may request admin authorization to install the privileged h
 - Right-click menu: About, helper repair when needed, Quit.
 ```
 
-- [ ] **Step 2: Add upstream attribution**
+- [x] **Step 2: Add upstream attribution**
 
 Create `NOTICE.md`:
 
@@ -1617,7 +1617,7 @@ Cocaine is a clean reimplementation for personal use. It was informed by these o
 If code is copied directly from either project in future changes, preserve the upstream copyright notice beside the copied code and update this file.
 ```
 
-- [ ] **Step 3: Run automated verification**
+- [x] **Step 3: Run automated verification**
 
 Run:
 
@@ -1627,7 +1627,7 @@ cd /Users/tr0n/Code/cocaine && make clean && make test && make app
 
 Expected: PASS.
 
-- [ ] **Step 4: Run manual verification**
+- [x] **Step 4: Run manual verification**
 
 Run:
 
@@ -1645,7 +1645,7 @@ Expected:
 - Left-click again turns off and restores normal sleep settings.
 - Quit while active restores normal sleep settings before exit.
 
-- [ ] **Step 5: Update task ledger and commit docs**
+- [x] **Step 5: Update task ledger and commit docs**
 
 Append this entry to `docs/feat/20260424192541-merge-fermatta-caffeine/context.md` after implementation evidence exists:
 

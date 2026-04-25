@@ -29,7 +29,7 @@
   <key>SMPrivilegedExecutables</key>
   <dict>
     <key>com.tr0n.Cocaine.Helper</key>
-    <string>identifier com.tr0n.Cocaine.Helper</string>
+    <string>anchor apple generic and identifier "com.tr0n.Cocaine.Helper" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists</string>
   </dict>
 </dict>
 </plist>
