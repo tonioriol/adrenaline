@@ -108,3 +108,9 @@ The approved design uses passive app-side lid observation with built-in macOS so
 
 - Why: The README needed to describe the new lid-close and lid-open sound behavior for users after the feature implementation.
 - How: Updated README.md behavior text to mention silent off-state behavior plus Hero-on-close and Basso-on-open while on; verified with `git diff -- README.md`; committed the documentation update as `9f917bb`.
+
+### 2026-04-25 23:12 — Lid event sounds implemented
+
+- Why: The approved feature needed audible close/open feedback while lid-close prevention is active.
+- How: Added testable lid sound policy, passive IOKit lid state monitoring, AppKit built-in sound playback, app lifecycle wiring, and README behavior docs. Verified `make clean && make test && make app` passed with 44 XCTest tests and signed app bundle creation. Confirmed built-in sound files resolve with `Hero: ok` for `/System/Library/Sounds/Hero.aiff` and `Basso: ok` for `/System/Library/Sounds/Basso.aiff`; manual MacBook validation remains pending.
+- Decision: Kept sound monitoring app-side and auxiliary; helper behavior and sleep-prevention rollback paths remain unchanged.
