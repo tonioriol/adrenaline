@@ -6,6 +6,7 @@ private final class FakePowerAssertionClient: PowerAssertionClient {
     var createdReasons: [String] = []
     var releasedIDs: [UInt32] = []
     var createError: Error?
+    var displayCreateError: Error?
 
     func createNoIdleSleepAssertion(reason: String) throws -> UInt32 {
         if let createError { throw createError }
@@ -16,6 +17,7 @@ private final class FakePowerAssertionClient: PowerAssertionClient {
 
     func createDisplaySleepAssertion(reason: String) throws -> UInt32 {
         if let createError { throw createError }
+        if let displayCreateError { throw displayCreateError }
         createdReasons.append(reason)
         nextID += 1
         return nextID
@@ -24,6 +26,10 @@ private final class FakePowerAssertionClient: PowerAssertionClient {
     func releaseAssertion(id: UInt32) {
         releasedIDs.append(id)
     }
+}
+
+private struct TestError: LocalizedError {
+    var errorDescription: String?
 }
 
 @MainActor
@@ -57,6 +63,23 @@ final class AwakeControllerTests: XCTestCase {
         try controller.enable()
 
         XCTAssertEqual(client.createdReasons.count, 2)
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testEnableReleasesSystemAssertionWhenDisplayAssertionFails() throws {
+        let client = FakePowerAssertionClient()
+        client.displayCreateError = TestError(errorDescription: "display failed")
+        let controller = AwakeController(client: client)
+
+        XCTAssertThrowsError(try controller.enable())
+
+        XCTAssertEqual(client.releasedIDs, [42])
+        XCTAssertFalse(controller.isEnabled)
+
+        client.displayCreateError = nil
+        try controller.enable()
+
+        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active", "Cocaine is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 }
