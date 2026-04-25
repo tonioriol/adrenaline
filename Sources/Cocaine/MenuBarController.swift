@@ -32,6 +32,10 @@ final class MenuBarController: NSObject {
         state.$isActive.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
         state.$isBusy.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
         state.$lastErrorMessage.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
+        preferences.preventLidCloseSleepPublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.render() }
+            .store(in: &cancellables)
     }
 
     private func render() {
@@ -240,6 +244,9 @@ final class MenuBarController: NSObject {
         }
         Task { @MainActor in
             await coordinator.setPreventLidCloseSleep(newValue)
+            if newValue && !preferences.preventLidCloseSleep {
+                preferences.lidClosePreventionConfirmed = false
+            }
         }
     }
 
