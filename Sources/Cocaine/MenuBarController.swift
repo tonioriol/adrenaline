@@ -57,7 +57,8 @@ final class MenuBarController: NSObject {
     }
 
     private func pillImage(filled: Bool) -> NSImage {
-        let size = NSSize(width: 18, height: 14)
+        let pillScale: CGFloat = 1.2
+        let size = NSSize(width: 21, height: 17)
 
         let image = NSImage(size: size, flipped: false) { rect in
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
@@ -71,7 +72,14 @@ final class MenuBarController: NSObject {
             context.translateBy(x: rect.midX, y: rect.midY)
             context.rotate(by: .pi / 6)
 
-            let pillRect = CGRect(x: -6.6, y: -3.25, width: 13.2, height: 6.5)
+            let pillWidth: CGFloat = 13.2 * pillScale
+            let pillHeight: CGFloat = 6.5 * pillScale
+            let pillRect = CGRect(
+                x: -pillWidth / 2,
+                y: -pillHeight / 2,
+                width: pillWidth,
+                height: pillHeight
+            )
             let radius = pillRect.height / 2
             let pillPath = CGPath(
                 roundedRect: pillRect,
@@ -88,11 +96,13 @@ final class MenuBarController: NSObject {
                 context.fillPath()
 
                 context.setBlendMode(.clear)
+                let splitWidth: CGFloat = 1.9 * pillScale
+                let splitInset: CGFloat = 1.75 * pillScale
                 let splitRect = CGRect(
-                    x: -0.95,
-                    y: pillRect.minY - 1.75,
-                    width: 1.9,
-                    height: pillRect.height + 3.5
+                    x: -splitWidth / 2,
+                    y: pillRect.minY - splitInset,
+                    width: splitWidth,
+                    height: pillRect.height + (splitInset * 2)
                 )
                 context.fill(splitRect)
             } else {
@@ -101,8 +111,9 @@ final class MenuBarController: NSObject {
                 context.strokePath()
 
                 context.setLineWidth(1.25)
-                context.move(to: CGPoint(x: 0, y: pillRect.minY - 0.9))
-                context.addLine(to: CGPoint(x: 0, y: pillRect.maxY + 0.9))
+                let seamOvershoot: CGFloat = 0.9 * pillScale
+                context.move(to: CGPoint(x: 0, y: pillRect.minY - seamOvershoot))
+                context.addLine(to: CGPoint(x: 0, y: pillRect.maxY + seamOvershoot))
                 context.strokePath()
             }
 
