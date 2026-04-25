@@ -6,12 +6,14 @@ import CocaineCore
 final class MenuBarController: NSObject {
     private let state: AppState
     private let coordinator: AppCoordinator
+    private let preferences: PreferencesStore
     private let statusItem: NSStatusItem
     private var cancellables: Set<AnyCancellable> = []
 
-    init(state: AppState, coordinator: AppCoordinator) {
+    init(state: AppState, coordinator: AppCoordinator, preferences: PreferencesStore) {
         self.state = state
         self.coordinator = coordinator
+        self.preferences = preferences
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         super.init()
         configureStatusItem()
@@ -126,7 +128,11 @@ final class MenuBarController: NSObject {
 
     private var tooltipText: String {
         if state.isBusy { return "Cocaine is changing sleep prevention state" }
-        if state.isActive { return "Cocaine is preventing sleep, including lid-close sleep" }
+        if state.isActive {
+            return preferences.preventLidCloseSleep
+                ? "Cocaine is preventing sleep, including lid-close sleep"
+                : "Cocaine is preventing sleep"
+        }
         if let error = state.lastErrorMessage { return "Cocaine is off: \(error)" }
         return "Cocaine is off"
     }
@@ -158,7 +164,40 @@ final class MenuBarController: NSObject {
         aboutItem.target = self
         menu.addItem(aboutItem)
 
-        let repairItem = NSMenuItem(title: "Repair/Install Helper", action: #selector(repairHelper), keyEquivalent: "")
+        menu.addItem(NSMenuItem.separator())
+
+        menu.addItem(makeCheckboxItem(
+            title: "Prevent display sleep",
+            isOn: preferences.preventDisplaySleep,
+            action: #selector(togglePreventDisplaySleep)
+        ))
+
+        let lidCloseTitle = preferences.preventLidCloseSleep
+            ? "⚠ Prevent sleep with lid closed"
+            : "Prevent sleep with lid closed"
+        menu.addItem(makeCheckboxItem(
+            title: lidCloseTitle,
+            isOn: preferences.preventLidCloseSleep,
+            action: #selector(togglePreventLidCloseSleep)
+        ))
+
+        let lockItem = makeCheckboxItem(
+            title: "    Lock screen when lid closes",
+            isOn: preferences.lockScreenOnLidClose,
+            action: #selector(toggleLockScreenOnLidClose)
+        )
+        lockItem.isEnabled = preferences.preventLidCloseSleep
+        menu.addItem(lockItem)
+
+        menu.addItem(makeCheckboxItem(
+            title: "Play lid event sounds",
+            isOn: preferences.playLidEventSounds,
+            action: #selector(togglePlayLidEventSounds)
+        ))
+
+        menu.addItem(NSMenuItem.separator())
+
+        let repairItem = NSMenuItem(title: "Repair / Install Helper", action: #selector(repairHelper), keyEquivalent: "")
         repairItem.target = self
         repairItem.isEnabled = state.lastErrorMessage != nil
         menu.addItem(repairItem)
@@ -172,6 +211,58 @@ final class MenuBarController: NSObject {
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
+    }
+
+    private func makeCheckboxItem(title: String, isOn: Bool, action: Selector) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+        item.target = self
+        item.state = isOn ? .on : .off
+        return item
+    }
+
+    @objc
+    private func togglePreventDisplaySleep() {
+        let newValue = !preferences.preventDisplaySleep
+        Task { @MainActor in
+            await coordinator.setPreventDisplaySleep(newValue)
+        }
+    }
+
+    @objc
+    private func togglePreventLidCloseSleep() {
+        let newValue = !preferences.preventLidCloseSleep
+        if newValue && !preferences.lidClosePreventionConfirmed {
+            guard confirmLidClosePreventionEnable() else { return }
+            preferences.lidClosePreventionConfirmed = true
+        }
+        if !newValue {
+            preferences.lidClosePreventionConfirmed = false
+        }
+        Task { @MainActor in
+            await coordinator.setPreventLidCloseSleep(newValue)
+        }
+    }
+
+    private func confirmLidClosePreventionEnable() -> Bool {
+        let alert = NSAlert()
+        alert.messageText = "Prevent sleep with lid closed?"
+        alert.informativeText = "Preventing lid-close sleep can leave a closed MacBook running. " +
+            "Don't put it in a bag while this is enabled — it may overheat."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Enable")
+        alert.addButton(withTitle: "Cancel")
+        NSApp.activate(ignoringOtherApps: true)
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+
+    @objc
+    private func toggleLockScreenOnLidClose() {
+        preferences.lockScreenOnLidClose.toggle()
+    }
+
+    @objc
+    private func togglePlayLidEventSounds() {
+        preferences.playLidEventSounds.toggle()
     }
 
     @objc

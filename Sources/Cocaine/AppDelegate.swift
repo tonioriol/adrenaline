@@ -2,26 +2,50 @@ import AppKit
 import CocaineCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var preferences: PreferencesStore?
     private var menuBarController: MenuBarController?
     private var coordinator: AppCoordinator?
     private var lidEventSoundController: LidEventSoundController?
+    private var lidCloseLockResponder: LidCloseLockResponder?
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let preferences = PreferencesStore()
         let state = AppState()
         let awake = AwakeController()
         let lidClose = LidCloseController()
-        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lidClose)
+        let coordinator = AppCoordinator(
+            state: state,
+            awakeController: awake,
+            lidCloseController: lidClose,
+            preferences: preferences
+        )
         let lidStateMonitor = LidStateMonitor()
         let soundPlayer = SystemSoundPlayer()
+        let screenLocker = LoginFrameworkScreenLocker()
 
-        self.coordinator = coordinator
-        self.lidEventSoundController = LidEventSoundController(
+        let lidEventSoundController = LidEventSoundController(
             state: state,
             monitor: lidStateMonitor,
-            soundPlayer: soundPlayer
+            soundPlayer: soundPlayer,
+            preferences: preferences
         )
-        self.menuBarController = MenuBarController(state: state, coordinator: coordinator)
+        let lidCloseLockResponder = LidCloseLockResponder(
+            state: state,
+            monitor: lidStateMonitor,
+            screenLocker: screenLocker,
+            preferences: preferences
+        )
+
+        self.preferences = preferences
+        self.coordinator = coordinator
+        self.lidEventSoundController = lidEventSoundController
+        self.lidCloseLockResponder = lidCloseLockResponder
+        self.menuBarController = MenuBarController(
+            state: state,
+            coordinator: coordinator,
+            preferences: preferences
+        )
     }
 
     @MainActor
