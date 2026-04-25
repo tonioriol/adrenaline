@@ -22,21 +22,38 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 ## SPEC
 
-_Pending — to be written after design approval._
+[spec.md](./spec.md) — opt-in lid-close prevention, display-sleep / lock-screen / sound checkboxes in the right-click menu, persisted via `UserDefaults`, with live coordinator reconciliation while on.
 
 ## FILES
 
 - `docs/scratch.md` — original musing prompting the task
 - `docs/feat/20260424192541-merge-fermatta-caffeine/spec.md` — current one-toggle behavior reference
 - `docs/feat/20260425200131-lid-event-sounds/spec.md` — current lid-event sound behavior reference
-- `Sources/CocaineCore/AppCoordinator.swift` — current activation/rollback orchestration
-- `Sources/CocaineCore/AwakeController.swift` — current ordinary IOKit assertion controller
-- `Sources/CocaineCore/LidCloseController.swift` — current lid-close prevention boundary
-- `Sources/Cocaine/MenuBarController.swift` — current menu bar UI and right-click menu
+- `Sources/CocaineCore/PreferencesStore.swift` — planned settings store (UserDefaults-backed observable)
+- `Sources/CocaineCore/ScreenLocker.swift` — planned `ScreenLocking` protocol + concrete impl
+- `Sources/CocaineCore/LidCloseLockResponder.swift` — planned lid-close lock responder
+- `Sources/CocaineCore/AppState.swift` — adds `recordErrorWhileActive(_:)` for live-reconciliation failures
+- `Sources/CocaineCore/AwakeController.swift` — adds `enable(preventDisplaySleep:)` + `setPreventDisplaySleep(_:)`
+- `Sources/CocaineCore/AppCoordinator.swift` — accepts `PreferencesProviding`, conditional helper, live reconciliation
+- `Sources/CocaineCore/LidEventSoundController.swift` — gates sounds on `playLidEventSounds`
+- `Sources/CocaineCore/LidCloseController.swift` — current lid-close prevention boundary (untouched)
+- `Sources/Cocaine/AppDelegate.swift` — wires prefs, screen locker, lock responder
+- `Sources/Cocaine/MenuBarController.swift` — extended menu with checkbox items + confirmation alert
+- `Tests/CocaineCoreTests/PreferencesStoreTests.swift` — planned defaults/round-trip/publishing tests
+- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — planned gating-matrix tests
+- `Tests/CocaineCoreTests/AppStateTests.swift` — extended with `recordErrorWhileActive` test
+- `Tests/CocaineCoreTests/AwakeControllerTests.swift` — extended with display-flag tests
+- `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — extended with prefs-aware + reconciliation tests
+- `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` — extended with sound-pref gating tests
+- `README.md` — documents new preferences, defaults, and upgrade note
 
 ## PLAN
 
-_Pending — to be written after spec approval._
+**Plan:** [plan.md](./plan.md)
+
+**Cursor:** Task 1 — PreferencesStore
+
+**Status:** in_progress
 
 ## LOG
 
@@ -44,3 +61,15 @@ _Pending — to be written after spec approval._
 
 - Why: User raised settings ideas in `docs/scratch.md` that change behavior and need a design before implementation.
 - How: Created this task ledger after confirming no existing task covers configurable lid-close behavior; the prior tasks covered initial keep-awake and lid event sounds only.
+
+### 2026-04-25 23:54 — Spec approved and committed
+
+- Why: Brainstorming converged on an opt-in settings model that splits the click toggle from lid-close prevention and adds lock-screen, display-sleep, and sound preferences.
+- How: Wrote `spec.md` covering UX, architecture, state model, on/off and live reconciliation flows, error handling, testing, risks, and rejected alternatives. Committed as `0ec5e23`.
+- Decision: Default `preventLidCloseSleep` to OFF (intentional safety regression vs. today); default `lockScreenOnLidClose` to ON; reconcile live via `runTransition` busy-guard; auto-revert preferences on failed live engagement.
+
+### 2026-04-26 00:05 — Implementation plan generated
+
+- Why: Spec approved and ready for executable bite-sized tasks.
+- How: Wrote `plan.md` with 9 tasks covering `PreferencesStore`, `AwakeController` refactor, `AppState.recordErrorWhileActive`, `AppCoordinator` reconciliation, `LidEventSoundController` gating, `ScreenLocker` + `LidCloseLockResponder`, `AppDelegate` wiring, `MenuBarController` checkbox menu + confirmation alert, README docs, and final verification. Self-reviewed against the spec, fixed three issues inline (dead code in screen-locker fallback, ambiguous live-reconciliation isActive handling, missing construction-order note for the lid-event consumers).
+- Decision: Use `dlopen`/`dlsym` for `SACLockScreenImmediate` with a `CGSession -suspend` fallback to keep `Package.swift` free of private framework links.
