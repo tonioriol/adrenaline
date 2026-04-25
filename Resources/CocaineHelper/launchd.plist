@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>dev.local.CocaineHelper</string>
+    <string>com.tr0n.Cocaine.Helper</string>
     <key>MachServices</key>
     <dict>
-        <key>dev.local.CocaineHelper</key>
+        <key>com.tr0n.Cocaine.Helper</key>
         <true/>
     </dict>
 </dict>
