@@ -26,6 +26,8 @@ The first activation may request admin authorization to install the privileged h
 ## Behavior
 
 - Left-click menu bar icon: toggle off/on.
-- Off: normal sleep behavior.
+- Off: normal sleep behavior and no lid event sounds.
 - On: ordinary sleep and lid-close sleep are prevented.
+- On, lid closes: plays the built-in macOS Hero sound.
+- On, lid opens: plays the built-in macOS Basso sound.
 - Right-click menu: About, helper repair when needed, Quit.
