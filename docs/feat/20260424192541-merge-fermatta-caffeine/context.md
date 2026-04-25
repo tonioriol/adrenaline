@@ -41,6 +41,7 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Sources/CocaineCore/PrivilegedHelperClient.swift` — concrete privileged helper client
 - `Sources/CocaineHelper/ApplePowerSettings.swift` — helper-side SleepDisabled bridge
 - `Sources/CocaineHelper/main.swift` — helper mach-service listener
+- `Resources/Cocaine/Info.plist` — app bundle metadata
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
 - `Tests/CocaineCoreTests/AwakeControllerTests.swift` — ordinary assertion controller tests
@@ -52,7 +53,7 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 6 — App Bundle Packaging and Signing
+**Cursor:** Task 7 — Menu Bar App UI
 
 **Status:** ready
 
@@ -175,3 +176,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: The helper implementation needed app-bundle metadata, LaunchServices placement, and code-signing commands so SMJobBless packaging can locate the privileged executable from the app bundle.
 - How: Added Resources/Cocaine/Info.plist and replaced Makefile targets with build/app/sign/run/verify-helper-sections packaging flow. Verified with `make build && make verify-helper-sections`, `make app`, and explicit executable presence checks for build/Cocaine.app/Contents/MacOS/Cocaine and build/Cocaine.app/Contents/Library/LaunchServices/com.tr0n.Cocaine.Helper. Committed as 259b793.
 - Decision: Kept the plan's ad-hoc default CODE_SIGN_IDENTITY (`-`) because the specified packaging verification passed without requiring the available Apple Development identity.
+
+### 2026-04-25 12:58 — Task 7 menu bar app UI
+
+- Why: Add the executable menu bar UI for the one-toggle keep-awake app after core coordination, helper, and packaging tasks were complete.
+- How: Replaced `Sources/Cocaine/main.swift` with the AppKit app entry point, added `Sources/Cocaine/AppDelegate.swift` to wire `AppState`, `AwakeController`, `LidCloseController`, and `AppCoordinator`, and added `Sources/Cocaine/MenuBarController.swift` for status-item rendering, one-click toggle, contextual menu, about panel, helper repair action, and quit behavior. Verified with `make app` passing after the pragmatic compile fix of isolating only AppDelegate lifecycle methods on `@MainActor`. Committed code as `a565332`.
+- Decision: Kept top-level app entry code from the task plan and moved `@MainActor` isolation from the entire delegate type to its AppKit lifecycle methods because SwiftPM top-level executable code cannot synchronously instantiate a globally main-actor-isolated delegate.
