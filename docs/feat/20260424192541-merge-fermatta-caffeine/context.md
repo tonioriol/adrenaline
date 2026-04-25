@@ -141,3 +141,8 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - Why: Add the tested public contract that lets the coordinator delegate lid-close prevention to a future privileged helper implementation without implementing SMJobBless/XPC behavior yet.
 - How: Added `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Sources/CocaineCore/LidCloseController.swift`, `Sources/CocaineCore/PrivilegedHelperClient.swift`, and `Tests/CocaineCoreTests/LidCloseControllerTests.swift`. TDD evidence: `swift test --filter LidCloseControllerTests` first failed because `PrivilegedHelperClientProtocol` and `LidCloseController` were missing, then `swift test --filter LidCloseControllerTests && make test` passed with 20 total XCTest tests. Commit: `3d29e44`.
 - Decision: Keep `PrivilegedHelperClient` as a throwing `.notImplemented` stub so Task 4 defines the controller/helper protocol boundary only; privileged installation, XPC connection, and power-setting mutation remain deferred to Task 5.
+
+### 2026-04-25 10:23 — Task 4 quality fixes
+
+- Why: Code quality review found helper resource identifiers diverged from the canonical helper constants and controller error sequencing lacked tests.
+- How: Aligned helper plist/launchd identifiers, documented XPC reply semantics, added install/enable failure tests, verified with `swift test --filter LidCloseControllerTests`, `make test`, and `plutil -p Resources/CocaineHelper/Info.plist && plutil -p Resources/CocaineHelper/launchd.plist`, commit `3dd5564`.
