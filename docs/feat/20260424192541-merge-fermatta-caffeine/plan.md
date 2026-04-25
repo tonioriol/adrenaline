@@ -936,7 +936,7 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/CocaineHelperProtocol
 - Create: `Resources/CocaineHelper/Info.plist`
 - Create: `Resources/CocaineHelper/launchd.plist`
 
-- [ ] **Step 1: Replace helper client stub with SMJobBless/XPC implementation**
+- [x] **Step 1: Replace helper client stub with SMJobBless/XPC implementation**
 
 Replace `Sources/CocaineCore/PrivilegedHelperClient.swift` with:
 
@@ -1060,7 +1060,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
 }
 ```
 
-- [ ] **Step 2: Implement helper power setting bridge**
+- [x] **Step 2: Implement helper power setting bridge**
 
 Create `Sources/CocaineHelper/ApplePowerSettings.swift`:
 
@@ -1111,7 +1111,7 @@ final class ApplePowerSettings {
 }
 ```
 
-- [ ] **Step 3: Implement helper XPC listener**
+- [x] **Step 3: Implement helper XPC listener**
 
 Create `Sources/CocaineHelper/main.swift`:
 
@@ -1168,7 +1168,7 @@ listener.resume()
 RunLoop.current.run()
 ```
 
-- [ ] **Step 4: Add helper embedded metadata**
+- [x] **Step 4: Add helper embedded metadata**
 
 Create `Resources/CocaineHelper/Info.plist`:
 
@@ -1211,7 +1211,7 @@ Create `Resources/CocaineHelper/launchd.plist`:
 </plist>
 ```
 
-- [ ] **Step 5: Build and commit helper implementation**
+- [x] **Step 5: Build and commit helper implementation**
 
 Run:
 

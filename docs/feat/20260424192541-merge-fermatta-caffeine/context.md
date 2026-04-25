@@ -38,18 +38,21 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 - `Sources/CocaineCore/CocaineHelperProtocol.swift` — helper constants, XPC protocol, and helper client protocol
 - `Sources/CocaineCore/LidCloseController.swift` — lid-close controller contract adapter
 - `Sources/CocaineCore/PowerAssertionClient.swift` — fakeable IOKit assertion wrapper
-- `Sources/CocaineCore/PrivilegedHelperClient.swift` — privileged helper client stub
-- `Sources/CocaineHelper/main.swift` — helper executable placeholder
+- `Sources/CocaineCore/PrivilegedHelperClient.swift` — concrete privileged helper client
+- `Sources/CocaineHelper/ApplePowerSettings.swift` — helper-side SleepDisabled bridge
+- `Sources/CocaineHelper/main.swift` — helper mach-service listener
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — coordinator unit tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — AppState unit tests
 - `Tests/CocaineCoreTests/AwakeControllerTests.swift` — ordinary assertion controller tests
+- `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift` — signing requirement constant tests
 - `Tests/CocaineCoreTests/LidCloseControllerTests.swift` — lid-close controller contract tests
+- `Tests/CocaineCoreTests/PrivilegedHelperClientTests.swift` — privileged helper client reply-semantics tests
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 5 — Privileged Helper Implementation
+**Cursor:** Task 6 — App Bundle Packaging and Signing
 
 **Status:** ready
 
@@ -166,3 +169,9 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: Code quality review found the privileged helper trust boundary still relied on identifier-only checks.
 - How: Added canonical signing requirement strings using Team ID A79T83GM42, applied them to the runtime listener gate and helper authorized clients, verified with `swift build && swift test && plutil -p Resources/CocaineHelper/Info.plist`, commit 166677c.
+
+### 2026-04-25 12:26 — Task 6 app bundle packaging and signing
+
+- Why: The helper implementation needed app-bundle metadata, LaunchServices placement, and code-signing commands so SMJobBless packaging can locate the privileged executable from the app bundle.
+- How: Added Resources/Cocaine/Info.plist and replaced Makefile targets with build/app/sign/run/verify-helper-sections packaging flow. Verified with `make build && make verify-helper-sections`, `make app`, and explicit executable presence checks for build/Cocaine.app/Contents/MacOS/Cocaine and build/Cocaine.app/Contents/Library/LaunchServices/com.tr0n.Cocaine.Helper. Committed as 259b793.
+- Decision: Kept the plan's ad-hoc default CODE_SIGN_IDENTITY (`-`) because the specified packaging verification passed without requiring the available Apple Development identity.
