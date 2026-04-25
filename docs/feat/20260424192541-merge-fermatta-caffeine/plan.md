@@ -1235,7 +1235,7 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PrivilegedHelperClien
 - Modify: `Makefile`
 - Create: `Resources/Cocaine/Info.plist`
 
-- [ ] **Step 1: Add app bundle metadata**
+- [x] **Step 1: Add app bundle metadata**
 
 Create `Resources/Cocaine/Info.plist`:
 
@@ -1277,7 +1277,7 @@ Create `Resources/Cocaine/Info.plist`:
 </plist>
 ```
 
-- [ ] **Step 2: Replace Makefile with bundling commands**
+- [x] **Step 2: Replace Makefile with bundling commands**
 
 Replace `Makefile` with:
 
@@ -1324,7 +1324,7 @@ clean:
 	rm -rf .build build
 ```
 
-- [ ] **Step 3: Build package and verify helper sections**
+- [x] **Step 3: Build package and verify helper sections**
 
 Run:
 
@@ -1334,7 +1334,7 @@ cd /Users/tr0n/Code/cocaine && make build && make verify-helper-sections
 
 Expected: PASS. `otool` exits 0 for both embedded helper plist sections.
 
-- [ ] **Step 4: Build the app bundle**
+- [x] **Step 4: Build the app bundle**
 
 Run:
 
@@ -1344,7 +1344,7 @@ cd /Users/tr0n/Code/cocaine && make app
 
 Expected: PASS and `build/Cocaine.app/Contents/MacOS/Cocaine` plus `build/Cocaine.app/Contents/Library/LaunchServices/com.tr0n.Cocaine.Helper` exist.
 
-- [ ] **Step 5: Commit bundling work**
+- [x] **Step 5: Commit bundling work**
 
 Commit:
 
