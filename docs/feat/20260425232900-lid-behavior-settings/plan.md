@@ -1379,7 +1379,7 @@ git -c commit.gpgsign=false commit -m "feat: gate lid event sounds on preference
 - Create: `Sources/CocaineCore/LidCloseLockResponder.swift`
 - Test: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`:
 
@@ -1505,12 +1505,12 @@ final class LidCloseLockResponderTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -20`
 Expected: FAIL — `cannot find 'ScreenLocking' in scope`, `cannot find 'LidCloseLockResponder' in scope`.
 
-- [ ] **Step 3: Create ScreenLocker source**
+- [x] **Step 3: Create ScreenLocker source**
 
 Create `Sources/CocaineCore/ScreenLocker.swift`:
 
@@ -1599,7 +1599,7 @@ public final class LoginFrameworkScreenLocker: ScreenLocking {
 
 Note: `CGSession -suspend` is the documented public command-line lock-session technique on macOS and is the safer fallback than AppleScript automation prompts.
 
-- [ ] **Step 4: Create LidCloseLockResponder source**
+- [x] **Step 4: Create LidCloseLockResponder source**
 
 Create `Sources/CocaineCore/LidCloseLockResponder.swift`:
 
@@ -1655,17 +1655,17 @@ public final class LidCloseLockResponder {
 
 The responder chains itself onto the existing `onLidStateChange` callback so both `LidEventSoundController` and `LidCloseLockResponder` see every event. Order in `AppDelegate` matters: construct the sound controller first, then the lock responder.
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -20`
-Expected: PASS — 6 tests.
+Expected: PASS — 6 tests. _Actual after review fix: 7 tests._
 
-- [ ] **Step 6: Run the full suite**
+- [x] **Step 6: Run the full suite**
 
 Run: `swift test 2>&1 | tail -10`
-Expected: PASS — 69 total.
+Expected: PASS — 69 total. _Actual after review fix: 73 total._
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift

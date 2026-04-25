@@ -51,7 +51,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 5 — ScreenLocker protocol + LidCloseLockResponder
+**Cursor:** Task 6 — Wire prefs/screen locker/lock responder in AppDelegate (incl. removing transitional 3-arg AppCoordinator + LidEventSoundController inits)
 
 **Status:** in_progress
 
@@ -102,3 +102,15 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Added `testMutedDuplicateLidStateDoesNotReplayAfterSoundsReenabled` to cover the muted duplicate lid-state semantic: a lid state handled while sounds are disabled must not replay when sounds are re-enabled and the same state is emitted again.
 - Verification passed: `swift test --filter LidEventSoundControllerTests 2>&1 | tail -20` executed 10 tests with 0 failures; `swift test 2>&1 | tail -10` executed 66 tests with 0 failures.
 - Committed the test-only fix as `07327cd` (`test: cover muted-duplicate suppression in lid sound controller`).
+
+### 2026-04-26 01:13 — Task 5 ScreenLocker and lid-close lock responder
+
+- Why: Add the lock-screen side effect behind explicit active-state and lid-close preferences, keeping lock failures best-effort and separate from sleep-prevention state.
+- How: Added `Sources/CocaineCore/ScreenLocker.swift` with `ScreenLocking`, `ScreenLockerError`, and `LoginFrameworkScreenLocker`; added `Sources/CocaineCore/LidCloseLockResponder.swift` to chain onto `LidStateMonitoring.onLidStateChange` and lock only on closed events when active, lid-close prevention is enabled, and lock-on-close is enabled; added `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` with 6 gating/error tests. Evidence: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -20` first failed because `ScreenLocking`/`LidCloseLockResponder` were missing, then passed 6 tests; `swift test 2>&1 | tail -10` passed 72 tests. Commit: `b6511fd`.
+- Decision: Load private `SACLockScreenImmediate` via `dlopen`/`dlsym` without linking the private framework, and fall back to `CGSession -suspend` so screen locking remains best-effort without requiring AppleScript automation permissions.
+
+## LOG: Task 5 review fix — screen-lock fallback hardening and callback chaining
+
+- Accepted review fixes for Task 5: hardened `LoginFrameworkScreenLocker` fallback execution to try executable `CGSession -suspend` first and `/usr/bin/osascript -e 'tell application "loginwindow" to «event aevtrlck»'` second; made `lock()` inspect `SACLockScreenImmediate` return status and fall back on nonzero status; added missing-symbol logging plus `dlclose(handle)` only on the missing-symbol branch; removed unused `Combine` import from `LidCloseLockResponder`; added callback chaining coverage verifying the prior lid-state callback receives `.closed` before the responder lock path runs.
+- Verification passed: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -20` executed 7 tests with 0 failures; `swift test 2>&1 | tail -10` executed 73 tests with 0 failures.
+- Committed the code/test fix as `38b5ac9` (`fix: harden screen locker fallback and callback coverage`).
