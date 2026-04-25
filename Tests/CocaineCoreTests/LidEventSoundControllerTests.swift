@@ -199,4 +199,20 @@ final class LidEventSoundControllerTests: XCTestCase {
         XCTAssertEqual(player.playedSoundNames, ["Hero", "Hero"])
         _ = controller
     }
+
+    func testMutedDuplicateLidStateDoesNotReplayAfterSoundsReenabled() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        prefs.playLidEventSounds = false
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        monitor.emit(.closed)
+        prefs.playLidEventSounds = true
+        monitor.emit(.closed)
+
+        XCTAssertTrue(player.playedSoundNames.isEmpty, "Re-enabling sounds must not replay a duplicate of a state already handled while muted")
+        _ = controller
+    }
 }
