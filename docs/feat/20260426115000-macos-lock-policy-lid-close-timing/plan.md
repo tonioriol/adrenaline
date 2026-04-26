@@ -988,7 +988,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `Sources/Cocaine/AppDelegate.swift`
 
-- [ ] **Step 1: Run build to capture current integration failure**
+- [x] **Step 1: Run build to capture current integration failure**
 
 Run:
 
@@ -998,7 +998,7 @@ swift build 2>&1 | tail -40
 
 Expected: FAIL because `AppDelegate` still calls `LidCloseLockResponder` without the new `policyReader:` argument.
 
-- [ ] **Step 2: Wire the production policy reader**
+- [x] **Step 2: Wire the production policy reader**
 
 In `Sources/Cocaine/AppDelegate.swift`, change the setup around `screenLocker` and `LidCloseLockResponder` to this exact shape:
 
@@ -1025,7 +1025,7 @@ In `Sources/Cocaine/AppDelegate.swift`, change the setup around `screenLocker` a
 
 Do not move `LidEventSoundController` below `LidCloseLockResponder`; the responder intentionally wraps the existing lid callback so both sound and lock behavior see each event.
 
-- [ ] **Step 3: Run the focused build again**
+- [x] **Step 3: Run the focused build again**
 
 Run:
 
@@ -1035,7 +1035,7 @@ swift build 2>&1 | tail -40
 
 Expected: PASS.
 
-- [ ] **Step 4: Run all tests after app wiring**
+- [x] **Step 4: Run all tests after app wiring**
 
 Run:
 
@@ -1045,7 +1045,7 @@ swift test 2>&1 | tail -40
 
 Expected: PASS with all XCTest tests passing.
 
-- [ ] **Step 5: Commit app wiring**
+- [x] **Step 5: Commit app wiring**
 
 Run:
 

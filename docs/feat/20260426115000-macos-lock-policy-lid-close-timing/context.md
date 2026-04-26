@@ -40,7 +40,7 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — wire the policy reader into the app and verify integration
+**Cursor:** Task 4 — update README behavior docs
 
 **Status:** in_progress
 
@@ -94,3 +94,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - How: Replaced `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` with delayed scheduling/cancellation/recheck coverage; confirmed RED with `swift test --filter LidCloseLockResponderTests 2>&1 | tail -60` failing on missing scheduler and initializer labels; added `Sources/CocaineCore/LidCloseLockScheduler.swift`; refactored `Sources/CocaineCore/LidCloseLockResponder.swift` to read `MacOSLockPolicyReading`, schedule cancellable delayed locks, cancel on lid open, and recheck state/preferences/lid before locking; confirmed GREEN with `swift test --filter LidCloseLockResponderTests 2>&1 | tail -60` passing 12 tests, 0 failures; committed `bcc16c8`.
 - Decision: Kept a compatibility initializer that creates the default policy reader so existing app wiring continues to build until Task 3 explicitly injects the reader. Review fix: removed that implicit policy-wiring initializer so Task 3 owns the explicit `MacOSLockPolicyReader` integration point; committed `a82c2ce`.
 - Review continuation: Accepted Task 2 quality feedback by replacing asynchronous deinit cancellation with synchronous main-actor-isolated cancellation and adding focused current-lid-state recheck coverage that does not use the lid-open callback cancellation path. Evidence: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -80` still stops at the expected Task 3 `AppDelegate.swift` missing `policyReader:` wiring error with no new Task 2 errors; `swift build --target CocaineCoreTests 2>&1 | tail -80` compiled the focused test target; `swift test --skip-build --filter LidCloseLockResponderTests 2>&1 | tail -80` passed 12 tests, 0 failures. Commit: `c56076a`.
+
+### 2026-04-26 14:50 — Task 3 app policy reader wiring
+
+- Why: Production app wiring still used the old `LidCloseLockResponder` initializer, so the app target could not compile after the responder was changed to require an explicit macOS lock policy reader.
+- How: Updated `Sources/Cocaine/AppDelegate.swift` to construct `MacOSLockPolicyReader()` next to `LoginFrameworkScreenLocker()` and pass it as `policyReader:` while preserving sound-controller-before-responder construction order. Evidence: initial `swift build 2>&1 | tail -40` failed with missing `policyReader`; after wiring, `swift build 2>&1 | tail -40` passed and `swift test 2>&1 | tail -40` passed 106 XCTest tests, 0 failures. Commit: `2a518e1`.
+- Decision: Kept the existing lid event sound controller construction before `LidCloseLockResponder` so the responder continues to wrap and forward the existing lid-state callback.
