@@ -25,9 +25,33 @@ public enum LidStateMonitorError: Error, LocalizedError, Equatable {
 public final class LidStateMonitor: LidStateMonitoring {
     nonisolated static let clamshellStateChangeMessage: UInt32 = (0x38 << 26) | (13 << 14) | 0x100
     nonisolated static let clamshellStateBit: UInt = 1 << 0
+    private static let appleClamshellStateKey = "AppleClamshellState"
 
     public var onLidStateChange: (@MainActor (LidState) -> Void)?
     public private(set) var isMonitoring = false
+
+    public var currentLidState: LidState? {
+        let service = rootDomain != 0 ? rootDomain : IOServiceGetMatchingService(
+            kIOMainPortDefault,
+            IOServiceMatching("IOPMrootDomain")
+        )
+        guard service != 0 else { return nil }
+        defer {
+            if service != rootDomain { IOObjectRelease(service) }
+        }
+
+        guard let property = IORegistryEntryCreateCFProperty(
+            service,
+            Self.appleClamshellStateKey as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() else {
+            return nil
+        }
+
+        guard let isClosed = property as? Bool else { return nil }
+        return isClosed ? .closed : .open
+    }
 
     private var rootDomain: io_service_t = 0
     private var notificationPort: IONotificationPortRef?

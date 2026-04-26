@@ -9,6 +9,7 @@ private final class FakeLidStateMonitor: LidStateMonitoring {
     var startCallCount = 0
     var stopCallCount = 0
     var startError: Error?
+    var currentLidState: LidState?
 
     func start() throws {
         startCallCount += 1
@@ -238,6 +239,42 @@ final class LidEventSoundControllerTests: XCTestCase {
         monitor.emit(.closed)
 
         XCTAssertTrue(player.playedSoundNames.isEmpty, "Re-enabling sounds must not replay a duplicate of a state already handled while muted")
+        _ = controller
+    }
+
+    func testFirstSpuriousLidEventMatchingCurrentStateIsSuppressed() {
+        let state = AppState()
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        monitor.currentLidState = .open
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        state.setActive(true)
+
+        monitor.emit(.open)
+
+        XCTAssertTrue(
+            player.playedSoundNames.isEmpty,
+            "A spurious lid notification matching the actual lid state (e.g. on display dim/wake) must not play a sound"
+        )
+        _ = controller
+    }
+
+    func testRealLidCloseAfterSeededOpenStillPlaysHero() {
+        let state = AppState()
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        monitor.currentLidState = .open
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        state.setActive(true)
+        monitor.emit(.closed)
+
+        XCTAssertEqual(player.playedSoundNames, ["Hero"])
         _ = controller
     }
 }
