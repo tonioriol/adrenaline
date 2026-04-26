@@ -66,3 +66,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: User approved the plain-English design: check macOS settings on lid close, skip locking when Require Password is Never, otherwise delay by current display-off timer plus password delay, and cancel on lid reopen.
 - How: Wrote `spec.md` covering user-facing behavior, policy reading, delayed responder scheduling, cancellation/recheck rules, tests, docs, risks, and rejected alternatives.
 - Decision: Keep the feature invisible in the menu and preserve the current computed gate: only fill the lock gap when Cocaine is active, lid-close sleep prevention is enabled, and display sleep prevention is off.
+
+### 2026-04-26 12:12 — Spec approved
+
+- Why: The written design matches the requested user-facing behavior and is ready for implementation planning.
+- How: User approved `spec.md` and asked to continue to implementation planning.
+- Decision: Proceed to a detailed plan that implements a macOS lock policy reader, delayed/cancellable lid-close lock scheduling, test coverage, and README updates.
