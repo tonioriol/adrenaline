@@ -90,4 +90,11 @@ created: 2026-04-26
 - Summary: Added the tag-triggered GitHub Actions release workflow and a Makefile `release-zip` target for signed app zip packaging.
 - Files changed: `Makefile`, `.github/workflows/release.yml`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
 - Commands run: Task 3 content validation script passed for Makefile and workflow requirements.
-- Commit SHA: c2f584a.
+- Commit SHA: d4ad6ba.
+
+### 2026-04-26 17:28 — Task 3 release workflow quality fixes
+
+- Summary: Accepted code quality review fixes for Task 3 by moving signing secrets to runner temp paths, renaming the keychain password path variable for clarity, deriving the exact Developer ID signing identity from the imported temporary keychain, removing the hard-coded signing identity, adding always-run signing material cleanup, and quoting the Makefile release zip paths.
+- Files changed: `Makefile`, `.github/workflows/release.yml`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Commands run: Task 3 quality validation script passed for temporary signing material paths, derived signing identity, cleanup step, quoted release zip paths, corrected Task 3 SHA, and a single follow-up LOG entry.
+- New commit: `ci: harden release signing workflow`.
