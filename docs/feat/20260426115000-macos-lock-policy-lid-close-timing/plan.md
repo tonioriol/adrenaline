@@ -463,7 +463,7 @@ Expected: commit succeeds.
 - Modify: `Sources/CocaineCore/LidCloseLockResponder.swift`
 - Modify: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
 
-- [ ] **Step 1: Replace responder tests with delayed-lock coverage**
+- [x] **Step 1: Replace responder tests with delayed-lock coverage**
 
 Replace `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` with this content:
 
@@ -785,7 +785,7 @@ final class LidCloseLockResponderTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run responder tests to verify they fail**
+- [x] **Step 2: Run responder tests to verify they fail**
 
 Run:
 
@@ -795,7 +795,7 @@ swift test --filter LidCloseLockResponderTests 2>&1 | tail -60
 
 Expected: FAIL with compiler errors like `cannot find type 'LidCloseLockScheduling' in scope` and initializer argument label errors for `policyReader` / `scheduler`.
 
-- [ ] **Step 3: Add the scheduler abstraction**
+- [x] **Step 3: Add the scheduler abstraction**
 
 Create `Sources/CocaineCore/LidCloseLockScheduler.swift` with this content:
 
@@ -854,7 +854,7 @@ private final class TaskLidCloseLockCancellable: LidCloseLockCancellable {
 }
 ```
 
-- [ ] **Step 4: Refactor `LidCloseLockResponder` to schedule delayed locks**
+- [x] **Step 4: Refactor `LidCloseLockResponder` to schedule delayed locks**
 
 Replace `Sources/CocaineCore/LidCloseLockResponder.swift` with this content:
 
@@ -960,7 +960,7 @@ public final class LidCloseLockResponder {
 }
 ```
 
-- [ ] **Step 5: Run responder tests to verify they pass**
+- [x] **Step 5: Run responder tests to verify they pass**
 
 Run:
 
@@ -970,7 +970,7 @@ swift test --filter LidCloseLockResponderTests 2>&1 | tail -60
 
 Expected: PASS with all `LidCloseLockResponderTests` tests passing.
 
-- [ ] **Step 6: Commit delayed responder behavior**
+- [x] **Step 6: Commit delayed responder behavior**
 
 Run:
 

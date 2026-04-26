@@ -23,8 +23,8 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 
 ## FILES
 
-- Sources/CocaineCore/LidCloseLockResponder.swift — existing computed lid-close lock behavior
-- Sources/CocaineCore/LidCloseLockScheduler.swift — planned cancellable delayed lock scheduler abstraction
+- Sources/CocaineCore/LidCloseLockResponder.swift — delayed computed lid-close lock behavior
+- Sources/CocaineCore/LidCloseLockScheduler.swift — cancellable delayed lock scheduler abstraction
 - Sources/CocaineCore/MacOSLockPolicyReader.swift — macOS Require Password/display timer policy reader
 - Sources/CocaineCore/ScreenLocker.swift — lock implementation used by lid-close responder
 - Sources/CocaineCore/PreferencesStore.swift — app preference state that currently controls display and lid behavior
@@ -40,7 +40,7 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — add cancellable delayed lock scheduling to the responder
+**Cursor:** Task 3 — wire the policy reader into the app and verify integration
 
 **Status:** in_progress
 
@@ -87,3 +87,10 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: Later lid-close scheduling needs a testable snapshot of whether macOS requires a password and when macOS would lock for the active power source.
 - How: Added `Sources/CocaineCore/MacOSLockPolicyReader.swift` and `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift`; confirmed RED with `swift test --filter MacOSLockPolicyReaderTests 2>&1 | tail -40` failing because `MacOSLockPolicyReader`, `MacOSPowerSource`, and `MacOSLockPolicyReaderError` were missing; confirmed GREEN with the same command passing 10 tests, 0 failures; committed `26bb89d`.
 - Decision: Treat unknown power source as battery-first fallback to match the approved conservative behavior and clamp negative display/password delays to zero at the policy boundary.
+
+### 2026-04-26 14:31 — Task 2 delayed lid-close lock scheduling
+
+- Why: The responder needed to preserve the computed lid-close lock gate while matching macOS timing instead of locking immediately.
+- How: Replaced `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` with delayed scheduling/cancellation/recheck coverage; confirmed RED with `swift test --filter LidCloseLockResponderTests 2>&1 | tail -60` failing on missing scheduler and initializer labels; added `Sources/CocaineCore/LidCloseLockScheduler.swift`; refactored `Sources/CocaineCore/LidCloseLockResponder.swift` to read `MacOSLockPolicyReading`, schedule cancellable delayed locks, cancel on lid open, and recheck state/preferences/lid before locking; confirmed GREEN with `swift test --filter LidCloseLockResponderTests 2>&1 | tail -60` passing 12 tests, 0 failures; committed `bcc16c8`.
+- Decision: Kept a compatibility initializer that creates the default policy reader so existing app wiring continues to build until Task 3 explicitly injects the reader. Review fix: removed that implicit policy-wiring initializer so Task 3 owns the explicit `MacOSLockPolicyReader` integration point; committed `a82c2ce`.
+- Review continuation: Accepted Task 2 quality feedback by replacing asynchronous deinit cancellation with synchronous main-actor-isolated cancellation and adding focused current-lid-state recheck coverage that does not use the lid-open callback cancellation path. Evidence: `swift test --filter LidCloseLockResponderTests 2>&1 | tail -80` still stops at the expected Task 3 `AppDelegate.swift` missing `policyReader:` wiring error with no new Task 2 errors; `swift build --target CocaineCoreTests 2>&1 | tail -80` compiled the focused test target; `swift test --skip-build --filter LidCloseLockResponderTests 2>&1 | tail -80` passed 12 tests, 0 failures. Commit: `c56076a`.
