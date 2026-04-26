@@ -30,7 +30,7 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — wire icon into app bundle metadata and packaging
+**Cursor:** Task 3 — verify bundle output
 
 **Status:** in_progress
 
@@ -63,3 +63,9 @@ created: 2026-04-26
 - Why: Review found the generator used point-sized `NSImage` rendering through AppKit, which could serialize iconset PNGs at host-dependent Retina scale instead of the requested pixel dimensions.
 - How: Updated `Scripts/generate-app-icon.swift` to render each iconset entry into an explicit `NSBitmapImageRep` sized in pixels, added per-PNG bitmap dimension verification before invoking `iconutil`, regenerated `Resources/Cocaine/Cocaine.icns`, and verified extracted iconset entries from 16 × 16 through 1024 × 1024 pixels.
 - Follow-up: Task 2 should wire `CFBundleIconFile` and copy `Cocaine.icns` into the app bundle resources.
+
+### 2026-04-26 17:02 — Task 2 bundle icon metadata and packaging
+
+- Why: The generated capsule app icon needed to be declared in the app bundle metadata and copied into the manually packaged app bundle resources.
+- How: Added `CFBundleIconFile` to `Resources/Cocaine/Info.plist`, added `RESOURCES_DIR` plus `generate-app-icon` to `Makefile`, and updated the `app` recipe to create `Contents/Resources` and copy `Resources/Cocaine/Cocaine.icns` before signing. Verification: `make generate-app-icon` passed and refreshed the icon asset. Commit: `17f14bc`.
+- Follow-up: Task 3 should verify the built bundle output contains `Contents/Resources/Cocaine.icns` and the copied plist reports `CFBundleIconFile` as `Cocaine`.

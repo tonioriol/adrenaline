@@ -159,7 +159,7 @@ Expected: commit succeeds.
 - Modify: `Resources/Cocaine/Info.plist`
 - Modify: `Makefile`
 
-- [ ] **Step 1: Add the bundle icon declaration**
+- [x] **Step 1: Add the bundle icon declaration**
 
 In `Resources/Cocaine/Info.plist`, insert this key/value pair after `CFBundleExecutable`:
 
@@ -168,7 +168,7 @@ In `Resources/Cocaine/Info.plist`, insert this key/value pair after `CFBundleExe
   <string>Cocaine</string>
 ```
 
-- [ ] **Step 2: Update Makefile resource packaging**
+- [x] **Step 2: Update Makefile resource packaging**
 
 Change the directory variables and `app` target in `Makefile` so it contains these lines:
 
@@ -189,7 +189,7 @@ app: build
 	$(MAKE) sign
 ```
 
-- [ ] **Step 3: Add a generator target**
+- [x] **Step 3: Add a generator target**
 
 Update `.PHONY` and add this target to `Makefile`:
 
@@ -200,7 +200,7 @@ generate-app-icon:
 	swift Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
 ```
 
-- [ ] **Step 4: Verify the generator target**
+- [x] **Step 4: Verify the generator target**
 
 Run:
 
@@ -210,7 +210,7 @@ make generate-app-icon
 
 Expected: command exits 0 and refreshes `Resources/Cocaine/Cocaine.icns`.
 
-- [ ] **Step 5: Commit metadata and packaging**
+- [x] **Step 5: Commit metadata and packaging**
 
 Run:
 
