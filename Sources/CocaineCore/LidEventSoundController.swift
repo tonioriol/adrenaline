@@ -10,6 +10,7 @@ public enum LidState: Equatable, Sendable {
 public protocol LidStateMonitoring: AnyObject {
     var onLidStateChange: (@MainActor (LidState) -> Void)? { get set }
     var isMonitoring: Bool { get }
+    var currentLidState: LidState? { get }
     func start() throws
     func stop()
 }
@@ -59,6 +60,7 @@ public final class LidEventSoundController {
             do {
                 try monitor.start()
                 monitoringStarted = true
+                lastHandledState = monitor.currentLidState
             } catch {
                 monitoringStarted = false
             }

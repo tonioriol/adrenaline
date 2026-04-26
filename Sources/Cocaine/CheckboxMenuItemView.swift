@@ -3,7 +3,7 @@ import AppKit
 @MainActor
 final class CheckboxMenuItemView: NSView {
     private enum Metrics {
-        static let width: CGFloat = 240
+        static let width: CGFloat = 280
         static let height: CGFloat = 24
         static let leadingPadding: CGFloat = 14
         static let childIndent: CGFloat = 18
