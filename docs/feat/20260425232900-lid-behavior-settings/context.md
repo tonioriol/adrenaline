@@ -158,3 +158,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: The user selected the local-merge completion path after implementation and verification were finished.
 - How: Confirmed the completed work was already on [`main`](.git/HEAD) rather than a separate feature branch, with green tests from [`make test`](Makefile:1). Because the implementation commits were already on the target branch, no additional `git merge` step or branch deletion was needed. No separate worktree cleanup was required.
 - Decision: Treat the requested local merge as a no-op integration on the current branch; keep the remaining follow-up limited to manual MacBook lid-close validation outside this session.
+
+### 2026-04-26 08:17 — Installed app bundle refreshed
+
+- Why: The user asked to reinstall the completed app after integration was finished.
+- How: Rebuilt and signed [`build/Cocaine.app`](build/Cocaine.app), replaced the installed Applications copy, relaunched it, and verified a running Cocoa process from the installed bundle.
+- Decision: Keep the locally installed app in sync with the current completed branch state; no source changes were needed.
