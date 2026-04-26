@@ -9,8 +9,9 @@ LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 SWIFT_BIN_DIR := .build/$(CONFIGURATION)
 TEAM_ID ?= A79T83GM42
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/A79T83GM42/ {print $$2; exit}')
+INSTALL_APP_DIR ?= /Applications/Cocaine.app
 
-.PHONY: test build app sign run clean verify-helper-sections
+.PHONY: test build app sign reinstall run clean verify-helper-sections
 
 test:
 	swift test
@@ -33,6 +34,15 @@ sign:
 	fi
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
+
+reinstall: app
+	@if pgrep -f "$(INSTALL_APP_DIR)/Contents/MacOS/Cocaine" >/dev/null; then \
+		pkill -f "$(INSTALL_APP_DIR)/Contents/MacOS/Cocaine"; \
+		sleep 1; \
+	fi
+	rm -rf "$(INSTALL_APP_DIR)"
+	cp -R "$(APP_DIR)" "$(INSTALL_APP_DIR)"
+	open "$(INSTALL_APP_DIR)"
 
 verify-helper-sections:
 	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/CocaineHelper >/dev/null
