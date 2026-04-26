@@ -25,12 +25,17 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 - [Sources/Cocaine/MenuBarController.swift](../../../Sources/Cocaine/MenuBarController.swift) — menu UI to update
 - [Sources/CocaineCore/PreferencesStore.swift](../../../Sources/CocaineCore/PreferencesStore.swift) — preferences to extend
 - [Sources/CocaineCore/LidEventSoundController.swift](../../../Sources/CocaineCore/LidEventSoundController.swift) — sound gating logic
-- [Sources/CocaineCore/LidCloseLockResponder.swift](../../../Sources/CocaineCore/LidCloseLockResponder.swift) — lock gating logic
-- [Sources/Cocaine/AppDelegate.swift](../../../Sources/Cocaine/AppDelegate.swift) — wiring + launch-at-login service registration
+- [Sources/CocaineCore/LaunchAtLoginController.swift](../../../Sources/CocaineCore/LaunchAtLoginController.swift) — planned login-item state and registration controller
+- [Sources/Cocaine/CheckboxMenuItemView.swift](../../../Sources/Cocaine/CheckboxMenuItemView.swift) — planned non-dismissing checkbox row view
+- [Sources/Cocaine/AppDelegate.swift](../../../Sources/Cocaine/AppDelegate.swift) — app wiring; forced lock responder removed in Task 1, launch-at-login wiring planned
+- [README.md](../../../README.md) — behavior documentation to update
+- Deleted in Task 1: `Sources/CocaineCore/ScreenLocker.swift`, `Sources/CocaineCore/LidCloseLockResponder.swift`, `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
 
 ## PLAN
 
 [plan.md](./plan.md) — Six-task implementation plan covering forced lock removal, sound gating, Launch at Login, non-dismissing menu rows, README updates, and final verification.
+
+Cursor: Task 2 — Gate lid event sounds on lid-close prevention.
 
 ## LOG
 

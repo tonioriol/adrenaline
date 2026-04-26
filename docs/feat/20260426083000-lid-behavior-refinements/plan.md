@@ -35,7 +35,7 @@
 - Delete: `Sources/CocaineCore/LidCloseLockResponder.swift`
 - Delete: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
 
-- [ ] **Step 1: Run the focused test that currently covers the feature being removed**
+- [x] **Step 1: Run the focused test that currently covers the feature being removed**
 
 Run:
 
@@ -45,7 +45,7 @@ swift test --filter LidCloseLockResponderTests
 
 Expected before deletion: PASS. This confirms the soon-to-be-removed forced lock path is currently represented by tests.
 
-- [ ] **Step 2: Unwire the lock responder from the app delegate**
+- [x] **Step 2: Unwire the lock responder from the app delegate**
 
 Replace the contents of `Sources/Cocaine/AppDelegate.swift` with:
 
@@ -103,7 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
-- [ ] **Step 3: Delete forced-lock source files and tests**
+- [x] **Step 3: Delete forced-lock source files and tests**
 
 Run:
 
@@ -113,7 +113,7 @@ rm Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockRespon
 
 Expected: files are removed locally.
 
-- [ ] **Step 4: Verify no production code references the deleted feature**
+- [x] **Step 4: Verify no production code references the deleted feature**
 
 Run:
 
@@ -123,7 +123,7 @@ rg -n "LidCloseLockResponder|ScreenLocker|ScreenLocking|LoginFrameworkScreenLock
 
 Expected: no output.
 
-- [ ] **Step 5: Verify the package still builds after deleting forced-lock files**
+- [x] **Step 5: Verify the package still builds after deleting forced-lock files**
 
 Run:
 
@@ -133,7 +133,7 @@ swift build
 
 Expected: build succeeds.
 
-- [ ] **Step 6: Commit Task 1**
+- [x] **Step 6: Commit Task 1**
 
 ```bash
 git add Sources/Cocaine/AppDelegate.swift Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift
