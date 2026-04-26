@@ -6,13 +6,14 @@ final class CheckboxMenuItemView: NSView {
         static let width: CGFloat = 240
         static let height: CGFloat = 24
         static let leadingPadding: CGFloat = 14
+        static let childIndent: CGFloat = 18
         static let trailingPadding: CGFloat = 8
     }
 
     private let checkbox: NSButton
     var onToggle: (() -> Void)?
 
-    init(title: String, isOn: Bool, isEnabled: Bool = true) {
+    init(title: String, isOn: Bool, isEnabled: Bool = true, isChild: Bool = false) {
         self.checkbox = NSButton(checkboxWithTitle: title, target: nil, action: nil)
         super.init(frame: NSRect(x: 0, y: 0, width: Metrics.width, height: Metrics.height))
 
@@ -24,8 +25,9 @@ final class CheckboxMenuItemView: NSView {
 
         addSubview(checkbox)
 
+        let leading = Metrics.leadingPadding + (isChild ? Metrics.childIndent : 0)
         NSLayoutConstraint.activate([
-            checkbox.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Metrics.leadingPadding),
+            checkbox.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leading),
             checkbox.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -Metrics.trailingPadding),
             checkbox.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])

@@ -222,7 +222,8 @@ final class MenuBarController: NSObject {
             id: .playLidEventSounds,
             title: "Play lid event sounds",
             isOn: preferences.playLidEventSounds,
-            isEnabled: preferences.preventLidCloseSleep
+            isEnabled: preferences.preventLidCloseSleep,
+            isChild: true
         ) { [weak self] in
             self?.togglePlayLidEventSounds()
         }
@@ -261,10 +262,11 @@ final class MenuBarController: NSObject {
         title: String,
         isOn: Bool,
         isEnabled: Bool,
+        isChild: Bool = false,
         action: @escaping () -> Void
     ) {
         let item = NSMenuItem()
-        let row = CheckboxMenuItemView(title: title, isOn: isOn, isEnabled: isEnabled)
+        let row = CheckboxMenuItemView(title: title, isOn: isOn, isEnabled: isEnabled, isChild: isChild)
         row.onToggle = action
         item.view = row
         menu.addItem(item)
