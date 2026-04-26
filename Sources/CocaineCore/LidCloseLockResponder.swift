@@ -13,21 +13,6 @@ public final class LidCloseLockResponder {
     private let scheduler: LidCloseLockScheduling
     private var pendingLock: LidCloseLockCancellable?
 
-    public convenience init(
-        state: AppState,
-        monitor: LidStateMonitoring,
-        screenLocker: ScreenLocking,
-        preferences: PreferencesProviding
-    ) {
-        self.init(
-            state: state,
-            monitor: monitor,
-            screenLocker: screenLocker,
-            preferences: preferences,
-            policyReader: MacOSLockPolicyReader()
-        )
-    }
-
     public init(
         state: AppState,
         monitor: LidStateMonitoring,
