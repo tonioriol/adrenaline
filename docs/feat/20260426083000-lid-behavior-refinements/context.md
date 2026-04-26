@@ -1,5 +1,5 @@
 ---
-status: done
+status: active
 spec: ./spec.md
 plan: ./plan.md
 ---
@@ -27,15 +27,19 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 - [Sources/CocaineCore/LidEventSoundController.swift](../../../Sources/CocaineCore/LidEventSoundController.swift) — sound gating logic
 - [Sources/CocaineCore/LaunchAtLoginController.swift](../../../Sources/CocaineCore/LaunchAtLoginController.swift) — planned login-item state and registration controller
 - [Sources/Cocaine/CheckboxMenuItemView.swift](../../../Sources/Cocaine/CheckboxMenuItemView.swift) — planned non-dismissing checkbox row view
-- [Sources/Cocaine/AppDelegate.swift](../../../Sources/Cocaine/AppDelegate.swift) — app wiring; forced lock responder removed in Task 1, launch-at-login wiring planned
+- [Sources/Cocaine/AppDelegate.swift](../../../Sources/Cocaine/AppDelegate.swift) — app wiring; launch-at-login wired and lock responder restored with computed behavior
+- [Sources/CocaineCore/LidCloseLockResponder.swift](../../../Sources/CocaineCore/LidCloseLockResponder.swift) — computed lock-on-lid-close behavior, now derived from display + lid-close preferences
+- [Sources/CocaineCore/ScreenLocker.swift](../../../Sources/CocaineCore/ScreenLocker.swift) — restored lock implementation used when lid-close prevention keeps system awake
+- [Sources/CocaineCore/PreferenceMenuRows.swift](../../../Sources/CocaineCore/PreferenceMenuRows.swift) — menu row model, cleaned up to remove explicit lock row contamination
 - [README.md](../../../README.md) — behavior documentation to update
-- Deleted in Task 1: `Sources/CocaineCore/ScreenLocker.swift`, `Sources/CocaineCore/LidCloseLockResponder.swift`, `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
+- [Tests/CocaineCoreTests/LidCloseLockResponderTests.swift](../../../Tests/CocaineCoreTests/LidCloseLockResponderTests.swift) — computed lock behavior tests
+- [Tests/CocaineCoreTests/PreferenceMenuRowsTests.swift](../../../Tests/CocaineCoreTests/PreferenceMenuRowsTests.swift) — menu row model tests after contamination cleanup
 
 ## PLAN
 
 [plan.md](./plan.md) — Six-task implementation plan covering forced lock removal, sound gating, Launch at Login, non-dismissing menu rows, README updates, and final verification.
 
-Cursor: all tasks complete; manual GUI checks remain as follow-up.
+Cursor: follow-up bugfixes after shipped refinement work; latest state matches computed lock matrix and cleaned menu model.
 
 ## LOG
 
@@ -78,3 +82,19 @@ Verified the completed lid behavior refinements from HEAD `e018b41`. `make test`
 ### 2026-04-26 10:11 — Local merge option completed
 
 User selected option 1, merge back to `main` locally. The repository was already on `main`, so there was no feature branch to merge and no branch cleanup to perform. Completion verification had already passed on `main`: `make test` executed 79 XCTest tests with 0 failures, and final review approved the implementation. Remaining untracked files are pre-existing `.gitkeep`, `.vscode/`, and `docs/scratch.md`. Manual GUI checks remain the only follow-up.
+
+### 2026-04-26 10:20 — Reinstall target added and app reinstalled
+
+Added a new `reinstall` target to `Makefile` so the app can be rebuilt, copied into `/Applications/Cocaine.app`, and relaunched in one command. Verified the target shape with `make -n reinstall`, then ran `make test`, `make app`, and `make reinstall`; the installed app relaunched successfully from `/Applications/Cocaine.app/Contents/MacOS/Cocaine`. Commit SHA: `82533a1`.
+
+### 2026-04-26 10:24 — Lid sounds row nested and lid-close label clarified
+
+Updated the menu presentation so `Play lid event sounds` is visually nested under `Prevent system sleep with lid closed`, and widened the row view so the longer lid-close label is not truncated. Also updated `README.md` to use the new lid-close wording. Reinstalled the app after each UI change. Commits: `5e7d000` (nested child row) and `065f477` (renamed lid-close row and README sync).
+
+### 2026-04-26 10:50 — Spurious lid sounds on display dim/wake suppressed
+
+Root cause investigation showed the sound controller treated the first clamshell notification after monitoring start as a real lid transition because `lastHandledState` started as `nil`. Added `currentLidState` to `LidStateMonitoring`, implemented it in `LidStateMonitor` by reading `AppleClamshellState` from `IOPMrootDomain`, and seeded `lastHandledState` on monitor start. Added two regression tests to `LidEventSoundControllerTests` and widened the menu row to 280pt. Verification: 87 tests passed, `make reinstall` succeeded, and the installed app relaunched. Commit SHA: `a935aee`.
+
+### 2026-04-26 11:07 — Computed lid-close lock behavior restored and explicit lock row removed
+
+The user clarified the intended matrix: lock-on-lid-close must be computed from `preventDisplaySleep` and `preventLidCloseSleep`, not exposed as a separate menu preference. Restored `ScreenLocker` / `LidCloseLockResponder` so lid-close prevention can keep the system awake while explicitly locking the screen when `preventDisplaySleep == false`, then removed the mistaken explicit `Lock screen on lid close` menu row/toggle plumbing from `PreferenceMenuRows` and `MenuBarController`. Updated `LidCloseLockResponderTests` and `PreferenceMenuRowsTests` so they assert the agreed computed model instead of the contaminated explicit-toggle model. Final verification: focused `LidCloseLockResponderTests` and `PreferenceMenuRowsTests` passed, full suite reached 90 tests with 0 failures, and `make reinstall` relaunched the installed app. Commits: `64b51fe` (restore computed lock-on-close behavior) and `43828fe` (remove explicit lock row contamination and keep lock computed).
