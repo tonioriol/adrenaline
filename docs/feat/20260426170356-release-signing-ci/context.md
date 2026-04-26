@@ -34,7 +34,7 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — update Developer ID signing requirements
+**Cursor:** Task 3 — add tag-triggered GitHub Actions release workflow
 
 **Status:** ready
 

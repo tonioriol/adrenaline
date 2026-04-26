@@ -149,7 +149,7 @@ Expected: commit succeeds.
 - Modify: `Resources/CocaineHelper/Info.plist`
 - Modify: `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`
 
-- [ ] **Step 1: Update source signing requirement constants**
+- [x] **Step 1: Update source signing requirement constants**
 
 In `Sources/CocaineCore/CocaineHelperProtocol.swift`, replace the two signing requirement constants with Developer ID Application requirements:
 
@@ -160,7 +160,7 @@ In `Sources/CocaineCore/CocaineHelperProtocol.swift`, replace the two signing re
 
 Expected: requirements no longer mention `Apple Development`.
 
-- [ ] **Step 2: Update plist signing requirements**
+- [x] **Step 2: Update plist signing requirements**
 
 Run:
 
@@ -186,7 +186,7 @@ PY
 
 Expected: command exits 0.
 
-- [ ] **Step 3: Update signing tests**
+- [x] **Step 3: Update signing tests**
 
 In `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, update expected strings to:
 
@@ -197,7 +197,7 @@ In `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, update expected s
 
 Expected: test expectations match source constants.
 
-- [ ] **Step 4: Run focused signing tests**
+- [x] **Step 4: Run focused signing tests**
 
 Run:
 
@@ -207,7 +207,7 @@ swift test --filter CocaineHelperConstantsTests
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit signing requirement updates**
+- [x] **Step 5: Commit signing requirement updates**
 
 Run:
 
