@@ -7,7 +7,6 @@ final class MenuBarController: NSObject {
     private enum PreferenceRowID: Hashable {
         case preventDisplaySleep
         case preventLidCloseSleep
-        case lockScreenOnLidClose
         case playLidEventSounds
         case launchAtLogin
 
@@ -17,8 +16,6 @@ final class MenuBarController: NSObject {
                 self = .preventDisplaySleep
             case .preventLidCloseSleep:
                 self = .preventLidCloseSleep
-            case .lockScreenOnLidClose:
-                self = .lockScreenOnLidClose
             case .playLidEventSounds:
                 self = .playLidEventSounds
             }
@@ -68,10 +65,6 @@ final class MenuBarController: NSObject {
                 self?.render()
                 self?.refreshVisibleRows()
             }
-            .store(in: &cancellables)
-        preferences.lockScreenOnLidClosePublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshVisibleRows() }
             .store(in: &cancellables)
         preferences.playLidEventSoundsPublisher
             .receive(on: RunLoop.main)
@@ -267,8 +260,6 @@ final class MenuBarController: NSObject {
             togglePreventDisplaySleep()
         case .preventLidCloseSleep:
             togglePreventLidCloseSleep()
-        case .lockScreenOnLidClose:
-            toggleLockScreenOnLidClose()
         case .playLidEventSounds:
             togglePlayLidEventSounds()
         }
@@ -334,15 +325,6 @@ final class MenuBarController: NSObject {
             }
             refreshVisibleRows()
         }
-    }
-
-    private func toggleLockScreenOnLidClose() {
-        guard preferences.preventLidCloseSleep else {
-            refreshVisibleRows()
-            return
-        }
-        preferences.lockScreenOnLidClose.toggle()
-        refreshVisibleRows()
     }
 
     private func confirmLidClosePreventionEnable() -> Bool {

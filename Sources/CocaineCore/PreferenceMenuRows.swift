@@ -1,7 +1,6 @@
 public enum PreferenceMenuRowID: Hashable, Sendable {
     case preventDisplaySleep
     case preventLidCloseSleep
-    case lockScreenOnLidClose
     case playLidEventSounds
 }
 
@@ -36,12 +35,6 @@ public enum PreferenceMenuRows {
                     : "Prevent system sleep with lid closed",
                 isOn: snapshot.preventLidCloseSleep,
                 isEnabled: true),
-            PreferenceMenuRow(
-                id: .lockScreenOnLidClose,
-                title: "Lock screen on lid close",
-                isOn: snapshot.lockScreenOnLidClose,
-                isEnabled: snapshot.preventLidCloseSleep,
-                isChild: true),
             PreferenceMenuRow(
                 id: .playLidEventSounds,
                 title: "Play lid event sounds",
