@@ -11,12 +11,7 @@ let iconsetDirectory = temporaryDirectory.appendingPathComponent("Cocaine.iconse
 try fileManager.createDirectory(at: iconsetDirectory, withIntermediateDirectories: true)
 defer { try? fileManager.removeItem(at: temporaryDirectory) }
 
-func drawIcon(size: CGFloat) -> NSImage {
-    let image = NSImage(size: NSSize(width: size, height: size))
-    image.lockFocus()
-    defer { image.unlockFocus() }
-
-    guard let context = NSGraphicsContext.current?.cgContext else { return image }
+func drawIcon(size: CGFloat, in context: CGContext) {
     context.setAllowsAntialiasing(true)
     context.setShouldAntialias(true)
 
@@ -48,18 +43,53 @@ func drawIcon(size: CGFloat) -> NSImage {
     context.setBlendMode(.clear)
     context.fill(CGRect(x: -size * 0.042, y: pillRect.minY - size * 0.05, width: size * 0.084, height: pillHeight + size * 0.10))
     context.restoreGState()
-
-    return image
 }
 
 func writePNG(size: CGFloat, filename: String) throws {
-    let image = drawIcon(size: size)
-    guard let tiffData = image.tiffRepresentation,
-          let bitmap = NSBitmapImageRep(data: tiffData),
-          let pngData = bitmap.representation(using: .png, properties: [:]) else {
+    let pixelSize = Int(size)
+    guard let bitmap = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: pixelSize,
+        pixelsHigh: pixelSize,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else {
         throw NSError(domain: "CocaineIconGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to render \(filename)"])
     }
-    try pngData.write(to: iconsetDirectory.appendingPathComponent(filename))
+
+    bitmap.size = NSSize(width: pixelSize, height: pixelSize)
+
+    guard let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmap) else {
+        throw NSError(domain: "CocaineIconGenerator", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create graphics context for \(filename)"])
+    }
+
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = graphicsContext
+    defer { NSGraphicsContext.restoreGraphicsState() }
+
+    guard let context = NSGraphicsContext.current?.cgContext else {
+        throw NSError(domain: "CocaineIconGenerator", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to access CGContext for \(filename)"])
+    }
+
+    drawIcon(size: size, in: context)
+
+    guard let pngData = bitmap.representation(using: .png, properties: [:]) else {
+        throw NSError(domain: "CocaineIconGenerator", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to encode \(filename)"])
+    }
+
+    let outputURL = iconsetDirectory.appendingPathComponent(filename)
+    try pngData.write(to: outputURL)
+
+    guard let verificationBitmap = NSBitmapImageRep(data: pngData),
+          verificationBitmap.pixelsWide == pixelSize,
+          verificationBitmap.pixelsHigh == pixelSize else {
+        throw NSError(domain: "CocaineIconGenerator", code: 5, userInfo: [NSLocalizedDescriptionKey: "Generated \(filename) did not match requested \(pixelSize)x\(pixelSize) pixels"])
+    }
 }
 
 let iconFiles: [(CGFloat, String)] = [
