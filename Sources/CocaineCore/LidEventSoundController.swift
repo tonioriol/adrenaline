@@ -73,7 +73,7 @@ public final class LidEventSoundController {
         guard state.isActive, monitoringStarted, lidState != lastHandledState else { return }
         lastHandledState = lidState
 
-        guard preferences.playLidEventSounds else { return }
+        guard preferences.preventLidCloseSleep, preferences.playLidEventSounds else { return }
 
         switch lidState {
         case .closed:
