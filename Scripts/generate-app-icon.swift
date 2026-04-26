@@ -16,32 +16,28 @@ func drawIcon(size: CGFloat, in context: CGContext) {
     context.setShouldAntialias(true)
 
     let rect = CGRect(x: 0, y: 0, width: size, height: size)
-    let cornerRadius = size * 0.225
-    let background = NSBezierPath(roundedRect: rect.insetBy(dx: size * 0.055, dy: size * 0.055), xRadius: cornerRadius, yRadius: cornerRadius)
-    NSColor(calibratedRed: 0.96, green: 0.97, blue: 0.99, alpha: 1.0).setFill()
+    let scale = size / 1024
+    let background = NSBezierPath(roundedRect: rect, xRadius: 220 * scale, yRadius: 220 * scale)
+    NSColor.white.setFill()
     background.fill()
-
-    let shadow = NSShadow()
-    shadow.shadowColor = NSColor.black.withAlphaComponent(0.18)
-    shadow.shadowBlurRadius = size * 0.035
-    shadow.shadowOffset = NSSize(width: 0, height: -size * 0.018)
-    shadow.set()
 
     context.saveGState()
     context.translateBy(x: rect.midX, y: rect.midY)
     context.rotate(by: .pi / 6)
+    context.scaleBy(x: scale, y: scale)
 
-    let pillWidth = size * 0.58
-    let pillHeight = size * 0.285
-    let pillRect = CGRect(x: -pillWidth / 2, y: -pillHeight / 2, width: pillWidth, height: pillHeight)
-    let pillPath = CGPath(roundedRect: pillRect, cornerWidth: pillHeight / 2, cornerHeight: pillHeight / 2, transform: nil)
-
-    context.addPath(pillPath)
-    context.setFillColor(NSColor(calibratedRed: 0.07, green: 0.075, blue: 0.085, alpha: 1.0).cgColor)
+    context.setFillColor(NSColor.black.cgColor)
+    let pill = CGPath(
+        roundedRect: CGRect(x: -270, y: -105, width: 540, height: 210),
+        cornerWidth: 105,
+        cornerHeight: 105,
+        transform: nil
+    )
+    context.addPath(pill)
     context.fillPath()
 
-    context.setBlendMode(.clear)
-    context.fill(CGRect(x: -size * 0.042, y: pillRect.minY - size * 0.05, width: size * 0.084, height: pillHeight + size * 0.10))
+    context.setFillColor(NSColor.white.cgColor)
+    context.fill(CGRect(x: -35, y: -125, width: 70, height: 250))
     context.restoreGState()
 }
 

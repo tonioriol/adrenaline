@@ -25,6 +25,7 @@ created: 2026-04-26
 - `Makefile` — app bundle construction and signing
 - `Scripts/generate-app-icon.swift` — reproducible app icon generator
 - `Resources/Cocaine/Cocaine.icns` — generated app bundle icon
+- `bw_pill_icon.svg` — user-provided source geometry for the app icon
 
 ## PLAN
 
@@ -68,6 +69,12 @@ created: 2026-04-26
 
 - Why: All planned work for using the capsule motif as the macOS app icon has passed implementation, specification review, quality review, and bundle verification.
 - How: Completed generator, packaging, and verification tasks across commits `de7cd0f`, `4b04c2d`, `91de93b`, `98aae13`, `17f14bc`, and `c0f52ba`; verified `swift test` passed with 106 XCTest tests, `make app` built and signed `build/Cocaine.app`, `build/Cocaine.app/Contents/Resources/Cocaine.icns` exists, and the built `Info.plist` reports `CFBundleIconFile` as `Cocaine`.
+
+### 2026-04-26 18:48 — App icon switched to provided SVG geometry
+
+- Why: Visual review showed the generated capsule icon did not match the desired flat black-and-white SVG source and was initially rendered with the opposite diagonal orientation.
+- How: Updated `Scripts/generate-app-icon.swift` to draw the geometry from `bw_pill_icon.svg`: white 1024 × 1024 rounded square, black rounded pill, flat white separator, and corrected visual orientation; regenerated `Resources/Cocaine/Cocaine.icns`, verified `make generate-app-icon`, `make app`, bundled `CFBundleIconFile`, 1024 × 1024 icon metadata, and reinstalled `/Applications/Cocaine.app` with `make reinstall`.
+- Decision: Keep the Swift generator as the reproducible source of the `.icns`, with `bw_pill_icon.svg` tracked as the user-provided visual reference.
 
 ### 2026-04-26 17:02 — Task 2 bundle icon metadata and packaging
 
