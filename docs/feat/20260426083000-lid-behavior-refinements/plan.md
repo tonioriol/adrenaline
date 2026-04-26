@@ -518,7 +518,7 @@ git commit -m "feat: add launch at login controller"
 - Modify: `Sources/Cocaine/MenuBarController.swift`
 - Modify: `Sources/Cocaine/AppDelegate.swift`
 
-- [ ] **Step 1: Add the custom checkbox row view**
+- [x] **Step 1: Add the custom checkbox row view**
 
 Create `Sources/Cocaine/CheckboxMenuItemView.swift` with:
 
@@ -573,7 +573,7 @@ final class CheckboxMenuItemView: NSView {
 }
 ```
 
-- [ ] **Step 2: Replace `MenuBarController` with the new menu implementation**
+- [x] **Step 2: Replace `MenuBarController` with the new menu implementation**
 
 Replace `Sources/Cocaine/MenuBarController.swift` with:
 
@@ -949,7 +949,7 @@ final class MenuBarController: NSObject {
 }
 ```
 
-- [ ] **Step 3: Wire the new launch-at-login controller in `AppDelegate`**
+- [x] **Step 3: Wire the new launch-at-login controller in `AppDelegate`**
 
 If Task 1 has not already changed `Sources/Cocaine/AppDelegate.swift`, update the `MenuBarController` construction to:
 
@@ -971,7 +971,7 @@ let lidCloseLockResponder = LidCloseLockResponder(
 self.lidCloseLockResponder = lidCloseLockResponder
 ```
 
-- [ ] **Step 4: Verify stale menu labels are gone**
+- [x] **Step 4: Verify stale menu labels are gone**
 
 Run:
 
@@ -981,7 +981,7 @@ rg -n "Lock screen when lid closes|Repair / Install Helper|toggleLockScreenOnLid
 
 Expected: no output.
 
-- [ ] **Step 5: Verify the app target builds**
+- [x] **Step 5: Verify the app target builds**
 
 Run:
 
@@ -991,7 +991,7 @@ swift build --product Cocaine
 
 Expected: build succeeds.
 
-- [ ] **Step 6: Commit Task 4**
+- [x] **Step 6: Commit Task 4**
 
 ```bash
 git add Sources/Cocaine/CheckboxMenuItemView.swift Sources/Cocaine/MenuBarController.swift Sources/Cocaine/AppDelegate.swift

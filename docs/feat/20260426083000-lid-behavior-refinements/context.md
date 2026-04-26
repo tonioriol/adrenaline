@@ -35,7 +35,7 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 
 [plan.md](./plan.md) — Six-task implementation plan covering forced lock removal, sound gating, Launch at Login, non-dismissing menu rows, README updates, and final verification.
 
-Cursor: Task 4 — Refactor menu checkboxes to stay open and match the new menu.
+Cursor: Task 5 — Update README behavior documentation.
 
 ## LOG
 
