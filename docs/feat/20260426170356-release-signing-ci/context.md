@@ -63,3 +63,11 @@ created: 2026-04-26
 - Why: The approved spec needs concrete implementation steps that keep the work small and verifiable.
 - How: Added `plan.md` with four tasks covering license and wording cleanup, Developer ID signing requirements, GitHub Actions release automation, and verification.
 - Decision: Keep release packaging as zip-only and rely on the existing Makefile app bundle flow.
+
+### 2026-04-26 17:09 — Task 1 implemented
+
+- Summary: Added the AGPL-3.0 license notice, removed personal-only wording, and documented release secrets plus license details in README.
+- Files changed: `LICENSE`, `README.md`, `NOTICE.md`, `docs/feat/20260424192541-merge-fermatta-caffeine/spec.md`, `docs/feat/20260424192541-merge-fermatta-caffeine/context.md`, `docs/feat/20260424192541-merge-fermatta-caffeine/plan.md`, `docs/feat/20260425200131-lid-event-sounds/plan.md`, `docs/feat/20260425232900-lid-behavior-settings/plan.md`, `docs/feat/20260426083000-lid-behavior-refinements/plan.md`, `docs/feat/20260426170356-release-signing-ci/plan.md`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Commands run: Python file update script; the required Markdown wording cleanup search first found additional out-of-scope historical matches, then passed with no matches after approved expanded cleanup.
+- Commit SHA: a3dd097.
+- Decision: Expanded cleanup beyond the original Task 1 file list after approval so the exact verification command returns no matches across all Markdown files.

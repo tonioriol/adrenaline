@@ -1,6 +1,6 @@
 # Cocaine
 
-Personal macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences can also prevent display sleep, prevent sleep with the lid closed, play lid event sounds, and launch Cocaine at login.
+macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences can also prevent display sleep, prevent sleep with the lid closed, play lid event sounds, and launch Cocaine at login.
 
 ## Safety
 
@@ -14,6 +14,23 @@ make app
 ```
 
 The app bundle is created at `build/Cocaine.app`.
+
+## Release
+
+Signed and notarized release artifacts are produced by GitHub Actions when a version tag such as `v0.1.0` is pushed.
+
+Required repository secrets:
+
+- `APPLE_DEVELOPER_ID_CERTIFICATE_BASE64`
+- `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD`
+- `APPLE_ID`
+- `APPLE_TEAM_ID`
+- `APPLE_APP_SPECIFIC_PASSWORD`
+- `APPLE_NOTARYTOOL_PROFILE`
+
+## License
+
+Cocaine is licensed under the GNU Affero General Public License v3.0. See `LICENSE`.
 
 ## Run
 

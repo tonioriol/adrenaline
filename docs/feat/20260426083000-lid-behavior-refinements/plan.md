@@ -1032,7 +1032,7 @@ In `README.md`, replace the current `## Behavior` section with:
 Replace the opening paragraph under `# Cocaine` with:
 
 ```markdown
-Personal macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences extend that to display sleep, lid-close sleep prevention, lid event sounds, and launching at login.
+macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences extend that to display sleep, lid-close sleep prevention, lid event sounds, and launching at login.
 ```
 
 - [x] **Step 3: Verify the README no longer advertises removed UI**

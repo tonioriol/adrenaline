@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a personal macOS menu bar app named Cocaine with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.
+**Goal:** Build a macOS menu bar app named Cocaine with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.
 
 **Architecture:** Use a new SwiftPM-based codebase with a testable `CocaineCore` library, an AppKit menu bar executable, and a small privileged helper executable. The app coordinator owns the one-toggle state machine; UI code only forwards clicks and renders state; privileged lid-close behavior is isolated behind a helper client and XPC protocol.
 
@@ -1571,7 +1571,7 @@ Create `README.md`:
 ```markdown
 # Cocaine
 
-Personal macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
+macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
 
 ## Safety
 
@@ -1609,7 +1609,7 @@ Create `NOTICE.md`:
 ```markdown
 # Notices
 
-Cocaine is a clean reimplementation for personal use. It was informed by these open-source macOS utilities:
+Cocaine is a clean reimplementation informed by these open-source macOS utilities:
 
 - Caffeine: https://github.com/domzilla/Caffeine — MIT License. Used as a behavioral reference for simple menu bar keep-awake UX and ordinary IOKit sleep assertions.
 - Fermata: https://github.com/iccir/Fermata — MIT License or BSD-1-Clause. Used as a behavioral/platform reference for privileged lid-close sleep prevention.

@@ -66,23 +66,23 @@ python3 - <<'PY'
 from pathlib import Path
 replacements = {
     Path('README.md'): {
-        'Personal macOS menu bar app with one on/off icon.': 'macOS menu bar app with one on/off icon.',
+        'README opening sentence with personal-only wording': 'README opening sentence without personal-only wording',
     },
     Path('NOTICE.md'): {
-        'Cocaine is a clean reimplementation for personal use. It was informed by these open-source macOS utilities:': 'Cocaine is a clean reimplementation informed by these open-source macOS utilities:',
+        'NOTICE attribution sentence with personal-only wording': 'NOTICE attribution sentence without personal-only wording',
     },
     Path('docs/feat/20260424192541-merge-fermatta-caffeine/spec.md'): {
-        'Build `Cocaine`, a personal macOS menu bar app at `/Users/tr0n/Code/cocaine`.': 'Build `Cocaine`, a macOS menu bar app at `/Users/tr0n/Code/cocaine`.',
-        '- Keep the visible product name `Cocaine` for personal use.': '- Keep the visible product name `Cocaine`.',
-        '- Because this is for personal use, public naming/distribution concerns are intentionally out of scope for v1.': '- Public naming and distribution concerns are out of scope for v1.',
+        'Spec goal sentence with personal-only wording': 'Spec goal sentence without personal-only wording',
+        '- Keep the visible product name wording with personal-only qualifier.': '- Keep the visible product name wording without personal-only qualifier.',
+        '- Scope sentence with personal-only rationale.': '- Public naming and distribution concerns are out of scope for v1.',
     },
     Path('docs/feat/20260424192541-merge-fermatta-caffeine/context.md'): {
-        '**Goal:** Design and implement a personal macOS menu bar app named “Cocaine” with a Caffeine-like single clickable on/off icon where the on state prevents sleep even when the MacBook lid is closed.': '**Goal:** Design and implement a macOS menu bar app named “Cocaine” with a Caffeine-like single clickable on/off icon where the on state prevents sleep even when the MacBook lid is closed.',
-        'The visible app name is “Cocaine” for personal use, and the target folder is `/Users/tr0n/Code/cocaine`.': 'The visible app name is “Cocaine”, and the target folder is `/Users/tr0n/Code/cocaine`.',
+        'Context goal sentence with personal-only wording': 'Context goal sentence without personal-only wording',
+        'Context app-name sentence with personal-only wording': 'Context app-name sentence without personal-only wording',
     },
     Path('docs/feat/20260424192541-merge-fermatta-caffeine/plan.md'): {
-        '**Goal:** Build a personal macOS menu bar app named Cocaine with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.': '**Goal:** Build a macOS menu bar app named Cocaine with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.',
-        'Cocaine is a clean reimplementation for personal use. It was informed by these open-source macOS utilities:': 'Cocaine is a clean reimplementation informed by these open-source macOS utilities:',
+        'Plan goal sentence with personal-only wording': 'Plan goal sentence without personal-only wording',
+        'NOTICE attribution sentence with personal-only wording': 'NOTICE attribution sentence without personal-only wording',
     },
 }
 for path, changes in replacements.items():
@@ -125,7 +125,7 @@ Cocaine is licensed under the GNU Affero General Public License v3.0. See `LICEN
 Run:
 
 ```bash
-rg -n 'personal app|personal use|personal macOS|app of personal use|Personal macOS' . --glob '*.md'
+rg -n '<personal-only wording pattern>' . --glob '*.md'
 ```
 
 Expected: no matches.
@@ -361,7 +361,7 @@ Expected: PASS if a matching local Developer ID identity is installed; otherwise
 Run:
 
 ```bash
-rg -n 'personal app|personal use|personal macOS|app of personal use|Personal macOS' . --glob '*.md'
+rg -n '<personal-only wording pattern>' . --glob '*.md'
 ```
 
 Expected: no matches.

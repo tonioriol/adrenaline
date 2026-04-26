@@ -2098,7 +2098,7 @@ Replace `README.md` with:
 ```markdown
 # Cocaine
 
-Personal macOS menu bar app with one on/off icon. When on, it prevents idle sleep using public IOKit assertions. Optional preferences extend that to display sleep, full lid-close sleep prevention, and screen locking on lid close.
+macOS menu bar app with one on/off icon. When on, it prevents idle sleep using public IOKit assertions. Optional preferences extend that to display sleep, full lid-close sleep prevention, and screen locking on lid close.
 
 ## Safety
 

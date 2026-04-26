@@ -9,7 +9,7 @@ created: 2026-04-24
 
 ## TASK
 
-**Goal:** Design and implement a personal macOS menu bar app named “Cocaine” with a Caffeine-like single clickable on/off icon where the on state prevents sleep even when the MacBook lid is closed.
+**Goal:** Design and implement a macOS menu bar app named “Cocaine” with a Caffeine-like single clickable on/off icon where the on state prevents sleep even when the MacBook lid is closed.
 
 The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/SwiftUI reimplementation informed by Caffeine and Fermata, not a wholesale fork of either. Upstream references are cloned at `Dev/merge-fermatta-caffeine/upstreams/Caffeine` and `Dev/merge-fermatta-caffeine/upstreams/Fermata`. Full lid-close prevention requires a privileged helper/admin authorization path like Fermata; normal idle/display prevention can use regular IOKit assertions like Caffeine.
 
@@ -102,7 +102,7 @@ The app should live at `/Users/tr0n/Code/cocaine`. It should be a clean Swift/Sw
 
 - Why: The user clarified the desired UX: a simple clickable icon like Caffeine, with no advanced rules or separate controls.
 - How: Replaced the earlier advanced-rule idea with a single state model: off means no prevention; on means prevent ordinary sleep and lid-close sleep.
-- Decision: Initial design excludes durations, app rules, advanced lid-close automation, and separate feature toggles. The visible app name is “Cocaine” for personal use, and the target folder is `/Users/tr0n/Code/cocaine`.
+- Decision: Initial design excludes durations, app rules, advanced lid-close automation, and separate feature toggles. The visible app name is “Cocaine”, and the target folder is `/Users/tr0n/Code/cocaine`.
 
 ### 2026-04-25 09:17 — Task docs moved under project folder
 

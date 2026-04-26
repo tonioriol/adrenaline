@@ -2,7 +2,7 @@
 
 ## Summary
 
-Build `Cocaine`, a personal macOS menu bar app at `/Users/tr0n/Code/cocaine`. It should behave like the simplest useful version of Caffeine: one visible menu bar icon, one click to turn on, one click to turn off. When on, it prevents normal idle/display sleep and also prevents sleep when the MacBook lid is closed. When off, it restores all normal sleep behavior.
+Build `Cocaine`, a macOS menu bar app at `/Users/tr0n/Code/cocaine`. It should behave like the simplest useful version of Caffeine: one visible menu bar icon, one click to turn on, one click to turn off. When on, it prevents normal idle/display sleep and also prevents sleep when the MacBook lid is closed. When off, it restores all normal sleep behavior.
 
 The app will be a clean Swift/SwiftUI reimplementation. Caffeine and Fermata are references for behavior and platform mechanisms, not bases to fork wholesale.
 
@@ -12,7 +12,7 @@ The app will be a clean Swift/SwiftUI reimplementation. Caffeine and Fermata are
 - In the on state, prevent ordinary idle/display sleep using public IOKit power assertions.
 - In the on state, prevent lid-close sleep using a privileged helper/admin-authorized mechanism modeled after Fermata.
 - In the off state, release all ordinary sleep assertions and restore normal lid-close sleep.
-- Keep the visible product name `Cocaine` for personal use.
+- Keep the visible product name `Cocaine`.
 - Keep the codebase small and understandable, with focused services instead of a large app-delegate controller.
 - Include attribution/license material for upstream behavioral references where code or patterns are reused.
 
@@ -178,4 +178,4 @@ The new app should not copy either app’s high-level structure. It should only 
 - The lid-close mechanism depends on private/unsupported power-management behavior and may break on macOS updates.
 - Privileged helper signing and authorization are the most complex implementation area.
 - Testing true lid-close sleep behavior may require manual validation on MacBook hardware.
-- Because this is for personal use, public naming/distribution concerns are intentionally out of scope for v1.
+- Public naming and distribution concerns are out of scope for v1.

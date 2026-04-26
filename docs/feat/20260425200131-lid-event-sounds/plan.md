@@ -685,7 +685,7 @@ Modify `README.md` to this exact content:
 ```markdown
 # Cocaine
 
-Personal macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
+macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
 
 ## Safety
 
