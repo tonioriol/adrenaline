@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let lidStateMonitor = LidStateMonitor()
         let soundPlayer = SystemSoundPlayer()
         let screenLocker = LoginFrameworkScreenLocker()
+        let lockPolicyReader = MacOSLockPolicyReader()
 
         let lidEventSoundController = LidEventSoundController(
             state: state,
@@ -34,7 +35,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             state: state,
             monitor: lidStateMonitor,
             screenLocker: screenLocker,
-            preferences: preferences
+            preferences: preferences,
+            policyReader: lockPolicyReader
         )
 
         self.preferences = preferences
