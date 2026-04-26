@@ -7,8 +7,22 @@ final class MenuBarController: NSObject {
     private enum PreferenceRowID: Hashable {
         case preventDisplaySleep
         case preventLidCloseSleep
+        case lockScreenOnLidClose
         case playLidEventSounds
         case launchAtLogin
+
+        init?(_ rowID: PreferenceMenuRowID) {
+            switch rowID {
+            case .preventDisplaySleep:
+                self = .preventDisplaySleep
+            case .preventLidCloseSleep:
+                self = .preventLidCloseSleep
+            case .lockScreenOnLidClose:
+                self = .lockScreenOnLidClose
+            case .playLidEventSounds:
+                self = .playLidEventSounds
+            }
+        }
     }
 
     private let state: AppState
@@ -54,6 +68,14 @@ final class MenuBarController: NSObject {
                 self?.render()
                 self?.refreshVisibleRows()
             }
+            .store(in: &cancellables)
+        preferences.lockScreenOnLidClosePublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refreshVisibleRows() }
+            .store(in: &cancellables)
+        preferences.playLidEventSoundsPublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refreshVisibleRows() }
             .store(in: &cancellables)
     }
 
@@ -197,35 +219,18 @@ final class MenuBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        addCheckboxRow(
-            to: menu,
-            id: .preventDisplaySleep,
-            title: "Prevent display sleep",
-            isOn: preferences.preventDisplaySleep,
-            isEnabled: true
-        ) { [weak self] in
-            self?.togglePreventDisplaySleep()
-        }
-
-        addCheckboxRow(
-            to: menu,
-            id: .preventLidCloseSleep,
-            title: lidCloseTitle,
-            isOn: preferences.preventLidCloseSleep,
-            isEnabled: true
-        ) { [weak self] in
-            self?.togglePreventLidCloseSleep()
-        }
-
-        addCheckboxRow(
-            to: menu,
-            id: .playLidEventSounds,
-            title: "Play lid event sounds",
-            isOn: preferences.playLidEventSounds,
-            isEnabled: preferences.preventLidCloseSleep,
-            isChild: true
-        ) { [weak self] in
-            self?.togglePlayLidEventSounds()
+        for row in PreferenceMenuRows.rows(for: preferences.snapshot()) {
+            guard let id = PreferenceRowID(row.id) else { continue }
+            addCheckboxRow(
+                to: menu,
+                id: id,
+                title: row.title,
+                isOn: row.isOn,
+                isEnabled: row.isEnabled,
+                isChild: row.isChild
+            ) { [weak self] in
+                self?.togglePreference(row.id)
+            }
         }
 
         addCheckboxRow(
@@ -256,6 +261,19 @@ final class MenuBarController: NSObject {
             : "Prevent system sleep with lid closed"
     }
 
+    private func togglePreference(_ id: PreferenceMenuRowID) {
+        switch id {
+        case .preventDisplaySleep:
+            togglePreventDisplaySleep()
+        case .preventLidCloseSleep:
+            togglePreventLidCloseSleep()
+        case .lockScreenOnLidClose:
+            toggleLockScreenOnLidClose()
+        case .playLidEventSounds:
+            togglePlayLidEventSounds()
+        }
+    }
+
     private func addCheckboxRow(
         to menu: NSMenu,
         id: PreferenceRowID,
@@ -274,21 +292,14 @@ final class MenuBarController: NSObject {
     }
 
     private func refreshVisibleRows() {
-        visibleRows[.preventDisplaySleep]?.update(
-            title: "Prevent display sleep",
-            isOn: preferences.preventDisplaySleep,
-            isEnabled: true
-        )
-        visibleRows[.preventLidCloseSleep]?.update(
-            title: lidCloseTitle,
-            isOn: preferences.preventLidCloseSleep,
-            isEnabled: true
-        )
-        visibleRows[.playLidEventSounds]?.update(
-            title: "Play lid event sounds",
-            isOn: preferences.playLidEventSounds,
-            isEnabled: preferences.preventLidCloseSleep
-        )
+        for row in PreferenceMenuRows.rows(for: preferences.snapshot()) {
+            guard let id = PreferenceRowID(row.id) else { continue }
+            visibleRows[id]?.update(
+                title: row.title,
+                isOn: row.isOn,
+                isEnabled: row.isEnabled
+            )
+        }
         visibleRows[.launchAtLogin]?.update(
             title: "Launch at login",
             isOn: launchAtLoginController.isEnabled,
@@ -323,6 +334,15 @@ final class MenuBarController: NSObject {
             }
             refreshVisibleRows()
         }
+    }
+
+    private func toggleLockScreenOnLidClose() {
+        guard preferences.preventLidCloseSleep else {
+            refreshVisibleRows()
+            return
+        }
+        preferences.lockScreenOnLidClose.toggle()
+        refreshVisibleRows()
     }
 
     private func confirmLidClosePreventionEnable() -> Bool {

@@ -33,6 +33,7 @@ public final class LidCloseLockResponder {
         guard state.isActive else { return }
         guard preferences.preventLidCloseSleep else { return }
         guard !preferences.preventDisplaySleep else { return }
+        guard preferences.lockScreenOnLidClose else { return }
 
         do {
             try screenLocker.lock()

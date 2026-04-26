@@ -30,10 +30,11 @@ The first time you enable **Prevent system sleep with lid closed**, macOS asks f
 
   | Preference | Default | What it does |
   |---|---|---|
-  | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. Mostly meaningful for external displays while the lid is open. |
-  | Prevent system sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
-  | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Cocaine is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
-  | Launch at login | OFF | Registers Cocaine as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
+   | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. Mostly meaningful for external displays while the lid is open. |
+   | Prevent system sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
+   | Lock screen on lid close | ON | Locks the screen when the lid closes while Cocaine is on, lid-close sleep prevention is enabled, and display sleep is allowed. The row is disabled while lid-close sleep prevention is off. |
+   | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Cocaine is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
+   | Launch at login | OFF | Registers Cocaine as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
 
 - **When Cocaine is off:** all preferences are inert. No assertions are held, no helper calls are made, no lock action fires.
 - **When Cocaine is on and lid-close prevention is off:** closing the lid follows native macOS behavior. The Mac may sleep and lock according to your system settings; Cocaine does not force any separate lid-close lock action.
