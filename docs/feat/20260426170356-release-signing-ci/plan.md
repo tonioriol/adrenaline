@@ -224,7 +224,7 @@ Expected: commit succeeds.
 - Create: `.github/workflows/release.yml`
 - Modify: `Makefile`
 
-- [ ] **Step 1: Add release packaging variables to Makefile**
+- [x] **Step 1: Add release packaging variables to Makefile**
 
 Update `Makefile` so `CODE_SIGN_IDENTITY` can be passed from CI and add a `release-zip` target:
 
@@ -240,7 +240,7 @@ release-zip: app
 
 Keep the existing `sign` target order: helper first, app second.
 
-- [ ] **Step 2: Create release workflow**
+- [x] **Step 2: Create release workflow**
 
 Create `.github/workflows/release.yml` with:
 
@@ -318,7 +318,7 @@ jobs:
           files: build/Cocaine-${{ github.ref_name }}.zip
 ```
 
-- [ ] **Step 3: Commit workflow and Makefile changes**
+- [x] **Step 3: Commit workflow and Makefile changes**
 
 Run:
 
