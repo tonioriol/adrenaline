@@ -19,18 +19,25 @@ jobs:
         env:
           CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ runner.temp }}/keychain-password
+          CERTIFICATE_PATH: ${{ runner.temp }}/certificate.p12
+          KEYCHAIN_PATH: ${{ runner.temp }}/build.keychain
+          KEYCHAIN_PASSWORD_FILE: ${{ runner.temp }}/keychain-password
         run: |
           set -euo pipefail
-          echo "$(uuidgen)" > "$KEYCHAIN_PASSWORD"
-          security create-keychain -p "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
-          security set-keychain-settings -lut 21600 build.keychain
-          echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
-          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
-          security find-identity -v -p codesigning build.keychain
+          echo "$(uuidgen)" > "$KEYCHAIN_PASSWORD_FILE"
+          security create-keychain -p "$(cat "$KEYCHAIN_PASSWORD_FILE")" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$(cat "$KEYCHAIN_PASSWORD_FILE")" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$(cat "$KEYCHAIN_PASSWORD_FILE")" "$KEYCHAIN_PATH"
+          CODE_SIGN_IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk -F'"' '/Developer ID Application/ {print $2; exit}')"
+          if [ -z "$CODE_SIGN_IDENTITY" ]; then
+            echo "No Developer ID Application signing identity found in temporary keychain" >&2
+            exit 1
+          fi
+          echo "CODE_SIGN_IDENTITY=$CODE_SIGN_IDENTITY" >> "$GITHUB_ENV"
 
       - name: Configure notarytool profile
         env:
@@ -46,8 +53,6 @@ jobs:
             --password "$APPLE_APP_SPECIFIC_PASSWORD"
 
       - name: Build signed app
-        env:
-          CODE_SIGN_IDENTITY: Developer ID Application
         run: |
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
@@ -69,3 +74,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: build/Cocaine-${{ github.ref_name }}.zip
+
+      - name: Cleanup signing materials
+        if: always()
+        env:
+          CERTIFICATE_PATH: ${{ runner.temp }}/certificate.p12
+          KEYCHAIN_PATH: ${{ runner.temp }}/build.keychain
+        run: |
+          set -euo pipefail
+          rm -f "$CERTIFICATE_PATH"
+          security default-keychain -s login.keychain-db || true
+          security delete-keychain "$KEYCHAIN_PATH" || true

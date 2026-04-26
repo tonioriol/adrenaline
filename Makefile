@@ -42,8 +42,8 @@ sign:
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
 
 release-zip: app
-	rm -f $(RELEASE_ZIP)
-	ditto -c -k --keepParent $(APP_DIR) $(RELEASE_ZIP)
+	rm -f "$(RELEASE_ZIP)"
+	ditto -c -k --keepParent "$(APP_DIR)" "$(RELEASE_ZIP)"
 
 reinstall: app
 	@if pgrep -f "$(INSTALL_APP_DIR)/Contents/MacOS/Cocaine" >/dev/null; then \
