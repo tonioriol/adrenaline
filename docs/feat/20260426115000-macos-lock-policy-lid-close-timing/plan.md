@@ -1109,7 +1109,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `docs/feat/20260426115000-macos-lock-policy-lid-close-timing/context.md`
 
-- [ ] **Step 1: Run full automated verification**
+- [x] **Step 1: Run full automated verification**
 
 Run:
 
@@ -1119,7 +1119,7 @@ make test 2>&1 | tail -40
 
 Expected: PASS with all XCTest tests passing.
 
-- [ ] **Step 2: Build the app bundle**
+- [x] **Step 2: Build the app bundle**
 
 Run:
 
@@ -1129,7 +1129,7 @@ make app 2>&1 | tail -40
 
 Expected: PASS and `build/Cocaine.app` recreated and signed.
 
-- [ ] **Step 3: Verify no stale immediate-lock language remains in source docs**
+- [x] **Step 3: Verify no stale immediate-lock language remains in source docs**
 
 Run:
 
@@ -1139,7 +1139,7 @@ rg -n "locks the screen when the lid closes|lock as soon as the lid closes|immed
 
 Expected: no matches.
 
-- [ ] **Step 4: Update task memory**
+- [x] **Step 4: Update task memory**
 
 Append this log entry to `docs/feat/20260426115000-macos-lock-policy-lid-close-timing/context.md`, adjusting test counts and commit SHAs to the actual results:
 
@@ -1159,7 +1159,7 @@ Also update the `## PLAN` cursor to:
 **Status:** done
 ```
 
-- [ ] **Step 5: Commit task memory update**
+- [x] **Step 5: Commit task memory update**
 
 Run:
 
