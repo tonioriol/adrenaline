@@ -1005,7 +1005,7 @@ git commit -m "feat: keep preference menu open while toggling"
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Replace the README behavior table and stale lock/repair text**
+- [x] **Step 1: Replace the README behavior table and stale lock/repair text**
 
 In `README.md`, replace the current `## Behavior` section with:
 
@@ -1027,7 +1027,7 @@ In `README.md`, replace the current `## Behavior` section with:
 - **When Cocaine is on and lid-close prevention is on:** the helper keeps the Mac awake with the lid closed. Do not put it in a bag in this state.
 ```
 
-- [ ] **Step 2: Update the README summary**
+- [x] **Step 2: Update the README summary**
 
 Replace the opening paragraph under `# Cocaine` with:
 
@@ -1035,7 +1035,7 @@ Replace the opening paragraph under `# Cocaine` with:
 Personal macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences extend that to display sleep, lid-close sleep prevention, lid event sounds, and launching at login.
 ```
 
-- [ ] **Step 3: Verify the README no longer advertises removed UI**
+- [x] **Step 3: Verify the README no longer advertises removed UI**
 
 Run:
 
@@ -1045,7 +1045,7 @@ rg -n "Lock screen when lid closes|Repair / Install Helper|screen locking on lid
 
 Expected: no output.
 
-- [ ] **Step 4: Commit Task 5**
+- [x] **Step 4: Commit Task 5**
 
 ```bash
 git add README.md
