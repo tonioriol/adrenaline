@@ -57,3 +57,9 @@ created: 2026-04-26
 - Why: Task 1 needed a reproducible source for the capsule-based app icon asset before bundle metadata and packaging are wired.
 - How: Added `Scripts/generate-app-icon.swift`, generated `Resources/Cocaine/Cocaine.icns`, verified it with `sips -g pixelWidth -g pixelHeight Resources/Cocaine/Cocaine.icns` reporting 1024 × 1024, and committed the generator plus generated icon as `de7cd0f`.
 - Follow-up: Task 2 should wire `CFBundleIconFile` and copy `Cocaine.icns` into the app bundle resources.
+
+### 2026-04-26 16:52 — Task 1 icon generation reproducibility fix
+
+- Why: Review found the generator used point-sized `NSImage` rendering through AppKit, which could serialize iconset PNGs at host-dependent Retina scale instead of the requested pixel dimensions.
+- How: Updated `Scripts/generate-app-icon.swift` to render each iconset entry into an explicit `NSBitmapImageRep` sized in pixels, added per-PNG bitmap dimension verification before invoking `iconutil`, regenerated `Resources/Cocaine/Cocaine.icns`, and verified extracted iconset entries from 16 × 16 through 1024 × 1024 pixels.
+- Follow-up: Task 2 should wire `CFBundleIconFile` and copy `Cocaine.icns` into the app bundle resources.
