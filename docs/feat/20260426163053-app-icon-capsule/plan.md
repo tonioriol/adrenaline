@@ -23,7 +23,7 @@
 **Files:**
 - Create: `Scripts/generate-app-icon.swift`
 
-- [ ] **Step 1: Create the generator file**
+- [x] **Step 1: Create the generator file**
 
 Create `Scripts/generate-app-icon.swift` with this exact content:
 
@@ -122,7 +122,7 @@ guard process.terminationStatus == 0 else {
 }
 ```
 
-- [ ] **Step 2: Run the generator manually**
+- [x] **Step 2: Run the generator manually**
 
 Run:
 
@@ -132,7 +132,7 @@ swift Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
 
 Expected: command exits 0 and creates `Resources/Cocaine/Cocaine.icns`.
 
-- [ ] **Step 3: Inspect generated icon metadata**
+- [x] **Step 3: Inspect generated icon metadata**
 
 Run:
 
@@ -142,7 +142,7 @@ sips -g pixelWidth -g pixelHeight Resources/Cocaine/Cocaine.icns
 
 Expected: command exits 0 and reports icon dimensions without an error.
 
-- [ ] **Step 4: Commit generator and icon**
+- [x] **Step 4: Commit generator and icon**
 
 Run:
 

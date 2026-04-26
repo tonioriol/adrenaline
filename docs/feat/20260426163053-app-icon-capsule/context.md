@@ -23,14 +23,14 @@ created: 2026-04-26
 - `Sources/Cocaine/MenuBarController.swift` — current capsule status-item icon drawing
 - `Resources/Cocaine/Info.plist` — app bundle metadata
 - `Makefile` — app bundle construction and signing
-- `Scripts/generate-app-icon.swift` — planned reproducible app icon generator
-- `Resources/Cocaine/Cocaine.icns` — planned generated app bundle icon
+- `Scripts/generate-app-icon.swift` — reproducible app icon generator
+- `Resources/Cocaine/Cocaine.icns` — generated app bundle icon
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — add reproducible capsule icon generator
+**Cursor:** Task 2 — wire icon into app bundle metadata and packaging
 
 **Status:** in_progress
 
