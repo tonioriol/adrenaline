@@ -227,7 +227,7 @@ Expected: commit succeeds.
 - Verify: `build/Cocaine.app/Contents/Info.plist`
 - Verify: `build/Cocaine.app/Contents/Resources/Cocaine.icns`
 
-- [ ] **Step 1: Run tests**
+- [x] **Step 1: Run tests**
 
 Run:
 
@@ -237,7 +237,7 @@ swift test
 
 Expected: PASS.
 
-- [ ] **Step 2: Build the app bundle**
+- [x] **Step 2: Build the app bundle**
 
 Run:
 
@@ -247,7 +247,7 @@ make app
 
 Expected: PASS and `build/Cocaine.app` exists.
 
-- [ ] **Step 3: Verify icon file is in the bundle**
+- [x] **Step 3: Verify icon file is in the bundle**
 
 Run:
 
@@ -257,7 +257,7 @@ test -f build/Cocaine.app/Contents/Resources/Cocaine.icns && echo "icon copied"
 
 Expected: prints `icon copied`.
 
-- [ ] **Step 4: Verify icon metadata is in the built plist**
+- [x] **Step 4: Verify icon metadata is in the built plist**
 
 Run:
 
@@ -267,7 +267,7 @@ Run:
 
 Expected: prints `Cocaine`.
 
-- [ ] **Step 5: Commit final verification updates if any**
+- [x] **Step 5: Commit final verification updates if any**
 
 Run:
 

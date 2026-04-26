@@ -30,9 +30,9 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — verify bundle output
+**Cursor:** all tasks complete
 
-**Status:** in_progress
+**Status:** complete
 
 ## LOG
 
@@ -64,8 +64,20 @@ created: 2026-04-26
 - How: Updated `Scripts/generate-app-icon.swift` to render each iconset entry into an explicit `NSBitmapImageRep` sized in pixels, added per-PNG bitmap dimension verification before invoking `iconutil`, regenerated `Resources/Cocaine/Cocaine.icns`, and verified extracted iconset entries from 16 × 16 through 1024 × 1024 pixels.
 - Follow-up: Task 2 should wire `CFBundleIconFile` and copy `Cocaine.icns` into the app bundle resources.
 
+### 2026-04-26 17:09 — App icon implementation complete
+
+- Why: All planned work for using the capsule motif as the macOS app icon has passed implementation, specification review, quality review, and bundle verification.
+- How: Completed generator, packaging, and verification tasks across commits `de7cd0f`, `4b04c2d`, `91de93b`, `98aae13`, `17f14bc`, and `c0f52ba`; verified `swift test` passed with 106 XCTest tests, `make app` built and signed `build/Cocaine.app`, `build/Cocaine.app/Contents/Resources/Cocaine.icns` exists, and the built `Info.plist` reports `CFBundleIconFile` as `Cocaine`.
+
 ### 2026-04-26 17:02 — Task 2 bundle icon metadata and packaging
 
 - Why: The generated capsule app icon needed to be declared in the app bundle metadata and copied into the manually packaged app bundle resources.
 - How: Added `CFBundleIconFile` to `Resources/Cocaine/Info.plist`, added `RESOURCES_DIR` plus `generate-app-icon` to `Makefile`, and updated the `app` recipe to create `Contents/Resources` and copy `Resources/Cocaine/Cocaine.icns` before signing. Verification: `make generate-app-icon` passed and refreshed the icon asset. Commit: `17f14bc`.
 - Follow-up: Task 3 should verify the built bundle output contains `Contents/Resources/Cocaine.icns` and the copied plist reports `CFBundleIconFile` as `Cocaine`.
+
+
+### 2026-04-26 17:06 — Task 3 bundle output verified
+
+- Why: The completed icon metadata and packaging needed final verification through the app bundle build path.
+- How: Ran `swift test` (106 XCTest tests passed, plus Swift Testing reported 0 tests passed), `make app` (bundle built and signed), verified `build/Cocaine.app/Contents/Resources/Cocaine.icns` exists with `icon copied`, and verified the built `Info.plist` reports `CFBundleIconFile` as `Cocaine`.
+- Follow-up: No implementation fixes were required. `git status --short` showed only pre-existing untracked workspace files: `.gitkeep`, `.vscode/`, and `docs/scratch.md`.
