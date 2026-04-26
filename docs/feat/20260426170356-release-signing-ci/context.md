@@ -32,7 +32,11 @@ created: 2026-04-26
 
 ## PLAN
 
-Pending.
+**Plan:** [plan.md](./plan.md)
+
+**Cursor:** Task 1 — add AGPL license and clean wording
+
+**Status:** ready
 
 ## LOG
 
@@ -53,3 +57,9 @@ Pending.
 - Why: The project should include an explicit open-source license before public release.
 - How: Added AGPL licensing to the approved release CI spec as a minimal repository-level `LICENSE` plus README reference.
 - Decision: Use AGPL-3.0 as requested, without adding extra licensing automation.
+
+### 2026-04-26 17:06 — Implementation plan generated
+
+- Why: The approved spec needs concrete implementation steps that keep the work small and verifiable.
+- How: Added `plan.md` with four tasks covering license and wording cleanup, Developer ID signing requirements, GitHub Actions release automation, and verification.
+- Decision: Keep release packaging as zip-only and rely on the existing Makefile app bundle flow.
