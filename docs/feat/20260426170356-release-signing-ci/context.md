@@ -34,7 +34,7 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — add AGPL license and clean wording
+**Cursor:** Task 2 — update Developer ID signing requirements
 
 **Status:** ready
 

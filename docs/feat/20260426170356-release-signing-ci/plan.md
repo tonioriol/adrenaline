@@ -35,7 +35,7 @@
 - Modify: `docs/feat/20260424192541-merge-fermatta-caffeine/context.md`
 - Modify: `docs/feat/20260424192541-merge-fermatta-caffeine/plan.md`
 
-- [ ] **Step 1: Add AGPL license text**
+- [x] **Step 1: Add AGPL license text**
 
 Run:
 
@@ -57,7 +57,7 @@ PY
 
 Expected: `LICENSE` exists with the AGPL-3.0 notice and official license URL.
 
-- [ ] **Step 2: Remove user-facing personal wording**
+- [x] **Step 2: Remove user-facing personal wording**
 
 Run:
 
@@ -97,7 +97,7 @@ PY
 
 Expected: command exits 0.
 
-- [ ] **Step 3: Add README license and release notes**
+- [x] **Step 3: Add README license and release notes**
 
 Insert these sections after the Build section in `README.md`:
 
@@ -120,7 +120,7 @@ Required repository secrets:
 Cocaine is licensed under the GNU Affero General Public License v3.0. See `LICENSE`.
 ```
 
-- [ ] **Step 4: Verify wording cleanup**
+- [x] **Step 4: Verify wording cleanup**
 
 Run:
 
@@ -130,7 +130,7 @@ rg -n '<personal-only wording pattern>' . --glob '*.md'
 
 Expected: no matches.
 
-- [ ] **Step 5: Commit wording and license**
+- [x] **Step 5: Commit wording and license**
 
 Run:
 
