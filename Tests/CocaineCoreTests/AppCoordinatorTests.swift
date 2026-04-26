@@ -246,6 +246,49 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertFalse(prefs.preventLidCloseSleep)
     }
 
+    func testSetPreventLidCloseSleepDisableFailureKeepsActiveAndLeavesPreferenceOff() async {
+        let state = AppState()
+        let awake = FakeAwakeController()
+        let lid = FakeLidCloseController()
+        lid.disableError = TestError(errorDescription: "disable failed")
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
+
+        await coordinator.turnOn()
+        XCTAssertTrue(state.isActive)
+        XCTAssertTrue(awake.isEnabled)
+        XCTAssertEqual(lid.enableCallCount, 1)
+
+        await coordinator.setPreventLidCloseSleep(false)
+
+        XCTAssertFalse(prefs.preventLidCloseSleep)
+        XCTAssertTrue(state.isActive, "ordinary awake assertions remain active, so UI must stay active-with-error")
+        XCTAssertEqual(state.lastErrorMessage, "disable failed")
+        XCTAssertTrue(awake.isEnabled)
+        XCTAssertEqual(lid.disableCallCount, 1)
+    }
+
+    func testSetPreventLidCloseSleepStatusStillActiveAfterDisableKeepsActiveAndRecordsError() async {
+        let state = AppState()
+        let awake = FakeAwakeController()
+        let lid = FakeLidCloseController()
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
+
+        await coordinator.turnOn()
+        lid.statusValue = true
+
+        await coordinator.setPreventLidCloseSleep(false)
+
+        XCTAssertFalse(prefs.preventLidCloseSleep)
+        XCTAssertTrue(state.isActive, "ordinary awake assertions remain active, so UI must stay active-with-error")
+        XCTAssertEqual(state.lastErrorMessage, "Lid-close prevention remained active after disable")
+        XCTAssertTrue(awake.isEnabled)
+        XCTAssertEqual(lid.disableCallCount, 1)
+    }
+
     func testToggleOnEnablesAwakeAndLidCloseAndMarksActive() async {
         let state = AppState()
         let awake = FakeAwakeController()
