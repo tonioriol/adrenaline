@@ -207,10 +207,14 @@ public final class AppCoordinator {
         } else {
             do {
                 try await lidCloseController.disable()
+
+                if try await lidCloseController.status() {
+                    throw AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable
+                }
+
                 lidCloseEngagedThisSession = false
             } catch {
-                lidCloseEngagedThisSession = false
-                state.recordError(error.localizedDescription)
+                state.recordErrorWhileActive(error.localizedDescription)
             }
         }
     }
