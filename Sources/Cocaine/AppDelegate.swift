@@ -6,7 +6,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
     private var coordinator: AppCoordinator?
     private var lidEventSoundController: LidEventSoundController?
-    private var lidCloseLockResponder: LidCloseLockResponder?
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -22,7 +21,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         let lidStateMonitor = LidStateMonitor()
         let soundPlayer = SystemSoundPlayer()
-        let screenLocker = LoginFrameworkScreenLocker()
 
         let lidEventSoundController = LidEventSoundController(
             state: state,
@@ -30,17 +28,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             soundPlayer: soundPlayer,
             preferences: preferences
         )
-        let lidCloseLockResponder = LidCloseLockResponder(
-            state: state,
-            monitor: lidStateMonitor,
-            screenLocker: screenLocker,
-            preferences: preferences
-        )
 
         self.preferences = preferences
         self.coordinator = coordinator
         self.lidEventSoundController = lidEventSoundController
-        self.lidCloseLockResponder = lidCloseLockResponder
         self.menuBarController = MenuBarController(
             state: state,
             coordinator: coordinator,
