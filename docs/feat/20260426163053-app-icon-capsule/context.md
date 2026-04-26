@@ -51,3 +51,9 @@ created: 2026-04-26
 
 - Why: The approved design needs a concrete sequence that keeps asset generation reproducible and bundle wiring verifiable.
 - How: Wrote `plan.md` with 3 tasks: add a Swift/AppKit `.icns` generator and generated asset, wire `Info.plist`/`Makefile`, then verify tests and bundle output.
+
+### 2026-04-26 16:41 — Task 1 generator and icon added
+
+- Why: Task 1 needed a reproducible source for the capsule-based app icon asset before bundle metadata and packaging are wired.
+- How: Added `Scripts/generate-app-icon.swift`, generated `Resources/Cocaine/Cocaine.icns`, verified it with `sips -g pixelWidth -g pixelHeight Resources/Cocaine/Cocaine.icns` reporting 1024 × 1024, and committed the generator plus generated icon as `de7cd0f`.
+- Follow-up: Task 2 should wire `CFBundleIconFile` and copy `Cocaine.icns` into the app bundle resources.
