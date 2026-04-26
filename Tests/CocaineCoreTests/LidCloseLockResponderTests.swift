@@ -51,42 +51,49 @@ private struct TestError: Error {}
 
 @MainActor
 final class LidCloseLockResponderTests: XCTestCase {
-    private func makeResponder(isActive: Bool, preventLid: Bool, lockOnClose: Bool)
+    private func makeResponder(isActive: Bool, preventDisplaySleep: Bool, preventLid: Bool)
         -> (FakeLidStateMonitor, FakeScreenLocker, LidCloseLockResponder)
     {
         let state = AppState(isActive: isActive)
         let monitor = FakeLidStateMonitor()
         let locker = FakeScreenLocker()
         let prefs = FakePreferencesStore()
+        prefs.preventDisplaySleep = preventDisplaySleep
         prefs.preventLidCloseSleep = preventLid
-        prefs.lockScreenOnLidClose = lockOnClose
         let responder = LidCloseLockResponder(state: state, monitor: monitor, screenLocker: locker, preferences: prefs)
         return (monitor, locker, responder)
     }
 
     func testInactiveStateDoesNotLock() {
-        let (monitor, locker, responder) = makeResponder(isActive: false, preventLid: true, lockOnClose: true)
+        let (monitor, locker, responder) = makeResponder(isActive: false, preventDisplaySleep: false, preventLid: true)
         monitor.emit(.closed)
         XCTAssertEqual(locker.lockCallCount, 0)
         _ = responder
     }
 
     func testPreventLidCloseOffDoesNotLock() {
-        let (monitor, locker, responder) = makeResponder(isActive: true, preventLid: false, lockOnClose: true)
+        let (monitor, locker, responder) = makeResponder(isActive: true, preventDisplaySleep: false, preventLid: false)
         monitor.emit(.closed)
         XCTAssertEqual(locker.lockCallCount, 0)
         _ = responder
     }
 
-    func testAllConditionsMetLocksOnceOnClose() {
-        let (monitor, locker, responder) = makeResponder(isActive: true, preventLid: true, lockOnClose: true)
+    func testPreventDisplaySleepOnDoesNotLock() {
+        let (monitor, locker, responder) = makeResponder(isActive: true, preventDisplaySleep: true, preventLid: true)
+        monitor.emit(.closed)
+        XCTAssertEqual(locker.lockCallCount, 0)
+        _ = responder
+    }
+
+    func testPreventDisplaySleepOffAndPreventLidCloseOnLocksOnceOnClose() {
+        let (monitor, locker, responder) = makeResponder(isActive: true, preventDisplaySleep: false, preventLid: true)
         monitor.emit(.closed)
         XCTAssertEqual(locker.lockCallCount, 1)
         _ = responder
     }
 
     func testLidOpenNeverLocks() {
-        let (monitor, locker, responder) = makeResponder(isActive: true, preventLid: true, lockOnClose: true)
+        let (monitor, locker, responder) = makeResponder(isActive: true, preventDisplaySleep: false, preventLid: true)
         monitor.emit(.open)
         monitor.emit(.open)
         XCTAssertEqual(locker.lockCallCount, 0)
@@ -99,8 +106,8 @@ final class LidCloseLockResponderTests: XCTestCase {
         let locker = FakeScreenLocker()
         locker.lockError = TestError()
         let prefs = FakePreferencesStore()
+        prefs.preventDisplaySleep = false
         prefs.preventLidCloseSleep = true
-        prefs.lockScreenOnLidClose = true
         let responder = LidCloseLockResponder(state: state, monitor: monitor, screenLocker: locker, preferences: prefs)
 
         monitor.emit(.closed)
@@ -116,8 +123,8 @@ final class LidCloseLockResponderTests: XCTestCase {
         let monitor = FakeLidStateMonitor()
         let locker = FakeScreenLocker()
         let prefs = FakePreferencesStore()
+        prefs.preventDisplaySleep = false
         prefs.preventLidCloseSleep = true
-        prefs.lockScreenOnLidClose = true
         var forwardedStates: [LidState] = []
         monitor.onLidStateChange = { forwardedStates.append($0) }
         let responder = LidCloseLockResponder(state: state, monitor: monitor, screenLocker: locker, preferences: prefs)
