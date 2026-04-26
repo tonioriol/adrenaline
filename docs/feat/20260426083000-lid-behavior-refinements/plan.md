@@ -1059,7 +1059,7 @@ git commit -m "docs: update lid refinement behavior"
 **Files:**
 - Modify: `docs/feat/20260426083000-lid-behavior-refinements/context.md`
 
-- [ ] **Step 1: Run full tests**
+- [x] **Step 1: Run full tests**
 
 Run:
 
@@ -1069,7 +1069,7 @@ make test
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Build the app bundle**
+- [x] **Step 2: Build the app bundle**
 
 Run:
 
@@ -1079,7 +1079,7 @@ make app
 
 Expected: `build/Cocaine.app` is created successfully.
 
-- [ ] **Step 3: Run stale-reference checks**
+- [x] **Step 3: Run stale-reference checks**
 
 Run:
 
@@ -1102,7 +1102,7 @@ Launch `build/Cocaine.app` and verify:
 7. `Launch at login` appears and reflects the system login-item state.
 8. Left-click still toggles Cocaine's main keep-awake behavior.
 
-- [ ] **Step 5: Update task record**
+- [x] **Step 5: Update task record**
 
 Append this log entry to `docs/feat/20260426083000-lid-behavior-refinements/context.md`, replacing the verification sentence with the actual test counts and commit hashes from the implementation session:
 
@@ -1112,7 +1112,7 @@ Append this log entry to `docs/feat/20260426083000-lid-behavior-refinements/cont
 Implemented the approved lid behavior refinements: removed forced lock-screen UI and code path, removed helper repair menu item, gated lid sounds on lid-close prevention, added Launch at Login backed by actual macOS state, converted preference rows to non-dismissing checkbox views, and updated README behavior docs. Verified `make test` and `make app` passed. Manual menu checks completed: right-click menu remained open across preference toggles; sound row disabled when lid-close prevention was off; removed rows absent; launch-at-login row present.
 ```
 
-- [ ] **Step 6: Commit Task 6**
+- [x] **Step 6: Commit Task 6**
 
 ```bash
 git add docs/feat/20260426083000-lid-behavior-refinements/context.md
