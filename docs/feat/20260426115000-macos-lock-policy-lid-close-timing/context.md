@@ -24,6 +24,8 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 ## FILES
 
 - Sources/CocaineCore/LidCloseLockResponder.swift — existing computed lid-close lock behavior
+- Sources/CocaineCore/LidCloseLockScheduler.swift — planned cancellable delayed lock scheduler abstraction
+- Sources/CocaineCore/MacOSLockPolicyReader.swift — planned macOS Require Password/display timer policy reader
 - Sources/CocaineCore/ScreenLocker.swift — lock implementation used by lid-close responder
 - Sources/CocaineCore/PreferencesStore.swift — app preference state that currently controls display and lid behavior
 - Sources/CocaineHelper/ApplePowerSettings.swift — existing helper-side macOS power settings access
@@ -31,13 +33,14 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Sources/Cocaine/MenuBarController.swift — current menu exposes display/lid/sound/login controls but no lock row
 - Sources/CocaineCore/PreferenceMenuRows.swift — current preference row model with no standalone lock row
 - Tests/CocaineCoreTests/LidCloseLockResponderTests.swift — lock behavior regression tests
+- Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift — planned policy reader regression tests
 - README.md — user-facing behavior table to update after design approval
 
 ## PLAN
 
-**Plan:** Pending — will be written after the approved spec.
+**Plan:** [plan.md](./plan.md)
 
-**Cursor:** Brainstorming — exploring current behavior and design alternatives.
+**Cursor:** Task 1 — add macOS lock policy reader
 
 **Status:** in_progress
 
@@ -72,3 +75,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: The written design matches the requested user-facing behavior and is ready for implementation planning.
 - How: User approved `spec.md` and asked to continue to implementation planning.
 - Decision: Proceed to a detailed plan that implements a macOS lock policy reader, delayed/cancellable lid-close lock scheduling, test coverage, and README updates.
+
+### 2026-04-26 12:19 — Implementation plan generated
+
+- Why: The approved behavior touches settings reads, asynchronous scheduling, app wiring, docs, and verification, so execution needs a stepwise TDD plan.
+- How: Wrote `plan.md` with five tasks: policy reader, delayed responder scheduling, app wiring, README update, and final verification/task memory update.
+- Decision: Use a focused `MacOSLockPolicyReader` plus `LidCloseLockScheduling` abstraction so policy reads and delayed lock timing can be tested without waiting real macOS timers.
