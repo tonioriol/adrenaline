@@ -81,7 +81,9 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
 
         monitor.emit(.closed)
 
@@ -93,7 +95,9 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
 
         monitor.emit(.open)
 
@@ -119,7 +123,9 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
 
         monitor.emit(.closed)
         monitor.emit(.closed)
@@ -135,7 +141,9 @@ final class LidEventSoundControllerTests: XCTestCase {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
-        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: FakePreferencesStore())
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
 
         monitor.emit(.closed)
         state.setActive(false)
@@ -183,11 +191,28 @@ final class LidEventSoundControllerTests: XCTestCase {
         _ = controller
     }
 
+    func testPreventLidCloseSleepOffSilencesEventsEvenWhenSoundsEnabled() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let player = FakeLidSoundPlayer()
+        let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = false
+        prefs.playLidEventSounds = true
+        let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
+
+        monitor.emit(.closed)
+        monitor.emit(.open)
+
+        XCTAssertTrue(player.playedSoundNames.isEmpty)
+        _ = controller
+    }
+
     func testTogglingPlayLidEventSoundsBetweenEventsAffectsOnlyNextEvent() {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()
         let player = FakeLidSoundPlayer()
         let prefs = FakePreferencesStore()
+        prefs.preventLidCloseSleep = true
         let controller = LidEventSoundController(state: state, monitor: monitor, soundPlayer: player, preferences: prefs)
 
         monitor.emit(.closed)
