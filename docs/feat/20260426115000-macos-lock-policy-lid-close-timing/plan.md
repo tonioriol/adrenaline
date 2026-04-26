@@ -1063,7 +1063,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Update the behavior table and explanatory bullets**
+- [x] **Step 1: Update the behavior table and explanatory bullets**
 
 Replace the lock-related rows and bullets in `README.md` under `## Behavior` with this content:
 
@@ -1081,7 +1081,7 @@ Replace the lock-related rows and bullets in `README.md` under `## Behavior` wit
 - **When lid-close prevention is on and display sleep is allowed:** Cocaine mirrors macOS lock policy. If **Require password** is **Never**, Cocaine does not lock on lid close. Otherwise, it locks after the active display-off timer plus the Require Password delay, and cancels that pending lock if the lid reopens first.
 ```
 
-- [ ] **Step 2: Verify stale lock-row docs are gone**
+- [x] **Step 2: Verify stale lock-row docs are gone**
 
 Run:
 
@@ -1091,7 +1091,7 @@ rg -n "Lock screen on lid close|separate lid-close lock action|lock action fires
 
 Expected: no matches.
 
-- [ ] **Step 3: Commit README update**
+- [x] **Step 3: Commit README update**
 
 Run:
 

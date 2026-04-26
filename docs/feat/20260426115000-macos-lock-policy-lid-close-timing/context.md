@@ -34,13 +34,13 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Sources/CocaineCore/PreferenceMenuRows.swift — current preference row model with no standalone lock row
 - Tests/CocaineCoreTests/LidCloseLockResponderTests.swift — lock behavior regression tests
 - Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift — policy reader regression tests
-- README.md — user-facing behavior table to update after design approval
+- README.md — user-facing behavior table updated for macOS-matched lid-close locking
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 4 — update README behavior docs
+**Cursor:** Task 5 — final verification and task memory update
 
 **Status:** in_progress
 
@@ -100,3 +100,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: Production app wiring still used the old `LidCloseLockResponder` initializer, so the app target could not compile after the responder was changed to require an explicit macOS lock policy reader.
 - How: Updated `Sources/Cocaine/AppDelegate.swift` to construct `MacOSLockPolicyReader()` next to `LoginFrameworkScreenLocker()` and pass it as `policyReader:` while preserving sound-controller-before-responder construction order. Evidence: initial `swift build 2>&1 | tail -40` failed with missing `policyReader`; after wiring, `swift build 2>&1 | tail -40` passed and `swift test 2>&1 | tail -40` passed 106 XCTest tests, 0 failures. Commit: `2a518e1`.
 - Decision: Kept the existing lid event sound controller construction before `LidCloseLockResponder` so the responder continues to wrap and forward the existing lid-state callback.
+
+### 2026-04-26 14:58 — Task 4 README lock policy docs
+
+- Why: The README still described the removed standalone lock row and older immediate/separate lid-close lock behavior, but the implemented behavior now mirrors macOS Require Password and display-off timing.
+- How: Updated README.md behavior preferences and lid-close bullets; ran `rg -n "Lock screen on lid close|separate lid-close lock action|lock action fires" README.md`, which returned no matches; committed README update as `90e5351`.
+- Decision: Removed the lock preference row entirely and documented the computed behavior matrix instead, because Cocaine has no user-facing lock setting and only fills the macOS lock gap when display sleep is allowed.
