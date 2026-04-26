@@ -256,7 +256,7 @@ git commit -m "fix: gate lid sounds on lid-close prevention"
 - Create: `Sources/CocaineCore/LaunchAtLoginController.swift`
 - Create: `Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift`
 
-- [ ] **Step 1: Write failing launch-at-login tests**
+- [x] **Step 1: Write failing launch-at-login tests**
 
 Create `Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift` with:
 
@@ -388,7 +388,7 @@ final class LaunchAtLoginControllerTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run the new tests and verify they fail to compile**
+- [x] **Step 2: Run the new tests and verify they fail to compile**
 
 Run:
 
@@ -398,7 +398,7 @@ swift test --filter LaunchAtLoginControllerTests
 
 Expected before implementation: FAIL to compile because `LaunchAtLoginController`, `LoginItemServicing`, and `LaunchAtLoginStatus` do not exist.
 
-- [ ] **Step 3: Add the launch-at-login controller**
+- [x] **Step 3: Add the launch-at-login controller**
 
 Create `Sources/CocaineCore/LaunchAtLoginController.swift` with:
 
@@ -492,7 +492,7 @@ public final class LaunchAtLoginController: LaunchAtLoginControlling {
 }
 ```
 
-- [ ] **Step 4: Run launch-at-login tests**
+- [x] **Step 4: Run launch-at-login tests**
 
 Run:
 
@@ -502,7 +502,7 @@ swift test --filter LaunchAtLoginControllerTests
 
 Expected: all `LaunchAtLoginControllerTests` pass.
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 ```bash
 git add Sources/CocaineCore/LaunchAtLoginController.swift Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift
