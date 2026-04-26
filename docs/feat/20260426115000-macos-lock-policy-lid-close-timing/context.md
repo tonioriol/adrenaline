@@ -1,6 +1,6 @@
 ---
 title: "Respect macOS lock policy for lid-close timing"
-status: active
+status: done
 repos: [cocaine]
 tags: [macos, power, security]
 related: [20260425232900-lid-behavior-settings, 20260426083000-lid-behavior-refinements]
@@ -113,8 +113,14 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - How: Added `MacOSLockPolicyReader`, delayed/cancellable `LidCloseLockResponder` scheduling, explicit app wiring, and README docs. Verification: `make test 2>&1 | tail -40` passed with 106 XCTest tests and 0 failures; `make app 2>&1 | tail -40` rebuilt and signed `build/Cocaine.app`; `rg -n "locks the screen when the lid closes|lock as soon as the lid closes|immediate.*lid" README.md Sources Tests` returned no matches. Implementation commits: `26bb89d`, `bcc16c8`, `a82c2ce`, `c56076a`, `2a518e1`, `90e5351`. Final verification record committed as `2119582`.
 - Decision: Lock timing is read once at lid close and rechecked for active/lid/preference gates before firing; power-source changes while already closed remain a future refinement. Manual physical-lid verification is still pending.
 
-### 2026-04-26 15:03 — macOS-matched lid-close lock timing implemented
+### 2026-04-26 15:03 — Final implementation wrap-up
 
 - Why: Cocaine should not create a separate lid-close security policy; it should respect macOS Require Password and display-off timing.
 - How: Added `MacOSLockPolicyReader`, delayed/cancellable `LidCloseLockResponder` scheduling, production app wiring, and README docs across commits `26bb89d`, `bcc16c8`, `a82c2ce`, `c56076a`, `2a518e1`, and `90e5351`. Verification: `make test 2>&1 | tail -40` passed 106 XCTest tests with 0 failures; `make app 2>&1 | tail -40` rebuilt `build/Cocaine.app` and signed the app/helper; `rg -n "locks the screen when the lid closes|lock as soon as the lid closes|immediate.*lid" README.md Sources Tests` returned no matches.
 - Decision: Lock timing is read once at lid close and rechecked for active/lid/preference gates before firing; power-source changes while already closed are left as a future refinement.
+
+### 2026-04-26 16:19 — Local merge option resolved on main
+
+- Why: The chosen completion path was to merge the work locally into `main`.
+- How: Verified the branch was already [`main`](.git/HEAD) with the implementation commits present directly in local history, so no extra checkout or merge step was required. Re-ran `make test 2>&1 | tail -40` to confirm the current local `main` still passed with 106 tests and 0 failures. No worktree cleanup was needed because the workspace is the primary repository path.
+- Decision: Treat the feature as already merged locally; leave unrelated untracked workspace files (`.gitkeep`, `.vscode/`, `docs/scratch.md`) untouched.
