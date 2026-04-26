@@ -54,8 +54,7 @@ final class LidCloseLockResponderTests: XCTestCase {
     private func makeResponder(
         isActive: Bool,
         preventDisplaySleep: Bool,
-        preventLid: Bool,
-        lockOnClose: Bool = true)
+        preventLid: Bool)
         -> (FakeLidStateMonitor, FakeScreenLocker, LidCloseLockResponder)
     {
         let state = AppState(isActive: isActive)
@@ -64,7 +63,6 @@ final class LidCloseLockResponderTests: XCTestCase {
         let prefs = FakePreferencesStore()
         prefs.preventDisplaySleep = preventDisplaySleep
         prefs.preventLidCloseSleep = preventLid
-        prefs.lockScreenOnLidClose = lockOnClose
         let responder = LidCloseLockResponder(state: state, monitor: monitor, screenLocker: locker, preferences: prefs)
         return (monitor, locker, responder)
     }
@@ -85,17 +83,6 @@ final class LidCloseLockResponderTests: XCTestCase {
 
     func testPreventDisplaySleepOnDoesNotLock() {
         let (monitor, locker, responder) = makeResponder(isActive: true, preventDisplaySleep: true, preventLid: true)
-        monitor.emit(.closed)
-        XCTAssertEqual(locker.lockCallCount, 0)
-        _ = responder
-    }
-
-    func testLockScreenOnLidCloseOffDoesNotLock() {
-        let (monitor, locker, responder) = makeResponder(
-            isActive: true,
-            preventDisplaySleep: false,
-            preventLid: true,
-            lockOnClose: false)
         monitor.emit(.closed)
         XCTAssertEqual(locker.lockCallCount, 0)
         _ = responder

@@ -2,7 +2,7 @@ import XCTest
 @testable import CocaineCore
 
 final class PreferenceMenuRowsTests: XCTestCase {
-    func testRowsExposeLockScreenOnLidCloseAsLidCloseChildPreference() {
+    func testRowsExposePlayLidEventSoundsAsLidCloseChildPreference() {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: false,
             preventLidCloseSleep: true,
@@ -15,18 +15,17 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(rows.map(\.id), [
             .preventDisplaySleep,
             .preventLidCloseSleep,
-            .lockScreenOnLidClose,
             .playLidEventSounds,
         ])
 
-        let row = rows.first { $0.id == .lockScreenOnLidClose }
-        XCTAssertEqual(row?.title, "Lock screen on lid close")
+        let row = rows.first { $0.id == .playLidEventSounds }
+        XCTAssertEqual(row?.title, "Play lid event sounds")
         XCTAssertEqual(row?.isOn, false)
         XCTAssertEqual(row?.isEnabled, true)
         XCTAssertEqual(row?.isChild, true)
     }
 
-    func testLockScreenOnLidCloseRowIsDisabledWhenLidClosePreventionIsOff() {
+    func testPlayLidEventSoundsRowIsDisabledWhenLidClosePreventionIsOff() {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: true,
             preventLidCloseSleep: false,
@@ -35,7 +34,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
         )
 
         let row = PreferenceMenuRows.rows(for: snapshot)
-            .first { $0.id == .lockScreenOnLidClose }
+            .first { $0.id == .playLidEventSounds }
 
         XCTAssertEqual(row?.isOn, true)
         XCTAssertEqual(row?.isEnabled, false)
