@@ -148,7 +148,7 @@ git commit -m "refactor: remove forced lid-close locking"
 - Modify: `Sources/CocaineCore/LidEventSoundController.swift`
 - Modify: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
 
-- [ ] **Step 1: Add the failing regression test**
+- [x] **Step 1: Add the failing regression test**
 
 In `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`, add this test inside `final class LidEventSoundControllerTests`:
 
@@ -170,7 +170,7 @@ func testPreventLidCloseSleepOffSilencesEventsEvenWhenSoundsEnabled() {
 }
 ```
 
-- [ ] **Step 2: Update existing sound-positive tests to express the required lid-close state**
+- [x] **Step 2: Update existing sound-positive tests to express the required lid-close state**
 
 For each test that expects `"Hero"` or `"Basso"` playback, create a preferences fake, set `preventLidCloseSleep = true`, and pass it into the controller. For example, change `testCloseEventWhileActivePlaysHero` to:
 
@@ -199,7 +199,7 @@ Apply the same `prefs.preventLidCloseSleep = true` setup to:
 - `testTogglingPlayLidEventSoundsBetweenEventsAffectsOnlyNextEvent`
 - `testMutedDuplicateLidStateDoesNotReplayAfterSoundsReenabled`
 
-- [ ] **Step 3: Run the focused test and verify the new test fails**
+- [x] **Step 3: Run the focused test and verify the new test fails**
 
 Run:
 
@@ -209,7 +209,7 @@ swift test --filter LidEventSoundControllerTests/testPreventLidCloseSleepOffSile
 
 Expected before implementation: FAIL because the controller currently checks only `playLidEventSounds`.
 
-- [ ] **Step 4: Implement the lid-close-prevention gate**
+- [x] **Step 4: Implement the lid-close-prevention gate**
 
 In `Sources/CocaineCore/LidEventSoundController.swift`, replace the `handle(_:)` method with:
 
@@ -231,7 +231,7 @@ private func handle(_ lidState: LidState) {
 
 The assignment to `lastHandledState` remains before the preference gates to preserve duplicate suppression for muted or disabled events.
 
-- [ ] **Step 5: Run the sound-controller tests**
+- [x] **Step 5: Run the sound-controller tests**
 
 Run:
 
@@ -241,7 +241,7 @@ swift test --filter LidEventSoundControllerTests
 
 Expected: all `LidEventSoundControllerTests` pass.
 
-- [ ] **Step 6: Commit Task 2**
+- [x] **Step 6: Commit Task 2**
 
 ```bash
 git add Sources/CocaineCore/LidEventSoundController.swift Tests/CocaineCoreTests/LidEventSoundControllerTests.swift
