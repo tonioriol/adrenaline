@@ -77,3 +77,10 @@ created: 2026-04-26
 - Why: Spec review found three archived plan snippets still used personal keep-awake wording after the initial Task 1 cleanup.
 - How: Updated the remaining `.credits` strings in the lid behavior refinement, merge, and lid behavior settings plans, then reran the required Markdown wording search with no matches.
 - Decision: Keep the attribution text intact while removing only the personal-use framing.
+
+### 2026-04-26 17:17 — Task 2 Developer ID signing requirements
+
+- Summary: Updated the app and helper signing requirement strings from Apple Development certificate constraints to Developer ID Application constraints using Team ID A79T83GM42.
+- Files changed: `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Resources/Cocaine/Info.plist`, `Resources/CocaineHelper/Info.plist`, `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Commands run: `swift test --filter CocaineHelperConstantsTests` passed with 4 tests and 0 failures.
+- Commit SHA: 0e2c7b0.

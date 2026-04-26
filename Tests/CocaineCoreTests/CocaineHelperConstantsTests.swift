@@ -2,8 +2,8 @@ import XCTest
 @testable import CocaineCore
 
 final class CocaineHelperConstantsTests: XCTestCase {
-    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.CN] = \"Apple Development: tonioriol@me.com (A79T83GM42)\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists"
-    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.CN] = \"Apple Development: tonioriol@me.com (A79T83GM42)\" and certificate 1[field.1.2.840.113635.100.6.2.1] exists"
+    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
 
     func testAppBundlePrivilegedHelperRequirementMatchesHelperSigningRequirement() throws {
         let projectRoot = URL(fileURLWithPath: #filePath)
