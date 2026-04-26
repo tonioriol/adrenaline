@@ -106,3 +106,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: The README still described the removed standalone lock row and older immediate/separate lid-close lock behavior, but the implemented behavior now mirrors macOS Require Password and display-off timing.
 - How: Updated README.md behavior preferences and lid-close bullets; ran `rg -n "Lock screen on lid close|separate lid-close lock action|lock action fires" README.md`, which returned no matches; committed README update as `90e5351`.
 - Decision: Removed the lock preference row entirely and documented the computed behavior matrix instead, because Cocaine has no user-facing lock setting and only fills the macOS lock gap when display sleep is allowed.
+
+### 2026-04-26 15:03 — macOS-matched lid-close lock timing implemented
+
+- Why: Cocaine should not create a separate lid-close security policy; it should respect macOS Require Password and display-off timing.
+- How: Added `MacOSLockPolicyReader`, delayed/cancellable `LidCloseLockResponder` scheduling, production app wiring, and README docs across commits `26bb89d`, `bcc16c8`, `a82c2ce`, `c56076a`, `2a518e1`, and `90e5351`. Verification: `make test 2>&1 | tail -40` passed 106 XCTest tests with 0 failures; `make app 2>&1 | tail -40` rebuilt `build/Cocaine.app` and signed the app/helper; `rg -n "locks the screen when the lid closes|lock as soon as the lid closes|immediate.*lid" README.md Sources Tests` returned no matches.
+- Decision: Lock timing is read once at lid close and rechecked for active/lid/preference gates before firing; power-source changes while already closed are left as a future refinement.
