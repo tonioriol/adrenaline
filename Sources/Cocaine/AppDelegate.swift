@@ -35,7 +35,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.menuBarController = MenuBarController(
             state: state,
             coordinator: coordinator,
-            preferences: preferences
+            preferences: preferences,
+            launchAtLoginController: LaunchAtLoginController()
         )
     }
 

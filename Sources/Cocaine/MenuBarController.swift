@@ -4,16 +4,32 @@ import CocaineCore
 
 @MainActor
 final class MenuBarController: NSObject {
+    private enum PreferenceRowID: Hashable {
+        case preventDisplaySleep
+        case preventLidCloseSleep
+        case playLidEventSounds
+        case launchAtLogin
+    }
+
     private let state: AppState
     private let coordinator: AppCoordinator
     private let preferences: PreferencesStore
+    private let launchAtLoginController: LaunchAtLoginControlling
     private let statusItem: NSStatusItem
     private var cancellables: Set<AnyCancellable> = []
+    private var visibleRows: [PreferenceRowID: CheckboxMenuItemView] = [:]
+    private var launchAtLoginErrorMessage: String?
 
-    init(state: AppState, coordinator: AppCoordinator, preferences: PreferencesStore) {
+    init(
+        state: AppState,
+        coordinator: AppCoordinator,
+        preferences: PreferencesStore,
+        launchAtLoginController: LaunchAtLoginControlling
+    ) {
         self.state = state
         self.coordinator = coordinator
         self.preferences = preferences
+        self.launchAtLoginController = launchAtLoginController
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         super.init()
         configureStatusItem()
@@ -34,7 +50,10 @@ final class MenuBarController: NSObject {
         state.$lastErrorMessage.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
         preferences.preventLidCloseSleepPublisher
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.render() }
+            .sink { [weak self] _ in
+                self?.render()
+                self?.refreshVisibleRows()
+            }
             .store(in: &cancellables)
     }
 
@@ -156,9 +175,17 @@ final class MenuBarController: NSObject {
 
     private func showMenu() {
         let menu = NSMenu()
+        visibleRows = [:]
 
         if let error = state.lastErrorMessage {
             let errorItem = NSMenuItem(title: "Error: \(error)", action: nil, keyEquivalent: "")
+            errorItem.isEnabled = false
+            menu.addItem(errorItem)
+            menu.addItem(NSMenuItem.separator())
+        }
+
+        if let launchAtLoginErrorMessage {
+            let errorItem = NSMenuItem(title: "Login item error: \(launchAtLoginErrorMessage)", action: nil, keyEquivalent: "")
             errorItem.isEnabled = false
             menu.addItem(errorItem)
             menu.addItem(NSMenuItem.separator())
@@ -170,41 +197,45 @@ final class MenuBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(makeCheckboxItem(
+        addCheckboxRow(
+            to: menu,
+            id: .preventDisplaySleep,
             title: "Prevent display sleep",
             isOn: preferences.preventDisplaySleep,
-            action: #selector(togglePreventDisplaySleep)
-        ))
+            isEnabled: true
+        ) { [weak self] in
+            self?.togglePreventDisplaySleep()
+        }
 
-        let lidCloseTitle = preferences.preventLidCloseSleep
-            ? "⚠ Prevent sleep with lid closed"
-            : "Prevent sleep with lid closed"
-        menu.addItem(makeCheckboxItem(
+        addCheckboxRow(
+            to: menu,
+            id: .preventLidCloseSleep,
             title: lidCloseTitle,
             isOn: preferences.preventLidCloseSleep,
-            action: #selector(togglePreventLidCloseSleep)
-        ))
+            isEnabled: true
+        ) { [weak self] in
+            self?.togglePreventLidCloseSleep()
+        }
 
-        let lockItem = makeCheckboxItem(
-            title: "    Lock screen when lid closes",
-            isOn: preferences.lockScreenOnLidClose,
-            action: #selector(toggleLockScreenOnLidClose)
-        )
-        lockItem.isEnabled = preferences.preventLidCloseSleep
-        menu.addItem(lockItem)
-
-        menu.addItem(makeCheckboxItem(
+        addCheckboxRow(
+            to: menu,
+            id: .playLidEventSounds,
             title: "Play lid event sounds",
             isOn: preferences.playLidEventSounds,
-            action: #selector(togglePlayLidEventSounds)
-        ))
+            isEnabled: preferences.preventLidCloseSleep
+        ) { [weak self] in
+            self?.togglePlayLidEventSounds()
+        }
 
-        menu.addItem(NSMenuItem.separator())
-
-        let repairItem = NSMenuItem(title: "Repair / Install Helper", action: #selector(repairHelper), keyEquivalent: "")
-        repairItem.target = self
-        repairItem.isEnabled = state.lastErrorMessage != nil
-        menu.addItem(repairItem)
+        addCheckboxRow(
+            to: menu,
+            id: .launchAtLogin,
+            title: "Launch at login",
+            isOn: launchAtLoginController.isEnabled,
+            isEnabled: true
+        ) { [weak self] in
+            self?.toggleLaunchAtLogin()
+        }
 
         menu.addItem(NSMenuItem.separator())
 
@@ -215,28 +246,69 @@ final class MenuBarController: NSObject {
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
+        visibleRows = [:]
     }
 
-    private func makeCheckboxItem(title: String, isOn: Bool, action: Selector) -> NSMenuItem {
-        let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
-        item.target = self
-        item.state = isOn ? .on : .off
-        return item
+    private var lidCloseTitle: String {
+        preferences.preventLidCloseSleep
+            ? "⚠ Prevent sleep with lid closed"
+            : "Prevent sleep with lid closed"
     }
 
-    @objc
+    private func addCheckboxRow(
+        to menu: NSMenu,
+        id: PreferenceRowID,
+        title: String,
+        isOn: Bool,
+        isEnabled: Bool,
+        action: @escaping () -> Void
+    ) {
+        let item = NSMenuItem()
+        let row = CheckboxMenuItemView(title: title, isOn: isOn, isEnabled: isEnabled)
+        row.onToggle = action
+        item.view = row
+        menu.addItem(item)
+        visibleRows[id] = row
+    }
+
+    private func refreshVisibleRows() {
+        visibleRows[.preventDisplaySleep]?.update(
+            title: "Prevent display sleep",
+            isOn: preferences.preventDisplaySleep,
+            isEnabled: true
+        )
+        visibleRows[.preventLidCloseSleep]?.update(
+            title: lidCloseTitle,
+            isOn: preferences.preventLidCloseSleep,
+            isEnabled: true
+        )
+        visibleRows[.playLidEventSounds]?.update(
+            title: "Play lid event sounds",
+            isOn: preferences.playLidEventSounds,
+            isEnabled: preferences.preventLidCloseSleep
+        )
+        visibleRows[.launchAtLogin]?.update(
+            title: "Launch at login",
+            isOn: launchAtLoginController.isEnabled,
+            isEnabled: true
+        )
+    }
+
     private func togglePreventDisplaySleep() {
         let newValue = !preferences.preventDisplaySleep
         Task { @MainActor in
             await coordinator.setPreventDisplaySleep(newValue)
+            refreshVisibleRows()
         }
     }
 
-    @objc
     private func togglePreventLidCloseSleep() {
         let newValue = !preferences.preventLidCloseSleep
         if newValue && !preferences.lidClosePreventionConfirmed {
-            guard confirmLidClosePreventionEnable() else { return }
+            guard confirmLidClosePreventionEnable() else {
+                refreshVisibleRows()
+                return
+            }
             preferences.lidClosePreventionConfirmed = true
         }
         if !newValue {
@@ -247,6 +319,7 @@ final class MenuBarController: NSObject {
             if newValue && !preferences.preventLidCloseSleep {
                 preferences.lidClosePreventionConfirmed = false
             }
+            refreshVisibleRows()
         }
     }
 
@@ -262,14 +335,23 @@ final class MenuBarController: NSObject {
         return alert.runModal() == .alertFirstButtonReturn
     }
 
-    @objc
-    private func toggleLockScreenOnLidClose() {
-        preferences.lockScreenOnLidClose.toggle()
+    private func togglePlayLidEventSounds() {
+        guard preferences.preventLidCloseSleep else {
+            refreshVisibleRows()
+            return
+        }
+        preferences.playLidEventSounds.toggle()
+        refreshVisibleRows()
     }
 
-    @objc
-    private func togglePlayLidEventSounds() {
-        preferences.playLidEventSounds.toggle()
+    private func toggleLaunchAtLogin() {
+        do {
+            try launchAtLoginController.setEnabled(!launchAtLoginController.isEnabled)
+            launchAtLoginErrorMessage = nil
+        } catch {
+            launchAtLoginErrorMessage = error.localizedDescription
+        }
+        refreshVisibleRows()
     }
 
     @objc
@@ -278,13 +360,6 @@ final class MenuBarController: NSObject {
         NSApp.orderFrontStandardAboutPanel(options: [
             .credits: NSAttributedString(string: "Personal keep-awake utility inspired by Caffeine and Fermata."),
         ])
-    }
-
-    @objc
-    private func repairHelper() {
-        Task { @MainActor in
-            await coordinator.turnOn()
-        }
     }
 
     @objc
