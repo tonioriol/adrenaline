@@ -1,5 +1,5 @@
 ---
-status: brainstorming
+status: done
 spec: ./spec.md
 plan: ./plan.md
 ---
@@ -35,7 +35,7 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 
 [plan.md](./plan.md) — Six-task implementation plan covering forced lock removal, sound gating, Launch at Login, non-dismissing menu rows, README updates, and final verification.
 
-Cursor: Final whole-implementation review.
+Cursor: all tasks complete; manual GUI checks remain as follow-up.
 
 ## LOG
 
@@ -74,3 +74,7 @@ Updated `README.md` to describe current user-facing behavior: system sleep preve
 ### 2026-04-26 10:02 — Task 6 final verification recorded
 
 Verified the completed lid behavior refinements from HEAD `e018b41`. `make test` PASS: 79 XCTest tests executed with 0 failures, followed by Swift Testing reporting 0 tests in 0 suites passed. `make app` PASS: debug build completed, `build/Cocaine.app` was recreated, helper and app binaries were copied into the bundle, and codesigning completed. Scoped stale-reference check `rg -n "Lock screen when lid closes|Repair / Install Helper|LidCloseLockResponder|ScreenLocker|LoginFrameworkScreenLocker|toggleLockScreenOnLidClose|repairHelper" Sources Tests README.md docs/feat/20260426083000-lid-behavior-refinements` returned matches only in this task's spec/plan/context history and no matches in `Sources`, `Tests`, or `README.md`; no production, test, or user-facing stale references were found. Final pre-record git status contained only pre-existing untracked `.gitkeep`, `.vscode/`, and `docs/scratch.md`. Manual app checks were not performed in this headless verification pass and remain pending for a local GUI run. Verification record commit SHA: cb523f6.
+
+### 2026-04-26 10:11 — Local merge option completed
+
+User selected option 1, merge back to `main` locally. The repository was already on `main`, so there was no feature branch to merge and no branch cleanup to perform. Completion verification had already passed on `main`: `make test` executed 79 XCTest tests with 0 failures, and final review approved the implementation. Remaining untracked files are pre-existing `.gitkeep`, `.vscode/`, and `docs/scratch.md`. Manual GUI checks remain the only follow-up.
