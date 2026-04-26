@@ -71,3 +71,9 @@ created: 2026-04-26
 - Commands run: Python file update script; the required Markdown wording cleanup search first found additional out-of-scope historical matches, then passed with no matches after approved expanded cleanup.
 - Commit SHA: a3dd097.
 - Decision: Expanded cleanup beyond the original Task 1 file list after approval so the exact verification command returns no matches across all Markdown files.
+
+### 2026-04-26 17:12 — Task 1 wording follow-up
+
+- Why: Spec review found three archived plan snippets still used personal keep-awake wording after the initial Task 1 cleanup.
+- How: Updated the remaining `.credits` strings in the lid behavior refinement, merge, and lid behavior settings plans, then reran the required Markdown wording search with no matches.
+- Decision: Keep the attribution text intact while removing only the personal-use framing.
