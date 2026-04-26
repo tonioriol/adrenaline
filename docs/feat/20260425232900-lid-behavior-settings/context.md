@@ -1,6 +1,6 @@
 ---
 title: "Configurable lid-close behavior settings"
-status: active
+status: done
 repos: [cocaine]
 tags: [macos]
 created: 2026-04-25
@@ -29,9 +29,9 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - `docs/scratch.md` — original musing prompting the task
 - `docs/feat/20260424192541-merge-fermatta-caffeine/spec.md` — current one-toggle behavior reference
 - `docs/feat/20260425200131-lid-event-sounds/spec.md` — current lid-event sound behavior reference
-- `Sources/CocaineCore/PreferencesStore.swift` — planned settings store (UserDefaults-backed observable)
-- `Sources/CocaineCore/ScreenLocker.swift` — planned `ScreenLocking` protocol + concrete impl
-- `Sources/CocaineCore/LidCloseLockResponder.swift` — planned lid-close lock responder
+- `Sources/CocaineCore/PreferencesStore.swift` — persisted settings store (`UserDefaults`-backed observable)
+- `Sources/CocaineCore/ScreenLocker.swift` — `ScreenLocking` protocol + concrete lock implementation with private-symbol + fallback strategy
+- `Sources/CocaineCore/LidCloseLockResponder.swift` — lid-close lock responder chained onto lid-state events
 - `Sources/CocaineCore/AppState.swift` — adds `recordErrorWhileActive(_:)` for live-reconciliation failures
 - `Sources/CocaineCore/AwakeController.swift` — adds `enable(preventDisplaySleep:)` + `setPreventDisplaySleep(_:)`
 - `Sources/CocaineCore/AppCoordinator.swift` — accepts `PreferencesProviding`, conditional helper, live reconciliation
@@ -39,8 +39,8 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - `Sources/CocaineCore/LidCloseController.swift` — current lid-close prevention boundary (untouched)
 - `Sources/Cocaine/AppDelegate.swift` — wires prefs, screen locker, lock responder
 - `Sources/Cocaine/MenuBarController.swift` — extended menu with checkbox items + confirmation alert
-- `Tests/CocaineCoreTests/PreferencesStoreTests.swift` — planned defaults/round-trip/publishing tests
-- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — planned gating-matrix tests
+- `Tests/CocaineCoreTests/PreferencesStoreTests.swift` — defaults/round-trip/publishing tests
+- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — gating matrix + callback chaining tests
 - `Tests/CocaineCoreTests/AppStateTests.swift` — extended with `recordErrorWhileActive` test
 - `Tests/CocaineCoreTests/AwakeControllerTests.swift` — extended with display-flag tests
 - `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — extended with prefs-aware + reconciliation tests
@@ -53,7 +53,7 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 
 **Cursor:** all tasks complete
 
-**Status:** in_progress
+**Status:** complete_with_manual_followup
 
 ## LOG
 
@@ -138,3 +138,23 @@ The user's musing in [`docs/scratch.md`](../../scratch.md:1) raises three relate
 - Why: Confirm the completed lid-behavior settings work builds, tests, launches, and cleans up before leaving only hardware-dependent manual checks.
 - How: Ran `make clean && make test 2>&1 | tail -20` (73 XCTest tests, 0 failures), `make app 2>&1 | tail -10` (app bundle copied and signed), `open build/Cocaine.app && sleep 2 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine` (smoke launch printed PIDs including `build/Cocaine.app/Contents/MacOS/Cocaine`), `pkill -f 'Cocaine.app/Contents/MacOS/Cocaine' && sleep 1 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine ; echo "exit=$?"` (`exit=1`, no matching process), and `pmset -g assertions | grep -i cocaine ; echo "exit=$?"` (`exit=1`, no Cocaine-named assertion).
 - Decision: Automated verification is complete; manual physical-hardware validation remains pending for right-click menu defaults, confirmation-alert behavior, lid-close lock/unlock behavior, SleepDisabled transitions, relaunch semantics, and normal sleep when lid-close prevention is off.
+
+### 2026-04-26 02:09 — Final review fix: live lid-close disable stays active on failure
+
+- Accepted final review item: the live disable path for lid-close prevention must not mark the app inactive while ordinary awake assertions are still held.
+- How: Updated `Sources/CocaineCore/AppCoordinator.swift` so successful live disable verifies `lidCloseController.status() == false` before clearing session engagement. Disable throws or status-still-active failures now call `recordErrorWhileActive()` and preserve the active UI/error state instead of clearing active state.
+- Tests: Added two `Tests/CocaineCoreTests/AppCoordinatorTests.swift` cases covering disable failure and disable-success/status-still-active behavior, including preference remains false, ordinary awake remains enabled, and UI remains active-with-error.
+- Verification passed: `swift test --filter AppCoordinatorTests 2>&1 | tail -20` executed 20 tests with 0 failures; `swift test 2>&1 | tail -10` executed 75 tests with 0 failures.
+- Commit: `f2ee147` (`fix: keep live lid-close disable failures active`).
+
+### 2026-04-26 02:12 — Implementation session complete
+
+- Why: All planned feature tasks, review fixes, documentation work, and automated verification are complete for the configurable lid-behavior settings release.
+- How: Delivered Tasks 1–9 plus review follow-ups across commits `ff0fa8c`, `7690d06`, `bfecf32`, `93fcabe`, `858ef15`, `07327cd`, `b6511fd`, `38b5ac9`, `2f6441b`, `a100841`, `44a94e3`, and `f2ee147`; completed automated verification with `make clean && make test` (75 XCTest tests), `make app`, smoke-launch of [`build/Cocaine.app`](build/Cocaine.app), clean process shutdown, and no lingering Cocaine-named `pmset` assertions.
+- Decision: Treat the implementation as complete for code and automated verification; the remaining follow-up is physical-hardware/manual validation of actual lid-close behavior, confirmation alerts, and lock/unlock behavior on a MacBook.
+
+### 2026-04-26 02:14 — Local merge option completed
+
+- Why: The user selected the local-merge completion path after implementation and verification were finished.
+- How: Confirmed the completed work was already on [`main`](.git/HEAD) rather than a separate feature branch, with green tests from [`make test`](Makefile:1). Because the implementation commits were already on the target branch, no additional `git merge` step or branch deletion was needed. No separate worktree cleanup was required.
+- Decision: Treat the requested local merge as a no-op integration on the current branch; keep the remaining follow-up limited to manual MacBook lid-close validation outside this session.
