@@ -22,6 +22,7 @@ created: 2026-04-26
 
 - NOTICE.md
 - README.md
+- LICENSE
 - Makefile
 - Resources/Cocaine/Info.plist
 - Resources/CocaineHelper/Info.plist
@@ -46,3 +47,9 @@ Pending.
 - Why: The release path needs a precise but small design before changing signing-sensitive files.
 - How: Captured the approved tag-triggered GitHub Actions workflow, Developer ID signing requirements, documentation cleanup scope, and non-goals.
 - Decision: Use a zipped app artifact rather than adding DMG generation or a separate release script.
+
+### 2026-04-26 17:06 — License scope added
+
+- Why: The project should include an explicit open-source license before public release.
+- How: Added AGPL licensing to the approved release CI spec as a minimal repository-level `LICENSE` plus README reference.
+- Decision: Use AGPL-3.0 as requested, without adding extra licensing automation.

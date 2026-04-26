@@ -8,6 +8,7 @@ Prepare Cocaine for public GitHub release artifacts by removing personal-use wor
 
 - Remove wording that frames the app as personal-only from user-facing docs and existing project docs.
 - Add one tag-triggered GitHub Actions workflow for notarized macOS release artifacts.
+- Add an AGPL license file and reference it from the README.
 - Keep packaging as a zip of `Cocaine.app`; do not add DMG generation.
 - Keep the implementation small: no separate release script unless the workflow becomes unreadable.
 
@@ -38,6 +39,10 @@ The app and privileged helper already use explicit signing requirement strings f
 - `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`
 
 The expected requirement shape should use the bundle identifier plus Developer ID Application certificate constraints for the configured Team ID. Tests should assert the source constants and plist values stay aligned.
+
+## Licensing
+
+Add a repository-level `LICENSE` file using the GNU Affero General Public License v3.0 text. `README.md` should include a concise license note pointing to that file.
 
 ## Documentation
 
