@@ -1,7 +1,7 @@
 ---
 status: brainstorming
-spec: null
-plan: null
+spec: ./spec.md
+plan: ./plan.md
 ---
 
 ## TASK
@@ -16,7 +16,7 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 
 ## SPEC
 
-(pending)
+[spec.md](./spec.md) — Refine right-click menu behavior, remove forced lock-screen UI, couple lid sounds to lid-close prevention, remove helper repair menu item, skip disk sleep, and add Launch at Login.
 
 ## FILES
 
@@ -30,10 +30,18 @@ Refine Cocaine's right-click menu and behavior based on real-use feedback after 
 
 ## PLAN
 
-(pending)
+[plan.md](./plan.md) — Six-task implementation plan covering forced lock removal, sound gating, Launch at Login, non-dismissing menu rows, README updates, and final verification.
 
 ## LOG
 
 ### 2026-04-26 08:30 — Task memory created
 
 Captured user feedback bullets from `docs/scratch.md`. Beginning brainstorming pass to clarify ambiguous behavioral semantics (lock-screen independence, disk sleep, launch-at-login defaults) before writing spec.
+
+### 2026-04-26 09:18 — Spec approved and committed
+
+User approved the written refinement spec. Final design keeps Cocaine's core system-awake behavior intact, keeps `Prevent display sleep` as a flat global setting, removes the separate lock-screen feature, keeps the existing first-enable warning on `Prevent sleep with lid closed`, gates lid sounds on lid-close prevention, removes `Repair / Install Helper`, skips disk-sleep controls, and adds `Launch at login` backed by actual macOS login-item state. Spec committed in `1e4db18`.
+
+### 2026-04-26 09:23 — Implementation plan generated
+
+Generated `plan.md` with six implementation tasks: remove forced lock-screen feature wiring and tests, gate lid sounds on lid-close prevention, add a testable Launch at Login controller, refactor menu preference rows to custom non-dismissing checkbox views, update README behavior docs, and run final verification plus task record update. Plan is ready for subagent-driven execution; user preference is to delegate implementer subtasks to GPT-5.5 Low for speed.
