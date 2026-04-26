@@ -6,12 +6,13 @@ APP_DIR := $(BUILD_DIR)/Cocaine.app
 CONTENTS_DIR := $(APP_DIR)/Contents
 MACOS_DIR := $(CONTENTS_DIR)/MacOS
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
+RESOURCES_DIR := $(CONTENTS_DIR)/Resources
 SWIFT_BIN_DIR := .build/$(CONFIGURATION)
 TEAM_ID ?= A79T83GM42
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/A79T83GM42/ {print $$2; exit}')
 INSTALL_APP_DIR ?= /Applications/Cocaine.app
 
-.PHONY: test build app sign reinstall run clean verify-helper-sections
+.PHONY: test build generate-app-icon app sign reinstall run clean verify-helper-sections
 
 test:
 	swift test
@@ -19,10 +20,14 @@ test:
 build:
 	swift build $(SWIFT_BUILD_FLAGS)
 
+generate-app-icon:
+	swift Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
+
 app: build
 	rm -rf $(APP_DIR)
-	mkdir -p $(MACOS_DIR) $(LAUNCH_SERVICES_DIR)
+	mkdir -p $(MACOS_DIR) $(LAUNCH_SERVICES_DIR) $(RESOURCES_DIR)
 	cp Resources/Cocaine/Info.plist $(CONTENTS_DIR)/Info.plist
+	cp Resources/Cocaine/Cocaine.icns $(RESOURCES_DIR)/Cocaine.icns
 	cp $(SWIFT_BIN_DIR)/Cocaine $(MACOS_DIR)/Cocaine
 	cp $(SWIFT_BIN_DIR)/CocaineHelper $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
 	$(MAKE) sign
