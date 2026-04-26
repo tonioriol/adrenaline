@@ -84,3 +84,10 @@ created: 2026-04-26
 - Files changed: `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Resources/Cocaine/Info.plist`, `Resources/CocaineHelper/Info.plist`, `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
 - Commands run: `swift test --filter CocaineHelperConstantsTests` passed with 4 tests and 0 failures.
 - Commit SHA: 0e2c7b0.
+
+### 2026-04-26 17:23 — Task 3 release workflow
+
+- Summary: Added the tag-triggered GitHub Actions release workflow and a Makefile `release-zip` target for signed app zip packaging.
+- Files changed: `Makefile`, `.github/workflows/release.yml`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Commands run: Task 3 content validation script passed for Makefile and workflow requirements.
+- Commit SHA: c2f584a.

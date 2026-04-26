@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-sign-notarize:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Import Developer ID certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ runner.temp }}/keychain-password
+        run: |
+          set -euo pipefail
+          echo "$(uuidgen)" > "$KEYCHAIN_PASSWORD"
+          security create-keychain -p "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$(cat "$KEYCHAIN_PASSWORD")" build.keychain
+          security find-identity -v -p codesigning build.keychain
+
+      - name: Configure notarytool profile
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_NOTARYTOOL_PROFILE: ${{ secrets.APPLE_NOTARYTOOL_PROFILE }}
+        run: |
+          set -euo pipefail
+          xcrun notarytool store-credentials "$APPLE_NOTARYTOOL_PROFILE" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD"
+
+      - name: Build signed app
+        env:
+          CODE_SIGN_IDENTITY: Developer ID Application
+        run: |
+          set -euo pipefail
+          make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
+          codesign --verify --deep --strict --verbose=2 build/Cocaine.app
+          spctl --assess --type execute --verbose=4 build/Cocaine.app
+
+      - name: Notarize app zip
+        env:
+          APPLE_NOTARYTOOL_PROFILE: ${{ secrets.APPLE_NOTARYTOOL_PROFILE }}
+        run: |
+          set -euo pipefail
+          xcrun notarytool submit build/Cocaine.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
+          xcrun stapler staple build/Cocaine.app
+          xcrun stapler validate build/Cocaine.app
+          rm -f build/Cocaine.zip
+          ditto -c -k --keepParent build/Cocaine.app build/Cocaine-${GITHUB_REF_NAME}.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Cocaine-${{ github.ref_name }}.zip

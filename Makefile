@@ -11,8 +11,9 @@ SWIFT_BIN_DIR := .build/$(CONFIGURATION)
 TEAM_ID ?= A79T83GM42
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/A79T83GM42/ {print $$2; exit}')
 INSTALL_APP_DIR ?= /Applications/Cocaine.app
+RELEASE_ZIP ?= $(BUILD_DIR)/Cocaine.zip
 
-.PHONY: test build generate-app-icon app sign reinstall run clean verify-helper-sections
+.PHONY: test build generate-app-icon app sign release-zip reinstall run clean verify-helper-sections
 
 test:
 	swift test
@@ -39,6 +40,10 @@ sign:
 	fi
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
+
+release-zip: app
+	rm -f $(RELEASE_ZIP)
+	ditto -c -k --keepParent $(APP_DIR) $(RELEASE_ZIP)
 
 reinstall: app
 	@if pgrep -f "$(INSTALL_APP_DIR)/Contents/MacOS/Cocaine" >/dev/null; then \
