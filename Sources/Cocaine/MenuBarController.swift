@@ -252,8 +252,8 @@ final class MenuBarController: NSObject {
 
     private var lidCloseTitle: String {
         preferences.preventLidCloseSleep
-            ? "⚠ Prevent sleep with lid closed"
-            : "Prevent sleep with lid closed"
+            ? "⚠ Prevent system sleep with lid closed"
+            : "Prevent system sleep with lid closed"
     }
 
     private func addCheckboxRow(
