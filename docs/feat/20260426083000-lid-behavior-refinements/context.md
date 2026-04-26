@@ -45,3 +45,7 @@ User approved the written refinement spec. Final design keeps Cocaine's core sys
 ### 2026-04-26 09:23 — Implementation plan generated
 
 Generated `plan.md` with six implementation tasks: remove forced lock-screen feature wiring and tests, gate lid sounds on lid-close prevention, add a testable Launch at Login controller, refactor menu preference rows to custom non-dismissing checkbox views, update README behavior docs, and run final verification plus task record update. Plan is ready for subagent-driven execution; user preference is to delegate implementer subtasks to GPT-5.5 Low for speed.
+
+### 2026-04-26 09:26 — Task 1 removed forced lid-close locking
+
+Removed forced lock-screen wiring from `Sources/Cocaine/AppDelegate.swift` and deleted `Sources/CocaineCore/ScreenLocker.swift`, `Sources/CocaineCore/LidCloseLockResponder.swift`, and `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`. Verification: `swift test --filter LidCloseLockResponderTests` PASS before deletion (7 tests); `rg -n "LidCloseLockResponder|ScreenLocker|ScreenLocking|LoginFrameworkScreenLocker" Sources Tests` PASS with no matches after deletion; `swift build` PASS. Commit SHA: assigned by Task 1 commit.
