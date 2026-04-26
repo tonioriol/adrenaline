@@ -201,6 +201,16 @@ final class LidCloseLockResponderTests: XCTestCase {
         _ = setup.responder
     }
 
+    func testOpenCurrentLidStateBeforeDelayPreventsLockEvenWithoutCancelCallback() {
+        let setup = makeResponder(isActive: true, preventDisplaySleep: false, preventLid: true)
+        setup.monitor.emit(.closed)
+        setup.monitor.currentLidState = .open
+        setup.scheduler.fire()
+
+        XCTAssertEqual(setup.locker.lockCallCount, 0)
+        _ = setup.responder
+    }
+
     func testInactiveBeforeDelayPreventsLock() {
         let state = AppState(isActive: true)
         let monitor = FakeLidStateMonitor()

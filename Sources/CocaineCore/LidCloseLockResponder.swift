@@ -36,8 +36,7 @@ public final class LidCloseLockResponder {
     }
 
     deinit {
-        let pendingLock = pendingLock
-        Task { @MainActor in
+        MainActor.assumeIsolated {
             pendingLock?.cancel()
         }
     }
