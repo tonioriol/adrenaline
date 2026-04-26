@@ -34,7 +34,7 @@
 - Create: `Sources/CocaineCore/MacOSLockPolicyReader.swift`
 - Create: `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift`
 
-- [ ] **Step 1: Write failing policy reader tests**
+- [x] **Step 1: Write failing policy reader tests**
 
 Create `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift` with this content:
 
@@ -246,7 +246,7 @@ final class MacOSLockPolicyReaderTests: XCTestCase {
 }
 ```
 
-- [ ] **Step 2: Run the policy reader tests to verify they fail**
+- [x] **Step 2: Run the policy reader tests to verify they fail**
 
 Run:
 
@@ -256,7 +256,7 @@ swift test --filter MacOSLockPolicyReaderTests 2>&1 | tail -40
 
 Expected: FAIL with compiler errors like `cannot find type 'MacOSPowerSource' in scope` and `cannot find 'MacOSLockPolicyReader' in scope`.
 
-- [ ] **Step 3: Add the policy reader implementation**
+- [x] **Step 3: Add the policy reader implementation**
 
 Create `Sources/CocaineCore/MacOSLockPolicyReader.swift` with this content:
 
@@ -433,7 +433,7 @@ public final class MacOSLockPolicyReader: MacOSLockPolicyReading {
 }
 ```
 
-- [ ] **Step 4: Run the policy reader tests to verify they pass**
+- [x] **Step 4: Run the policy reader tests to verify they pass**
 
 Run:
 
@@ -443,7 +443,7 @@ swift test --filter MacOSLockPolicyReaderTests 2>&1 | tail -40
 
 Expected: PASS with all `MacOSLockPolicyReaderTests` tests passing.
 
-- [ ] **Step 5: Commit the policy reader**
+- [x] **Step 5: Commit the policy reader**
 
 Run:
 

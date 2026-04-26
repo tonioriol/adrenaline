@@ -25,7 +25,7 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 
 - Sources/CocaineCore/LidCloseLockResponder.swift — existing computed lid-close lock behavior
 - Sources/CocaineCore/LidCloseLockScheduler.swift — planned cancellable delayed lock scheduler abstraction
-- Sources/CocaineCore/MacOSLockPolicyReader.swift — planned macOS Require Password/display timer policy reader
+- Sources/CocaineCore/MacOSLockPolicyReader.swift — macOS Require Password/display timer policy reader
 - Sources/CocaineCore/ScreenLocker.swift — lock implementation used by lid-close responder
 - Sources/CocaineCore/PreferencesStore.swift — app preference state that currently controls display and lid behavior
 - Sources/CocaineHelper/ApplePowerSettings.swift — existing helper-side macOS power settings access
@@ -33,14 +33,14 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Sources/Cocaine/MenuBarController.swift — current menu exposes display/lid/sound/login controls but no lock row
 - Sources/CocaineCore/PreferenceMenuRows.swift — current preference row model with no standalone lock row
 - Tests/CocaineCoreTests/LidCloseLockResponderTests.swift — lock behavior regression tests
-- Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift — planned policy reader regression tests
+- Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift — policy reader regression tests
 - README.md — user-facing behavior table to update after design approval
 
 ## PLAN
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — add macOS lock policy reader
+**Cursor:** Task 2 — add cancellable delayed lock scheduling to the responder
 
 **Status:** in_progress
 
@@ -81,3 +81,9 @@ The current computed lock path fills the gap where `SleepDisabled = true` preven
 - Why: The approved behavior touches settings reads, asynchronous scheduling, app wiring, docs, and verification, so execution needs a stepwise TDD plan.
 - How: Wrote `plan.md` with five tasks: policy reader, delayed responder scheduling, app wiring, README update, and final verification/task memory update.
 - Decision: Use a focused `MacOSLockPolicyReader` plus `LidCloseLockScheduling` abstraction so policy reads and delayed lock timing can be tested without waiting real macOS timers.
+
+### 2026-04-26 14:22 — Task 1 macOS lock policy reader
+
+- Why: Later lid-close scheduling needs a testable snapshot of whether macOS requires a password and when macOS would lock for the active power source.
+- How: Added `Sources/CocaineCore/MacOSLockPolicyReader.swift` and `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift`; confirmed RED with `swift test --filter MacOSLockPolicyReaderTests 2>&1 | tail -40` failing because `MacOSLockPolicyReader`, `MacOSPowerSource`, and `MacOSLockPolicyReaderError` were missing; confirmed GREEN with the same command passing 10 tests, 0 failures; committed `26bb89d`.
+- Decision: Treat unknown power source as battery-first fallback to match the approved conservative behavior and clamp negative display/password delays to zero at the policy boundary.
