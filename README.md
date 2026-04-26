@@ -4,7 +4,7 @@ Personal macOS menu bar app with one on/off icon. When on, it prevents system sl
 
 ## Safety
 
-Do not put a closed MacBook into a bag with **Prevent sleep with lid closed** enabled. Lid-close sleep prevention can leave the machine running and may cause overheating.
+Do not put a closed MacBook into a bag with **Prevent system sleep with lid closed** enabled. Lid-close sleep prevention can leave the machine running and may cause overheating.
 
 ## Build
 
@@ -21,7 +21,7 @@ The app bundle is created at `build/Cocaine.app`.
 make run
 ```
 
-The first time you enable **Prevent sleep with lid closed**, macOS asks for admin authorization to install the privileged helper that controls lid-close behavior.
+The first time you enable **Prevent system sleep with lid closed**, macOS asks for admin authorization to install the privileged helper that controls lid-close behavior.
 
 ## Behavior
 
@@ -31,7 +31,7 @@ The first time you enable **Prevent sleep with lid closed**, macOS asks for admi
   | Preference | Default | What it does |
   |---|---|---|
   | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. Mostly meaningful for external displays while the lid is open. |
-  | Prevent sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
+  | Prevent system sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
   | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Cocaine is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
   | Launch at login | OFF | Registers Cocaine as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
 
@@ -41,4 +41,4 @@ The first time you enable **Prevent sleep with lid closed**, macOS asks for admi
 
 ## Upgrading from earlier versions
 
-Earlier versions enabled lid-close sleep prevention as part of the single on/off toggle. This version makes lid-close prevention an explicit opt-in — its default after upgrade is **off**. To restore the old behavior, right-click the menu bar icon and check **Prevent sleep with lid closed** once.
+Earlier versions enabled lid-close sleep prevention as part of the single on/off toggle. This version makes lid-close prevention an explicit opt-in — its default after upgrade is **off**. To restore the old behavior, right-click the menu bar icon and check **Prevent system sleep with lid closed** once.
