@@ -98,3 +98,10 @@ created: 2026-04-26
 - Files changed: `Makefile`, `.github/workflows/release.yml`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
 - Commands run: Task 3 quality validation script passed for temporary signing material paths, derived signing identity, cleanup step, quoted release zip paths, corrected Task 3 SHA, and a single follow-up LOG entry.
 - New commit: `ci: harden release signing workflow`.
+
+### 2026-04-26 17:33 — Task 4 final verification
+
+- Summary: Completed final release signing CI verification without implementation changes.
+- Commands run: `swift test` passed with 106 tests and 0 failures; `make app CONFIGURATION=release` passed locally using the installed Apple Development signing identity; the Markdown personal-use wording search returned no matches; the release workflow secret reference search found all six required secret names in `.github/workflows/release.yml` and `README.md`.
+- Files changed: `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Unresolved follow-up: Full Developer ID notarization remains dependent on configured repository secrets and GitHub Actions execution on a `v*` tag.
