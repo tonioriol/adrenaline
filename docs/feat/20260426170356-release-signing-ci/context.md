@@ -34,9 +34,9 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 4 — final verification
+**Cursor:** all tasks complete
 
-**Status:** ready
+**Status:** complete
 
 ## LOG
 
@@ -105,3 +105,9 @@ created: 2026-04-26
 - Commands run: `swift test` passed with 106 tests and 0 failures; `make app CONFIGURATION=release` passed locally using the installed Apple Development signing identity; the Markdown personal-use wording search returned no matches; the release workflow secret reference search found all six required secret names in `.github/workflows/release.yml` and `README.md`.
 - Files changed: `docs/feat/20260426170356-release-signing-ci/context.md`.
 - Unresolved follow-up: Full Developer ID notarization remains dependent on configured repository secrets and GitHub Actions execution on a `v*` tag.
+
+### 2026-04-26 17:35 — Release CI implementation complete
+
+- Why: All planned release-signing tasks passed implementation, spec review, quality review, and final verification.
+- How: Completed license and wording cleanup, Developer ID requirement updates, tag-triggered GitHub Actions release workflow, and verification. Key commits include `2e26986`, `949474a`, `b25f02c`, `d4ad6ba`, `7851f7a`, and `fd4b6e8`.
+- Decision: Leave full notarization validation as a repository-secrets/tag-run follow-up because local verification cannot exercise GitHub-hosted Apple credentials.

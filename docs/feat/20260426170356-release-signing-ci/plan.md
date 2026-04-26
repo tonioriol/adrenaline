@@ -336,7 +336,7 @@ Expected: commit succeeds.
 - Verify: `.github/workflows/release.yml`
 - Verify: signing sources and plists
 
-- [ ] **Step 1: Run full tests**
+- [x] **Step 1: Run full tests**
 
 Run:
 
@@ -346,7 +346,7 @@ swift test
 
 Expected: PASS.
 
-- [ ] **Step 2: Build release app locally**
+- [x] **Step 2: Build release app locally**
 
 Run:
 
@@ -356,7 +356,7 @@ make app CONFIGURATION=release
 
 Expected: PASS if a matching local Developer ID identity is installed; otherwise fail only because the identity is unavailable.
 
-- [ ] **Step 3: Verify no personal-use wording remains**
+- [x] **Step 3: Verify no personal-use wording remains**
 
 Run:
 
@@ -366,7 +366,7 @@ rg -n '<personal-only wording pattern>' . --glob '*.md'
 
 Expected: no matches.
 
-- [ ] **Step 4: Verify workflow references all required secrets**
+- [x] **Step 4: Verify workflow references all required secrets**
 
 Run:
 
@@ -376,7 +376,7 @@ rg -n 'APPLE_DEVELOPER_ID_CERTIFICATE_BASE64|APPLE_DEVELOPER_ID_CERTIFICATE_PASS
 
 Expected: all six secret names appear in both workflow or README documentation as appropriate.
 
-- [ ] **Step 5: Update task memory and commit if needed**
+- [x] **Step 5: Update task memory and commit if needed**
 
 Append a final LOG entry to `docs/feat/20260426170356-release-signing-ci/context.md`, then run:
 
