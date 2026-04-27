@@ -8,3 +8,4 @@ build/
 *.p12
 *.cer
 *.certSigningRequest
+.env
