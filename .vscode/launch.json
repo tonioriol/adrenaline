@@ -1,0 +1,84 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Debug Insomnia",
+            "target": "Insomnia",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug Insomnia"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Release Insomnia",
+            "target": "Insomnia",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release Insomnia"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Debug InsomniaHelper",
+            "target": "InsomniaHelper",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug InsomniaHelper"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Release InsomniaHelper",
+            "target": "InsomniaHelper",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release InsomniaHelper"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Debug Insomnia",
+            "target": "Insomnia",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug Insomnia"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Release Insomnia",
+            "target": "Insomnia",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release Insomnia"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Debug InsomniaHelper",
+            "target": "InsomniaHelper",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug InsomniaHelper"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:insomnia}",
+            "name": "Release InsomniaHelper",
+            "target": "InsomniaHelper",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release InsomniaHelper"
+        }
+    ]
+}
