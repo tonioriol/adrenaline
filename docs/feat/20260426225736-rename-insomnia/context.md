@@ -84,3 +84,9 @@ created: 2026-04-26
 - Commands run: `make clean` (PASS: removed generated `.build` and `build` artifacts); `swift test` (PASS: 106 tests, 0 failures); `make app CONFIGURATION=release` (PASS: built and signed `build/Insomnia.app` with local Apple Development identity); `make release-zip CONFIGURATION=release` (PASS: created `build/Insomnia.zip`); PlistBuddy bundle identifier checks (PASS: `com.tonioriol.insomnia`, `com.tonioriol.insomnia.helper`, `com.tonioriol.insomnia.helper`); constructed-token content verification with `rg` (PASS: no matches, exit 1); constructed-token filename verification with `fd` and `rg` (PASS: no matches, exit 1); Insomnia reference sample with `rg` (PASS: renamed package, build, docs, bundle ID, helper ID, and test references present).
 - Local-only leftovers: generated `.build/`, `build/Insomnia.app`, and `build/Insomnia.zip` exist after the release verification by design and remain ignored build artifacts; no remote state was mutated.
 - Decision: Marked Task 2 and Task 3 complete and set the plan cursor/status to terminal because all required verification commands passed.
+
+### 2026-04-27 07:10 — Progress flushed before release setup
+
+- Why: The rename is complete and release setup can resume from the Insomnia identity instead of the previous app identity.
+- How: Confirmed the current working tree has no tracked changes, only local untracked `.gitkeep`; latest verification artifacts are `build/Insomnia.app` and `build/Insomnia.zip`; final checks showed no legacy content/path token matches and expected bundle identifiers `com.tonioriol.insomnia` and `com.tonioriol.insomnia.helper`.
+- Decision: Continue release setup only after using the Insomnia repository/artifact names and GitHub secrets for the renamed bundle identifiers.
