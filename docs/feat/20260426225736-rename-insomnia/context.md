@@ -57,3 +57,11 @@ created: 2026-04-26
 - Why: The approved rename spec needs executable steps that preserve behavior while changing every public identity surface.
 - How: Added `plan.md` with three tasks covering implementation identity, documentation/workspace text, and final verification/cleanup.
 - Decision: Use deterministic rename scripts and verification searches with constructed legacy tokens so the final workspace can contain no literal legacy-name traces.
+
+
+### 2026-04-27 06:10 — Task 1 implementation identity rename
+
+- Files changed: `Package.swift`, `Makefile`, `.github/workflows/release.yml`, `Scripts/generate-app-icon.swift`, `Sources/Insomnia/`, `Sources/InsomniaCore/`, `Sources/InsomniaHelper/`, `Tests/InsomniaCoreTests/`, `Resources/Insomnia/`, `Resources/InsomniaHelper/`.
+- Commands run: `git status --short --branch`; Task 1 `git mv` rename command block; Task 1 Python implementation rename mapping; Task 1 Python key identifier verification (`renamed identifiers verified`); `swift test --filter InsomniaHelperConstantsTests` (PASS: 4 tests, 0 failures); `git status --short`; pending commit command `git -c commit.gpgsign=false commit -m "refactor: rename app identity to insomnia"`.
+- Commit SHA: pending at log write time; final commit SHA recorded in task response after commit creation.
+- Decisions: Limited this pass to implementation identity surfaces only, leaving broader documentation/workspace text rename for Task 2 as requested; kept behavior unchanged while renaming visible name, Swift targets/modules, helper constants/protocol, bundle identifiers, helper label/Mach service, preference/log namespaces, app icon filename, and release artifact paths to Insomnia.

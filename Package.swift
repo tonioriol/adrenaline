@@ -2,16 +2,16 @@
 import PackageDescription
 
 let package = Package(
-    name: "Cocaine",
+    name: "Insomnia",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "Cocaine", targets: ["Cocaine"]),
-        .executable(name: "CocaineHelper", targets: ["CocaineHelper"]),
-        .library(name: "CocaineCore", targets: ["CocaineCore"]),
+        .executable(name: "Insomnia", targets: ["Insomnia"]),
+        .executable(name: "InsomniaHelper", targets: ["InsomniaHelper"]),
+        .library(name: "InsomniaCore", targets: ["InsomniaCore"]),
     ],
     targets: [
         .target(
-            name: "CocaineCore",
+            name: "InsomniaCore",
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -19,16 +19,16 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "Cocaine",
-            dependencies: ["CocaineCore"],
+            name: "Insomnia",
+            dependencies: ["InsomniaCore"],
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("Foundation"),
             ]
         ),
         .executableTarget(
-            name: "CocaineHelper",
-            dependencies: ["CocaineCore"],
+            name: "InsomniaHelper",
+            dependencies: ["InsomniaCore"],
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -36,17 +36,17 @@ let package = Package(
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Resources/CocaineHelper/Info.plist",
+                    "-Xlinker", "Resources/InsomniaHelper/Info.plist",
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__launchd_plist",
-                    "-Xlinker", "Resources/CocaineHelper/launchd.plist",
+                    "-Xlinker", "Resources/InsomniaHelper/launchd.plist",
                 ]),
             ]
         ),
         .testTarget(
-            name: "CocaineCoreTests",
-            dependencies: ["CocaineCore"]
+            name: "InsomniaCoreTests",
+            dependencies: ["InsomniaCore"]
         ),
     ]
 )
