@@ -56,24 +56,24 @@ jobs:
         run: |
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
-          codesign --verify --deep --strict --verbose=2 build/Cocaine.app
-          spctl --assess --type execute --verbose=4 build/Cocaine.app
+          codesign --verify --deep --strict --verbose=2 build/Insomnia.app
+          spctl --assess --type execute --verbose=4 build/Insomnia.app
 
       - name: Notarize app zip
         env:
           APPLE_NOTARYTOOL_PROFILE: ${{ secrets.APPLE_NOTARYTOOL_PROFILE }}
         run: |
           set -euo pipefail
-          xcrun notarytool submit build/Cocaine.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
-          xcrun stapler staple build/Cocaine.app
-          xcrun stapler validate build/Cocaine.app
-          rm -f build/Cocaine.zip
-          ditto -c -k --keepParent build/Cocaine.app build/Cocaine-${GITHUB_REF_NAME}.zip
+          xcrun notarytool submit build/Insomnia.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
+          xcrun stapler staple build/Insomnia.app
+          xcrun stapler validate build/Insomnia.app
+          rm -f build/Insomnia.zip
+          ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/Cocaine-${{ github.ref_name }}.zip
+          files: build/Insomnia-${{ github.ref_name }}.zip
 
       - name: Cleanup signing materials
         if: always()

@@ -1,0 +1,108 @@
+import Combine
+import Foundation
+
+public struct PreferencesSnapshot: Equatable, Sendable {
+    public var preventDisplaySleep: Bool
+    public var preventLidCloseSleep: Bool
+    public var lockScreenOnLidClose: Bool
+    public var playLidEventSounds: Bool
+
+    public init(
+        preventDisplaySleep: Bool,
+        preventLidCloseSleep: Bool,
+        lockScreenOnLidClose: Bool,
+        playLidEventSounds: Bool
+    ) {
+        self.preventDisplaySleep = preventDisplaySleep
+        self.preventLidCloseSleep = preventLidCloseSleep
+        self.lockScreenOnLidClose = lockScreenOnLidClose
+        self.playLidEventSounds = playLidEventSounds
+    }
+}
+
+@MainActor
+public protocol PreferencesProviding: AnyObject {
+    var preventDisplaySleep: Bool { get set }
+    var preventLidCloseSleep: Bool { get set }
+    var lockScreenOnLidClose: Bool { get set }
+    var playLidEventSounds: Bool { get set }
+    var lidClosePreventionConfirmed: Bool { get set }
+
+    var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { get }
+    var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { get }
+    var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> { get }
+    var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { get }
+
+    func snapshot() -> PreferencesSnapshot
+}
+
+@MainActor
+public final class PreferencesStore: ObservableObject, PreferencesProviding {
+    public enum Key {
+        public static let preventDisplaySleep = "Insomnia.preventDisplaySleep"
+        public static let preventLidCloseSleep = "Insomnia.preventLidCloseSleep"
+        public static let lockScreenOnLidClose = "Insomnia.lockScreenOnLidClose"
+        public static let playLidEventSounds = "Insomnia.playLidEventSounds"
+        public static let lidClosePreventionConfirmed = "Insomnia.lidClosePreventionConfirmed"
+    }
+
+    private let defaults: UserDefaults
+
+    @Published public var preventDisplaySleep: Bool {
+        didSet { defaults.set(preventDisplaySleep, forKey: Key.preventDisplaySleep) }
+    }
+
+    @Published public var preventLidCloseSleep: Bool {
+        didSet { defaults.set(preventLidCloseSleep, forKey: Key.preventLidCloseSleep) }
+    }
+
+    @Published public var lockScreenOnLidClose: Bool {
+        didSet { defaults.set(lockScreenOnLidClose, forKey: Key.lockScreenOnLidClose) }
+    }
+
+    @Published public var playLidEventSounds: Bool {
+        didSet { defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds) }
+    }
+
+    @Published public var lidClosePreventionConfirmed: Bool {
+        didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
+    }
+
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        self.preventDisplaySleep = Self.readBool(from: defaults, key: Key.preventDisplaySleep, default: true)
+        self.preventLidCloseSleep = Self.readBool(from: defaults, key: Key.preventLidCloseSleep, default: false)
+        self.lockScreenOnLidClose = Self.readBool(from: defaults, key: Key.lockScreenOnLidClose, default: true)
+        self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
+        self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
+    }
+
+    public var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> {
+        $preventDisplaySleep.eraseToAnyPublisher()
+    }
+
+    public var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> {
+        $preventLidCloseSleep.eraseToAnyPublisher()
+    }
+
+    public var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> {
+        $lockScreenOnLidClose.eraseToAnyPublisher()
+    }
+
+    public var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> {
+        $playLidEventSounds.eraseToAnyPublisher()
+    }
+
+    public func snapshot() -> PreferencesSnapshot {
+        PreferencesSnapshot(
+            preventDisplaySleep: preventDisplaySleep,
+            preventLidCloseSleep: preventLidCloseSleep,
+            lockScreenOnLidClose: lockScreenOnLidClose,
+            playLidEventSounds: playLidEventSounds
+        )
+    }
+
+    private static func readBool(from defaults: UserDefaults, key: String, default defaultValue: Bool) -> Bool {
+        defaults.object(forKey: key) as? Bool ?? defaultValue
+    }
+}
