@@ -70,10 +70,74 @@ jobs:
           rm -f build/Insomnia.zip
           ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
 
+      - name: Sign update with EdDSA
+        shell: bash
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          SPARKLE_VERSION=$(python3 - <<'PY'
+          import json
+          with open('Package.resolved') as f:
+              data = json.load(f)
+          for pin in data['pins']:
+              if pin['identity'] == 'sparkle':
+                  print(pin['state']['version'])
+                  break
+          else:
+              raise SystemExit('Sparkle pin not found in Package.resolved')
+          PY
+          )
+          curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
+            | tar -xJf - -C "$RUNNER_TEMP" "./bin/sign_update"
+          SIGN_UPDATE="$RUNNER_TEMP/bin/sign_update"
+          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-${GITHUB_REF_NAME}.zip")
+          echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: build/Insomnia-${{ github.ref_name }}.zip
+
+      - name: Publish appcast entry
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/Insomnia/Info.plist)
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Insomnia-${GITHUB_REF_NAME}.zip"
+          PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
+          RELEASE_NOTES=$(gh release view "$GITHUB_REF_NAME" --json body -q .body | head -c 8000)
+
+          git clone --depth 1 --branch gh-pages \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+          cd gh-pages
+
+          NEW_ITEM=$(cat <<EOF
+                  <item>
+                      <title>Insomnia ${VERSION}</title>
+                      <pubDate>${PUB_DATE}</pubDate>
+                      <sparkle:version>${BUILD_NUMBER}</sparkle:version>
+                      <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+                      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+                      <description><![CDATA[${RELEASE_NOTES}]]></description>
+                      <enclosure url="${DOWNLOAD_URL}"
+                                 type="application/octet-stream"
+                                 ${SPARKLE_SIG_AND_LEN} />
+                  </item>
+          EOF
+          )
+
+          awk -v item="$NEW_ITEM" '/<\/channel>/ { print item } { print }' appcast.xml > appcast.xml.new
+          mv appcast.xml.new appcast.xml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          git commit -m "appcast: ${GITHUB_REF_NAME}"
+          git push origin gh-pages
 
       - name: Cleanup signing materials
         if: always()

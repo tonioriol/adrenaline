@@ -17,9 +17,9 @@
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.1.0</string>
+  <string>0.2.0</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>2</string>
   <key>LSApplicationCategoryType</key>
   <string>public.app-category.utilities</string>
   <key>LSMinimumSystemVersion</key>
@@ -28,6 +28,14 @@
   <true/>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
+  <key>SUFeedURL</key>
+  <string>https://tonioriol.github.io/insomnia/appcast.xml</string>
+  <key>SUPublicEDKey</key>
+  <string>LqUZF4dqbYxjqC25RGacWalEo+7/cBs9+T+J+wmOMQ4=</string>
+  <key>SUEnableAutomaticChecks</key>
+  <true/>
+  <key>SUScheduledCheckInterval</key>
+  <integer>86400</integer>
   <key>SMPrivilegedExecutables</key>
   <dict>
     <key>com.tonioriol.insomnia.helper</key>
