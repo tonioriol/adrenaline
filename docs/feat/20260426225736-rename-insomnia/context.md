@@ -32,7 +32,11 @@ created: 2026-04-26
 
 ## PLAN
 
-Pending.
+**Plan:** [plan.md](./plan.md)
+
+**Cursor:** Task 1 — rename implementation identity
+
+**Status:** ready
 
 ## LOG
 
@@ -47,3 +51,9 @@ Pending.
 - Why: The rename affects bundle IDs, helper trust, target names, resources, CI, and docs, so it needs a complete design before edits.
 - How: Captured visible name, Swift target names, lowercase public bundle identifiers under `com.tonioriol.insomnia`, no-migration stance, CI artifact names, and verification searches.
 - Decision: Treat all tracked text as in scope for the no-traces rename; ignored build outputs and git internals are out of scope.
+
+### 2026-04-27 06:05 — Implementation plan generated
+
+- Why: The approved rename spec needs executable steps that preserve behavior while changing every public identity surface.
+- How: Added `plan.md` with three tasks covering implementation identity, documentation/workspace text, and final verification/cleanup.
+- Decision: Use deterministic rename scripts and verification searches with constructed legacy tokens so the final workspace can contain no literal legacy-name traces.
