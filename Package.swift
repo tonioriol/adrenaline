@@ -9,6 +9,9 @@ let package = Package(
         .executable(name: "InsomniaHelper", targets: ["InsomniaHelper"]),
         .library(name: "InsomniaCore", targets: ["InsomniaCore"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.7.0"),
+    ],
     targets: [
         .target(
             name: "InsomniaCore",
@@ -20,7 +23,10 @@ let package = Package(
         ),
         .executableTarget(
             name: "Insomnia",
-            dependencies: ["InsomniaCore"],
+            dependencies: [
+                "InsomniaCore",
+                .product(name: "Sparkle", package: "Sparkle"),
+            ],
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("Foundation"),

@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var coordinator: AppCoordinator?
     private var lidEventSoundController: LidEventSoundController?
     private var lidCloseLockResponder: LidCloseLockResponder?
+    private var updater: SparkleUpdaterController?
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -39,15 +40,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             policyReader: lockPolicyReader
         )
 
+        let updater = SparkleUpdaterController()
+
         self.preferences = preferences
         self.coordinator = coordinator
         self.lidEventSoundController = lidEventSoundController
         self.lidCloseLockResponder = lidCloseLockResponder
+        self.updater = updater
         self.menuBarController = MenuBarController(
             state: state,
             coordinator: coordinator,
             preferences: preferences,
-            launchAtLoginController: LaunchAtLoginController()
+            launchAtLoginController: LaunchAtLoginController(),
+            updater: updater
         )
     }
 

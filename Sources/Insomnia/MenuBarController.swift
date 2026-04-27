@@ -26,6 +26,8 @@ final class MenuBarController: NSObject {
     private let coordinator: AppCoordinator
     private let preferences: PreferencesStore
     private let launchAtLoginController: LaunchAtLoginControlling
+    private let updater: Updating
+    private var aboutWindowController: AboutWindowController?
     private let statusItem: NSStatusItem
     private var cancellables: Set<AnyCancellable> = []
     private var visibleRows: [PreferenceRowID: CheckboxMenuItemView] = [:]
@@ -35,12 +37,14 @@ final class MenuBarController: NSObject {
         state: AppState,
         coordinator: AppCoordinator,
         preferences: PreferencesStore,
-        launchAtLoginController: LaunchAtLoginControlling
+        launchAtLoginController: LaunchAtLoginControlling,
+        updater: Updating
     ) {
         self.state = state
         self.coordinator = coordinator
         self.preferences = preferences
         self.launchAtLoginController = launchAtLoginController
+        self.updater = updater
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         super.init()
         configureStatusItem()
@@ -360,10 +364,10 @@ final class MenuBarController: NSObject {
 
     @objc
     private func showAbout() {
-        NSApp.activate(ignoringOtherApps: true)
-        NSApp.orderFrontStandardAboutPanel(options: [
-            .credits: NSAttributedString(string: "macOS menu bar sleep prevention utility."),
-        ])
+        if aboutWindowController == nil {
+            aboutWindowController = AboutWindowController(updater: updater)
+        }
+        aboutWindowController?.showWindow()
     }
 
     @objc
