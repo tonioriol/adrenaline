@@ -2,13 +2,13 @@
 
 ## Summary
 
-Add audible feedback to Cocaine when lid-close sleep prevention is active. When the user closes the MacBook lid while Cocaine is on, the app plays the built-in macOS Hero sound. When the user opens the lid after the Mac remained awake, the app plays the built-in macOS Basso sound.
+Add audible feedback to Insomnia when lid-close sleep prevention is active. When the user closes the MacBook lid while Insomnia is on, the app plays the built-in macOS Hero sound. When the user opens the lid after the Mac remained awake, the app plays the built-in macOS Basso sound.
 
 The feature is app-side user feedback only. It does not change how lid-close sleep prevention is enabled, disabled, or restored.
 
 ## Goals
 
-- Play an audible close-lid warning so the user knows Cocaine was left enabled before leaving the Mac closed.
+- Play an audible close-lid warning so the user knows Insomnia was left enabled before leaving the Mac closed.
 - Play an audible open-lid confirmation so the user knows the computer stayed awake while the lid was closed.
 - Use built-in macOS sounds: Hero for lid close, Basso for lid open.
 - Keep sound detection passive and low-power: no continuous polling in the default design.
@@ -28,16 +28,16 @@ The feature is app-side user feedback only. It does not change how lid-close sle
 
 ### Active state
 
-When Cocaine is fully active and lid-close prevention has been confirmed, the app listens for lid state changes:
+When Insomnia is fully active and lid-close prevention has been confirmed, the app listens for lid state changes:
 
 - Lid closes: play Hero.
 - Lid opens: play Basso.
 
-The close sound communicates: “Cocaine is still enabled; this closed Mac may keep running.” The open sound communicates: “The Mac was awake while closed.”
+The close sound communicates: “Insomnia is still enabled; this closed Mac may keep running.” The open sound communicates: “The Mac was awake while closed.”
 
 ### Inactive, busy, and failure states
 
-When Cocaine is off, activation is still in progress, activation failed, shutdown cleanup is running, or the app is quitting, lid sounds do not play.
+When Insomnia is off, activation is still in progress, activation failed, shutdown cleanup is running, or the app is quitting, lid sounds do not play.
 
 Sounds should only be associated with the state the menu bar icon already promises: active means ordinary sleep and lid-close sleep are prevented.
 
@@ -88,7 +88,7 @@ Playback failures must not throw into activation or cleanup paths. A missing sou
 
 ### Activation
 
-1. User toggles Cocaine on.
+1. User toggles Insomnia on.
 2. Existing coordinator enables ordinary sleep prevention and lid-close sleep prevention.
 3. Existing coordinator marks `AppState.isActive = true` only after successful validation.
 4. `LidEventSoundController` observes active state and starts `LidStateMonitor`.
@@ -111,14 +111,14 @@ No lid sound should play just because activation succeeded. Sounds are tied to a
 
 ### Deactivation and quit
 
-1. User toggles Cocaine off or quits the app.
+1. User toggles Insomnia off or quits the app.
 2. Existing coordinator disables ordinary and lid-close prevention.
 3. `AppState.isActive` becomes false.
 4. `LidEventSoundController` stops monitoring and clears the last handled lid state for the next active session.
 
 ## Error Handling and Safety
 
-- Lid-monitor setup failure must not prevent Cocaine from turning on, because sleep prevention is the primary behavior and sounds are auxiliary feedback.
+- Lid-monitor setup failure must not prevent Insomnia from turning on, because sleep prevention is the primary behavior and sounds are auxiliary feedback.
 - Sound playback failure must not affect sleep prevention state.
 - Sound failures should not set the menu bar error icon; that error state remains reserved for sleep-prevention/helper failures.
 - If monitoring cannot start, the app may log a diagnostic in debug builds, but it should not alarm the user.
@@ -139,7 +139,7 @@ Add unit tests around policy with fake monitor and fake sound player:
 
 Add build verification with the existing SwiftPM test and app bundle commands.
 
-Manual validation should include running the app on MacBook hardware, activating Cocaine, closing the lid, hearing Hero, reopening the lid, and hearing Basso.
+Manual validation should include running the app on MacBook hardware, activating Insomnia, closing the lid, hearing Hero, reopening the lid, and hearing Basso.
 
 ## Risks
 

@@ -20,10 +20,10 @@
 - Modify `docs/feat/20260424192541-merge-fermatta-caffeine/context.md` — remove historical personal-use wording.
 - Modify `docs/feat/20260424192541-merge-fermatta-caffeine/plan.md` — remove historical personal-use wording.
 - Modify `Makefile` — support Developer ID release signing without disrupting local build commands.
-- Modify `Sources/CocaineCore/CocaineHelperProtocol.swift` — change signing requirement constants to Developer ID certificate shape.
-- Modify `Resources/Cocaine/Info.plist` — keep helper requirement aligned with constants.
-- Modify `Resources/CocaineHelper/Info.plist` — keep authorized client requirement aligned with constants.
-- Modify `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift` — update signing requirement expectations.
+- Modify `Sources/InsomniaCore/InsomniaHelperProtocol.swift` — change signing requirement constants to Developer ID certificate shape.
+- Modify `Resources/Insomnia/Info.plist` — keep helper requirement aligned with constants.
+- Modify `Resources/InsomniaHelper/Info.plist` — keep authorized client requirement aligned with constants.
+- Modify `Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift` — update signing requirement expectations.
 
 ## Task 1: Add AGPL license and clean wording
 
@@ -117,7 +117,7 @@ Required repository secrets:
 
 ## License
 
-Cocaine is licensed under the GNU Affero General Public License v3.0. See `LICENSE`.
+Insomnia is licensed under the GNU Affero General Public License v3.0. See `LICENSE`.
 ```
 
 - [x] **Step 4: Verify wording cleanup**
@@ -144,18 +144,18 @@ Expected: commit succeeds.
 ## Task 2: Update Developer ID signing requirements
 
 **Files:**
-- Modify: `Sources/CocaineCore/CocaineHelperProtocol.swift`
-- Modify: `Resources/Cocaine/Info.plist`
-- Modify: `Resources/CocaineHelper/Info.plist`
-- Modify: `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`
+- Modify: `Sources/InsomniaCore/InsomniaHelperProtocol.swift`
+- Modify: `Resources/Insomnia/Info.plist`
+- Modify: `Resources/InsomniaHelper/Info.plist`
+- Modify: `Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift`
 
 - [x] **Step 1: Update source signing requirement constants**
 
-In `Sources/CocaineCore/CocaineHelperProtocol.swift`, replace the two signing requirement constants with Developer ID Application requirements:
+In `Sources/InsomniaCore/InsomniaHelperProtocol.swift`, replace the two signing requirement constants with Developer ID Application requirements:
 
 ```swift
-    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
-    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia.helper\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
 ```
 
 Expected: requirements no longer mention `Apple Development`.
@@ -167,13 +167,13 @@ Run:
 ```bash
 python3 - <<'PY'
 from pathlib import Path
-old_helper = 'anchor apple generic and identifier "com.tr0n.Cocaine.Helper" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists'
-new_helper = 'anchor apple generic and identifier "com.tr0n.Cocaine.Helper" and certificate leaf[subject.OU] = "A79T83GM42" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists'
-old_app = 'anchor apple generic and identifier "com.tr0n.Cocaine" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists'
-new_app = 'anchor apple generic and identifier "com.tr0n.Cocaine" and certificate leaf[subject.OU] = "A79T83GM42" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists'
+old_helper = 'anchor apple generic and identifier "com.tonioriol.insomnia.helper" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists'
+new_helper = 'anchor apple generic and identifier "com.tonioriol.insomnia.helper" and certificate leaf[subject.OU] = "A79T83GM42" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists'
+old_app = 'anchor apple generic and identifier "com.tonioriol.insomnia" and certificate leaf[subject.CN] = "Apple Development: tonioriol@me.com (A79T83GM42)" and certificate 1[field.1.2.840.113635.100.6.2.1] exists'
+new_app = 'anchor apple generic and identifier "com.tonioriol.insomnia" and certificate leaf[subject.OU] = "A79T83GM42" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists'
 for path, pairs in {
-    Path('Resources/Cocaine/Info.plist'): [(old_helper, new_helper)],
-    Path('Resources/CocaineHelper/Info.plist'): [(old_app, new_app)],
+    Path('Resources/Insomnia/Info.plist'): [(old_helper, new_helper)],
+    Path('Resources/InsomniaHelper/Info.plist'): [(old_app, new_app)],
 }.items():
     text = path.read_text()
     for old, new in pairs:
@@ -188,11 +188,11 @@ Expected: command exits 0.
 
 - [x] **Step 3: Update signing tests**
 
-In `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, update expected strings to:
+In `Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift`, update expected strings to:
 
 ```swift
-    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
-    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tr0n.Cocaine.Helper\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia.helper\" and certificate leaf[subject.OU] = \"A79T83GM42\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
 ```
 
 Expected: test expectations match source constants.
@@ -202,7 +202,7 @@ Expected: test expectations match source constants.
 Run:
 
 ```bash
-swift test --filter CocaineHelperConstantsTests
+swift test --filter InsomniaHelperConstantsTests
 ```
 
 Expected: PASS.
@@ -212,7 +212,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add Sources/CocaineCore/CocaineHelperProtocol.swift Resources/Cocaine/Info.plist Resources/CocaineHelper/Info.plist Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift
+git add Sources/InsomniaCore/InsomniaHelperProtocol.swift Resources/Insomnia/Info.plist Resources/InsomniaHelper/Info.plist Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift
 git -c commit.gpgsign=false commit -m "build: use developer id signing requirements"
 ```
 
@@ -229,7 +229,7 @@ Expected: commit succeeds.
 Update `Makefile` so `CODE_SIGN_IDENTITY` can be passed from CI and add a `release-zip` target:
 
 ```makefile
-RELEASE_ZIP ?= $(BUILD_DIR)/Cocaine.zip
+RELEASE_ZIP ?= $(BUILD_DIR)/Insomnia.zip
 
 .PHONY: test build generate-app-icon app sign release-zip reinstall run clean verify-helper-sections
 
@@ -298,24 +298,24 @@ jobs:
         run: |
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
-          codesign --verify --deep --strict --verbose=2 build/Cocaine.app
-          spctl --assess --type execute --verbose=4 build/Cocaine.app
+          codesign --verify --deep --strict --verbose=2 build/Insomnia.app
+          spctl --assess --type execute --verbose=4 build/Insomnia.app
 
       - name: Notarize app zip
         env:
           APPLE_NOTARYTOOL_PROFILE: ${{ secrets.APPLE_NOTARYTOOL_PROFILE }}
         run: |
           set -euo pipefail
-          xcrun notarytool submit build/Cocaine.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
-          xcrun stapler staple build/Cocaine.app
-          xcrun stapler validate build/Cocaine.app
-          rm -f build/Cocaine.zip
-          ditto -c -k --keepParent build/Cocaine.app build/Cocaine-${GITHUB_REF_NAME}.zip
+          xcrun notarytool submit build/Insomnia.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
+          xcrun stapler staple build/Insomnia.app
+          xcrun stapler validate build/Insomnia.app
+          rm -f build/Insomnia.zip
+          ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/Cocaine-${{ github.ref_name }}.zip
+          files: build/Insomnia-${{ github.ref_name }}.zip
 ```
 
 - [x] **Step 3: Commit workflow and Makefile changes**

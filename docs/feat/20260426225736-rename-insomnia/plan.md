@@ -161,7 +161,7 @@ Expected: commit succeeds.
 - Modify: `docs/feat/20260426225736-rename-insomnia/spec.md`
 - Modify: `docs/feat/20260426225736-rename-insomnia/plan.md`
 
-- [ ] **Step 1: Apply text rename across docs and workspace support files**
+- [x] **Step 1: Apply text rename across docs and workspace support files**
 
 Run:
 
@@ -217,7 +217,7 @@ PY
 
 Expected: command exits 0.
 
-- [ ] **Step 2: Verify old text tokens are gone from workspace text**
+- [x] **Step 2: Verify old text tokens are gone from workspace text**
 
 Run:
 
@@ -230,7 +230,7 @@ rg -n "${OLD_CAP}|${OLD_LOW}|${OLD_UP}" . --glob '!build/**' --glob '!.build/**'
 
 Expected: no matches; `rg` exits 1 with empty output.
 
-- [ ] **Step 3: Verify old path tokens are gone from workspace filenames**
+- [x] **Step 3: Verify old path tokens are gone from workspace filenames**
 
 Run:
 
@@ -243,7 +243,7 @@ fd -H . . -E .git -E .build -E build | rg "${OLD_CAP}|${OLD_LOW}|${OLD_UP}"
 
 Expected: no matches; `rg` exits 1 with empty output.
 
-- [ ] **Step 4: Verify new user-facing docs**
+- [x] **Step 4: Verify new user-facing docs**
 
 Run:
 
@@ -253,7 +253,7 @@ rg -n 'Insomnia|build/Insomnia\.app|Insomnia is licensed|launch Insomnia at logi
 
 Expected: output includes the README title, app bundle path, license line, launch-at-login wording, and NOTICE attribution line.
 
-- [ ] **Step 5: Commit docs rename**
+- [x] **Step 5: Commit docs rename**
 
 Run:
 

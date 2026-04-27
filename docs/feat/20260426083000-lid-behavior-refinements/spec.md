@@ -2,13 +2,13 @@
 
 ## Summary
 
-Refine Cocaine's right-click menu and lid/display behavior after real-use feedback on the first lid-behavior settings release.
+Refine Insomnia's right-click menu and lid/display behavior after real-use feedback on the first lid-behavior settings release.
 
-The app's core feature remains unchanged: when Cocaine is ON, it prevents system sleep and keeps the computer awake. This work improves the preference menu UX, removes the confusing forced lock-screen feature, couples lid sounds to lid-close prevention, removes the helper repair item, skips disk-sleep controls, and adds a Launch at Login checkbox.
+The app's core feature remains unchanged: when Insomnia is ON, it prevents system sleep and keeps the computer awake. This work improves the preference menu UX, removes the confusing forced lock-screen feature, couples lid sounds to lid-close prevention, removes the helper repair item, skips disk-sleep controls, and adds a Launch at Login checkbox.
 
 ## Goals
 
-- Keep Cocaine's main ON behavior as the global system-awake toggle.
+- Keep Insomnia's main ON behavior as the global system-awake toggle.
 - Keep **Prevent display sleep** as the visible label and behavior.
 - Keep **Prevent sleep with lid closed** as an opt-in helper-backed setting with the existing first-enable safety warning.
 - Make **Play lid event sounds** apply only when **Prevent sleep with lid closed** is enabled.
@@ -20,7 +20,7 @@ The app's core feature remains unchanged: when Cocaine is ON, it prevents system
 
 ## Non-goals
 
-- Do not remove or weaken Cocaine's core system-sleep prevention.
+- Do not remove or weaken Insomnia's core system-sleep prevention.
 - Do not add a standalone lock-screen checkbox.
 - Do not force-lock the screen via private APIs.
 - Do not expose disk-sleep prevention.
@@ -31,9 +31,9 @@ The app's core feature remains unchanged: when Cocaine is ON, it prevents system
 
 ### Main ON/OFF toggle
 
-Left-clicking the menu bar icon still toggles Cocaine OFF/ON.
+Left-clicking the menu bar icon still toggles Insomnia OFF/ON.
 
-When ON, Cocaine always prevents system sleep. The computer stays awake unless the user explicitly allows a macOS path that still sleeps the system, such as closing the lid while **Prevent sleep with lid closed** is OFF.
+When ON, Insomnia always prevents system sleep. The computer stays awake unless the user explicitly allows a macOS path that still sleeps the system, such as closing the lid while **Prevent sleep with lid closed** is OFF.
 
 ### Right-click menu
 
@@ -41,7 +41,7 @@ The right-click menu keeps its menu shape but preference rows use custom checkbo
 
 Target order:
 
-1. About Cocaine
+1. About Insomnia
 2. separator
 3. **Prevent display sleep** checkbox
 4. **⚠ Prevent sleep with lid closed** checkbox
@@ -59,24 +59,24 @@ Removed rows:
 
 | Preference | Default | Meaning |
 |---|---:|---|
-| **Prevent display sleep** | ON | While Cocaine is ON, also hold a display-sleep assertion so the screen stays awake. If OFF, Cocaine still keeps the computer awake, but the display may sleep and macOS lock-screen settings may apply. |
-| **⚠ Prevent sleep with lid closed** | OFF | While Cocaine is ON, use the privileged helper so the computer stays awake even after the lid closes. Existing first-enable warning remains. |
-| **Play lid event sounds** | ON | While Cocaine is ON, play close/open sounds only if **Prevent sleep with lid closed** is also ON. The menu row is visible but disabled when lid-close prevention is OFF. |
-| **Launch at login** | OFF | Register/unregister Cocaine as a macOS login item. The checkbox reflects `SMAppService.mainApp.status`, not only an internal preference. |
+| **Prevent display sleep** | ON | While Insomnia is ON, also hold a display-sleep assertion so the screen stays awake. If OFF, Insomnia still keeps the computer awake, but the display may sleep and macOS lock-screen settings may apply. |
+| **⚠ Prevent sleep with lid closed** | OFF | While Insomnia is ON, use the privileged helper so the computer stays awake even after the lid closes. Existing first-enable warning remains. |
+| **Play lid event sounds** | ON | While Insomnia is ON, play close/open sounds only if **Prevent sleep with lid closed** is also ON. The menu row is visible but disabled when lid-close prevention is OFF. |
+| **Launch at login** | OFF | Register/unregister Insomnia as a macOS login item. The checkbox reflects `SMAppService.mainApp.status`, not only an internal preference. |
 
 ### Locking behavior
 
-Cocaine no longer provides a separate lock-screen preference.
+Insomnia no longer provides a separate lock-screen preference.
 
 If **Prevent sleep with lid closed** is OFF, closing the lid follows normal macOS behavior. macOS may sleep and lock according to the user's system settings.
 
-If **Prevent display sleep** is OFF, display sleep may occur while Cocaine keeps the computer awake. macOS may lock according to the user's system settings.
+If **Prevent display sleep** is OFF, display sleep may occur while Insomnia keeps the computer awake. macOS may lock according to the user's system settings.
 
-Cocaine does not force-lock via private API or AppleScript fallback.
+Insomnia does not force-lock via private API or AppleScript fallback.
 
 ### Disk sleep
 
-No disk-sleep setting is added. Modern SSD Macs make disk-idle prevention effectively pointless for this app's intended behavior. Cocaine's core no-idle sleep assertion is sufficient to keep work running.
+No disk-sleep setting is added. Modern SSD Macs make disk-idle prevention effectively pointless for this app's intended behavior. Insomnia's core no-idle sleep assertion is sufficient to keep work running.
 
 ## Architecture
 
@@ -110,7 +110,7 @@ Remove any coordinator dependency on lock-screen behavior.
 
 `LidEventSoundController` must gate sound playback on all of these conditions:
 
-- Cocaine is active.
+- Insomnia is active.
 - Monitoring is started.
 - The lid state is not a duplicate of the last handled state.
 - `playLidEventSounds == true`.
@@ -149,7 +149,7 @@ Responsibilities:
 - Unregister the app when the checkbox is turned OFF.
 - Refresh visible checkbox state after register/unregister so the menu reflects the system truth.
 
-Default is OFF because Cocaine should not add itself to login items without explicit user intent.
+Default is OFF because Insomnia should not add itself to login items without explicit user intent.
 
 ## Error Handling
 
@@ -161,7 +161,7 @@ With **Repair / Install Helper** removed, the retry path is to toggle **Prevent 
 
 ### Launch-at-login errors
 
-Launch-at-login failures should not put the main menu bar icon into a keep-awake error state. Login-item registration is ancillary and does not mean Cocaine's active sleep-prevention behavior failed.
+Launch-at-login failures should not put the main menu bar icon into a keep-awake error state. Login-item registration is ancillary and does not mean Insomnia's active sleep-prevention behavior failed.
 
 Prefer showing the error locally in the menu, refreshing the checkbox from actual system state, or both.
 
@@ -177,7 +177,7 @@ Checkbox row failures should refresh from source-of-truth state instead of leavi
 - `LidEventSoundController` plays sounds only when `playLidEventSounds == true` and `preventLidCloseSleep == true`.
 - `LidEventSoundController` ignores lid events when lid-close prevention is OFF, even if sounds are enabled.
 - Duplicate lid-state suppression still prevents replay after sound gating changes.
-- `AppCoordinator` continues to enable no-idle sleep prevention whenever Cocaine turns ON.
+- `AppCoordinator` continues to enable no-idle sleep prevention whenever Insomnia turns ON.
 - `AppCoordinator` continues to reconcile display-sleep prevention independently.
 - `AppCoordinator` continues to reconcile lid-close helper state independently.
 - Launch-at-login controller tests cover enabled/disabled status, register, unregister, and failure refresh semantics using a fake service.
@@ -207,8 +207,8 @@ Manual checks:
 4. **Lock screen when lid closes** is absent.
 5. **Repair / Install Helper** is absent.
 6. **Launch at login** reflects macOS login-item state.
-7. Turning Cocaine ON still prevents system sleep.
-8. Turning **Prevent display sleep** OFF allows display sleep while Cocaine stays ON.
+7. Turning Insomnia ON still prevents system sleep.
+8. Turning **Prevent display sleep** OFF allows display sleep while Insomnia stays ON.
 9. Turning **Prevent sleep with lid closed** ON still shows the existing warning and keeps the computer awake when the lid closes.
 
 ## Risks

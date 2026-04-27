@@ -1,7 +1,7 @@
 ---
 title: "Rename app to Insomnia"
 status: active
-repos: [cocaine]
+repos: [insomnia]
 tags: [macos, spm]
 created: 2026-04-26
 ---
@@ -34,7 +34,7 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 2 — rename documentation and local workspace text
+**Cursor:** Task 3 — final verification and cleanup
 
 **Status:** ready
 
@@ -65,3 +65,9 @@ created: 2026-04-26
 - Commands run: `git status --short --branch`; Task 1 `git mv` rename command block; Task 1 Python implementation rename mapping; Task 1 Python key identifier verification (`renamed identifiers verified`); `swift test --filter InsomniaHelperConstantsTests` (PASS: 4 tests, 0 failures); `git status --short`; pending commit command `git -c commit.gpgsign=false commit -m "refactor: rename app identity to insomnia"`.
 - Commit SHA: pending at log write time; final commit SHA recorded in task response after commit creation.
 - Decisions: Limited this pass to implementation identity surfaces only, leaving broader documentation/workspace text rename for Task 2 as requested; kept behavior unchanged while renaming visible name, Swift targets/modules, helper constants/protocol, bundle identifiers, helper label/Mach service, preference/log namespaces, app icon filename, and release artifact paths to Insomnia.
+
+### 2026-04-27 06:27 — Task 2 documentation and workspace text rename
+
+- Files changed: `README.md`, `NOTICE.md`, `docs/feat/`, `docs/scratch.md`, and `.vscode/launch.json` if present.
+- Commands run: Task 2 Python documentation/workspace rename mapping; constructed-token content verification with `rg` (PASS: no matches, exit 1); constructed-token filename verification with `fd` and `rg` (PASS: no matches, exit 1); new docs verification with `rg -n 'Insomnia|build/Insomnia\.app|Insomnia is licensed|launch Insomnia at login' README.md NOTICE.md` (PASS: README title, app bundle path, license line, launch-at-login wording, and NOTICE attribution present).
+- Decision: Rewrote docs and local workspace text, including the planning records, so tracked/local text contains only the Insomnia identity while ignored build artifacts and Git internals remain out of scope.

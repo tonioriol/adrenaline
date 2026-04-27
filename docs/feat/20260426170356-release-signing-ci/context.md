@@ -1,7 +1,7 @@
 ---
 title: "Release signing CI"
 status: active
-repos: [cocaine]
+repos: [insomnia]
 tags: [ci-cd, security, spm]
 created: 2026-04-26
 ---
@@ -24,10 +24,10 @@ created: 2026-04-26
 - README.md
 - LICENSE
 - Makefile
-- Resources/Cocaine/Info.plist
-- Resources/CocaineHelper/Info.plist
-- Sources/CocaineCore/CocaineHelperProtocol.swift
-- Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift
+- Resources/Insomnia/Info.plist
+- Resources/InsomniaHelper/Info.plist
+- Sources/InsomniaCore/InsomniaHelperProtocol.swift
+- Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift
 - .github/workflows/release.yml
 
 ## PLAN
@@ -81,8 +81,8 @@ created: 2026-04-26
 ### 2026-04-26 17:17 — Task 2 Developer ID signing requirements
 
 - Summary: Updated the app and helper signing requirement strings from Apple Development certificate constraints to Developer ID Application constraints using Team ID A79T83GM42.
-- Files changed: `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Resources/Cocaine/Info.plist`, `Resources/CocaineHelper/Info.plist`, `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
-- Commands run: `swift test --filter CocaineHelperConstantsTests` passed with 4 tests and 0 failures.
+- Files changed: `Sources/InsomniaCore/InsomniaHelperProtocol.swift`, `Resources/Insomnia/Info.plist`, `Resources/InsomniaHelper/Info.plist`, `Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift`, and `docs/feat/20260426170356-release-signing-ci/context.md`.
+- Commands run: `swift test --filter InsomniaHelperConstantsTests` passed with 4 tests and 0 failures.
 - Commit SHA: 0e2c7b0.
 
 ### 2026-04-26 17:23 — Task 3 release workflow

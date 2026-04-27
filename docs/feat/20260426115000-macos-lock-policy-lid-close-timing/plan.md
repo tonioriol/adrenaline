@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make Cocaine mirror macOS lock timing when lid-close sleep prevention keeps the Mac awake: skip locking when Require Password is disabled, otherwise lock after the active display-off timer plus password delay.
+**Goal:** Make Insomnia mirror macOS lock timing when lid-close sleep prevention keeps the Mac awake: skip locking when Require Password is disabled, otherwise lock after the active display-off timer plus password delay.
 
-**Architecture:** Add a small `CocaineCore` policy reader for macOS lock/display settings, then refactor `LidCloseLockResponder` to schedule a cancellable delayed lock instead of calling the locker immediately. Keep menu behavior unchanged and update README to describe the macOS-matching behavior.
+**Architecture:** Add a small `InsomniaCore` policy reader for macOS lock/display settings, then refactor `LidCloseLockResponder` to schedule a cancellable delayed lock instead of calling the locker immediately. Keep menu behavior unchanged and update README to describe the macOS-matching behavior.
 
 **Tech Stack:** Swift 5.9, SwiftPM, AppKit wiring, Foundation `UserDefaults`, property-list reading, IOKit power-source APIs, XCTest, existing `ScreenLocker` / `LidStateMonitor` abstractions.
 
@@ -14,15 +14,15 @@
 
 **Create:**
 
-- `Sources/CocaineCore/MacOSLockPolicyReader.swift` — `MacOSLockPolicy`, `MacOSPowerSource`, `MacOSLockPolicyReading`, and concrete `MacOSLockPolicyReader` that reads `com.apple.screensaver`, `/Library/Preferences/com.apple.PowerManagement.plist`, and current power source.
-- `Sources/CocaineCore/LidCloseLockScheduler.swift` — small scheduling abstraction plus production `Task`-backed scheduler so responder tests can fire delayed locks without waiting real minutes.
-- `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift` — pure tests for password policy parsing, display timer selection, power-source behavior, and unreadable settings behavior.
+- `Sources/InsomniaCore/MacOSLockPolicyReader.swift` — `MacOSLockPolicy`, `MacOSPowerSource`, `MacOSLockPolicyReading`, and concrete `MacOSLockPolicyReader` that reads `com.apple.screensaver`, `/Library/Preferences/com.apple.PowerManagement.plist`, and current power source.
+- `Sources/InsomniaCore/LidCloseLockScheduler.swift` — small scheduling abstraction plus production `Task`-backed scheduler so responder tests can fire delayed locks without waiting real minutes.
+- `Tests/InsomniaCoreTests/MacOSLockPolicyReaderTests.swift` — pure tests for password policy parsing, display timer selection, power-source behavior, and unreadable settings behavior.
 
 **Modify:**
 
-- `Sources/CocaineCore/LidCloseLockResponder.swift` — inject policy reader and scheduler; replace immediate lock with delayed/cancellable lock scheduling and final gate rechecks.
-- `Sources/Cocaine/AppDelegate.swift` — construct `MacOSLockPolicyReader` and pass it into `LidCloseLockResponder`.
-- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — replace immediate-lock expectations with delayed scheduling, cancellation, and recheck coverage.
+- `Sources/InsomniaCore/LidCloseLockResponder.swift` — inject policy reader and scheduler; replace immediate lock with delayed/cancellable lock scheduling and final gate rechecks.
+- `Sources/Insomnia/AppDelegate.swift` — construct `MacOSLockPolicyReader` and pass it into `LidCloseLockResponder`.
+- `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift` — replace immediate-lock expectations with delayed scheduling, cancellation, and recheck coverage.
 - `README.md` — describe that lid-close locking follows macOS Require Password and display-off timing.
 - `docs/feat/20260426115000-macos-lock-policy-lid-close-timing/context.md` — update plan link, FILES, cursor, and log.
 
@@ -31,16 +31,16 @@
 ### Task 1: Add macOS lock policy reader
 
 **Files:**
-- Create: `Sources/CocaineCore/MacOSLockPolicyReader.swift`
-- Create: `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift`
+- Create: `Sources/InsomniaCore/MacOSLockPolicyReader.swift`
+- Create: `Tests/InsomniaCoreTests/MacOSLockPolicyReaderTests.swift`
 
 - [x] **Step 1: Write failing policy reader tests**
 
-Create `Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift` with this content:
+Create `Tests/InsomniaCoreTests/MacOSLockPolicyReaderTests.swift` with this content:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 final class MacOSLockPolicyReaderTests: XCTestCase {
@@ -258,7 +258,7 @@ Expected: FAIL with compiler errors like `cannot find type 'MacOSPowerSource' in
 
 - [x] **Step 3: Add the policy reader implementation**
 
-Create `Sources/CocaineCore/MacOSLockPolicyReader.swift` with this content:
+Create `Sources/InsomniaCore/MacOSLockPolicyReader.swift` with this content:
 
 ```swift
 import Foundation
@@ -448,7 +448,7 @@ Expected: PASS with all `MacOSLockPolicyReaderTests` tests passing.
 Run:
 
 ```bash
-git add Sources/CocaineCore/MacOSLockPolicyReader.swift Tests/CocaineCoreTests/MacOSLockPolicyReaderTests.swift
+git add Sources/InsomniaCore/MacOSLockPolicyReader.swift Tests/InsomniaCoreTests/MacOSLockPolicyReaderTests.swift
 git commit -m "feat: read macos lock timing policy"
 ```
 
@@ -459,18 +459,18 @@ Expected: commit succeeds.
 ### Task 2: Add cancellable delayed lock scheduling to the responder
 
 **Files:**
-- Create: `Sources/CocaineCore/LidCloseLockScheduler.swift`
-- Modify: `Sources/CocaineCore/LidCloseLockResponder.swift`
-- Modify: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
+- Create: `Sources/InsomniaCore/LidCloseLockScheduler.swift`
+- Modify: `Sources/InsomniaCore/LidCloseLockResponder.swift`
+- Modify: `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift`
 
 - [x] **Step 1: Replace responder tests with delayed-lock coverage**
 
-Replace `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` with this content:
+Replace `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift` with this content:
 
 ```swift
 import Combine
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 private final class FakeLidStateMonitor: LidStateMonitoring {
@@ -797,7 +797,7 @@ Expected: FAIL with compiler errors like `cannot find type 'LidCloseLockScheduli
 
 - [x] **Step 3: Add the scheduler abstraction**
 
-Create `Sources/CocaineCore/LidCloseLockScheduler.swift` with this content:
+Create `Sources/InsomniaCore/LidCloseLockScheduler.swift` with this content:
 
 ```swift
 import Foundation
@@ -856,7 +856,7 @@ private final class TaskLidCloseLockCancellable: LidCloseLockCancellable {
 
 - [x] **Step 4: Refactor `LidCloseLockResponder` to schedule delayed locks**
 
-Replace `Sources/CocaineCore/LidCloseLockResponder.swift` with this content:
+Replace `Sources/InsomniaCore/LidCloseLockResponder.swift` with this content:
 
 ```swift
 import Foundation
@@ -864,7 +864,7 @@ import os.log
 
 @MainActor
 public final class LidCloseLockResponder {
-    private static let log = OSLog(subsystem: "com.tr0n.Cocaine", category: "LidCloseLockResponder")
+    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "LidCloseLockResponder")
 
     private let state: AppState
     private let monitor: LidStateMonitoring
@@ -975,7 +975,7 @@ Expected: PASS with all `LidCloseLockResponderTests` tests passing.
 Run:
 
 ```bash
-git add Sources/CocaineCore/LidCloseLockScheduler.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift
+git add Sources/InsomniaCore/LidCloseLockScheduler.swift Sources/InsomniaCore/LidCloseLockResponder.swift Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift
 git commit -m "feat: delay lid-close lock to match macos policy"
 ```
 
@@ -986,7 +986,7 @@ Expected: commit succeeds.
 ### Task 3: Wire the policy reader into the app and verify integration
 
 **Files:**
-- Modify: `Sources/Cocaine/AppDelegate.swift`
+- Modify: `Sources/Insomnia/AppDelegate.swift`
 
 - [x] **Step 1: Run build to capture current integration failure**
 
@@ -1000,7 +1000,7 @@ Expected: FAIL because `AppDelegate` still calls `LidCloseLockResponder` without
 
 - [x] **Step 2: Wire the production policy reader**
 
-In `Sources/Cocaine/AppDelegate.swift`, change the setup around `screenLocker` and `LidCloseLockResponder` to this exact shape:
+In `Sources/Insomnia/AppDelegate.swift`, change the setup around `screenLocker` and `LidCloseLockResponder` to this exact shape:
 
 ```swift
         let lidStateMonitor = LidStateMonitor()
@@ -1050,7 +1050,7 @@ Expected: PASS with all XCTest tests passing.
 Run:
 
 ```bash
-git add Sources/Cocaine/AppDelegate.swift
+git add Sources/Insomnia/AppDelegate.swift
 git commit -m "chore: wire macos lock policy reader"
 ```
 
@@ -1072,13 +1072,13 @@ Replace the lock-related rows and bullets in `README.md` under `## Behavior` wit
   |---|---|---|
    | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. Mostly meaningful for external displays while the lid is open. |
    | Prevent system sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
-   | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Cocaine is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
-   | Launch at login | OFF | Registers Cocaine as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
+   | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Insomnia is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
+   | Launch at login | OFF | Registers Insomnia as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
 
-- **When Cocaine is off:** all preferences are inert. No assertions are held, no helper calls are made, and Cocaine does not run a separate lock action.
-- **When Cocaine is on and lid-close prevention is off:** closing the lid follows native macOS behavior. The Mac may sleep and lock according to your system settings.
-- **When lid-close prevention is on and display sleep is prevented:** Cocaine keeps the Mac awake and intentionally suppresses the native display-off path, so it does not run a separate lid-close lock timer.
-- **When lid-close prevention is on and display sleep is allowed:** Cocaine mirrors macOS lock policy. If **Require password** is **Never**, Cocaine does not lock on lid close. Otherwise, it locks after the active display-off timer plus the Require Password delay, and cancels that pending lock if the lid reopens first.
+- **When Insomnia is off:** all preferences are inert. No assertions are held, no helper calls are made, and Insomnia does not run a separate lock action.
+- **When Insomnia is on and lid-close prevention is off:** closing the lid follows native macOS behavior. The Mac may sleep and lock according to your system settings.
+- **When lid-close prevention is on and display sleep is prevented:** Insomnia keeps the Mac awake and intentionally suppresses the native display-off path, so it does not run a separate lid-close lock timer.
+- **When lid-close prevention is on and display sleep is allowed:** Insomnia mirrors macOS lock policy. If **Require password** is **Never**, Insomnia does not lock on lid close. Otherwise, it locks after the active display-off timer plus the Require Password delay, and cancels that pending lock if the lid reopens first.
 ```
 
 - [x] **Step 2: Verify stale lock-row docs are gone**
@@ -1127,7 +1127,7 @@ Run:
 make app 2>&1 | tail -40
 ```
 
-Expected: PASS and `build/Cocaine.app` recreated and signed.
+Expected: PASS and `build/Insomnia.app` recreated and signed.
 
 - [x] **Step 3: Verify no stale immediate-lock language remains in source docs**
 
@@ -1146,7 +1146,7 @@ Append this log entry to `docs/feat/20260426115000-macos-lock-policy-lid-close-t
 ```markdown
 ### 2026-04-26 12:30 — macOS-matched lid-close lock timing implemented
 
-- Why: Cocaine should not create a separate lid-close security policy; it should respect macOS Require Password and display-off timing.
+- Why: Insomnia should not create a separate lid-close security policy; it should respect macOS Require Password and display-off timing.
 - How: Added `MacOSLockPolicyReader`, delayed/cancellable `LidCloseLockResponder` scheduling, production app wiring, and README docs. Verification: `make test` passed, `make app` passed, and stale immediate-lock wording check passed.
 - Decision: Lock timing is read once at lid close and rechecked for active/lid/preference gates before firing; power-source changes while already closed are left as a future refinement.
 ```
@@ -1176,7 +1176,7 @@ Expected: commit succeeds.
 
 Run these on a MacBook after automated verification:
 
-- [ ] Set Require Password to Never, turn Cocaine on, enable lid-close prevention, allow display sleep, close and reopen after longer than the display-off timer: session is not locked by Cocaine.
+- [ ] Set Require Password to Never, turn Insomnia on, enable lid-close prevention, allow display sleep, close and reopen after longer than the display-off timer: session is not locked by Insomnia.
 - [ ] Set Require Password to Immediately and battery display-off timer to 1 minute, run on battery, close lid, wait under 1 minute, reopen: not locked yet.
 - [ ] Same settings, close lid and wait over 1 minute, reopen: lock screen is shown.
 - [ ] Set Require Password delay to a positive value, confirm lock happens after display timer plus that delay.

@@ -21,7 +21,7 @@ Use the existing capsule/pill menu bar icon as the visual basis for the whole ma
 
 ### Icon asset
 
-Add a generated `Cocaine.icns` under `Resources/Cocaine/`. The icon composition should adapt the current diagonal split-capsule shape into a conventional macOS app icon:
+Add a generated `Insomnia.icns` under `Resources/Insomnia/`. The icon composition should adapt the current diagonal split-capsule shape into a conventional macOS app icon:
 
 - rounded-square background suitable for Finder/Launch Services surfaces;
 - centered, enlarged capsule/pill mark using the same diagonal orientation and split motif as the status item;
@@ -31,7 +31,7 @@ The generated `.icns` should include the standard macOS icon representations pro
 
 ### Bundle metadata
 
-Update `Resources/Cocaine/Info.plist` to declare `CFBundleIconFile` for the app icon. The declared icon filename should match the resource copied into `Contents/Resources` during bundling.
+Update `Resources/Insomnia/Info.plist` to declare `CFBundleIconFile` for the app icon. The declared icon filename should match the resource copied into `Contents/Resources` during bundling.
 
 ### Packaging
 
@@ -53,6 +53,6 @@ Setting `NSApplication.shared.applicationIconImage` at runtime would not fully s
 
 ## Testing
 
-- Run the app bundle build path and verify `build/Cocaine.app/Contents/Resources/Cocaine.icns` exists.
-- Verify `build/Cocaine.app/Contents/Info.plist` contains the icon declaration.
+- Run the app bundle build path and verify `build/Insomnia.app/Contents/Resources/Insomnia.icns` exists.
+- Verify `build/Insomnia.app/Contents/Info.plist` contains the icon declaration.
 - Run the existing test/build commands used by the project (`swift test` and `make app`) to ensure no regressions.

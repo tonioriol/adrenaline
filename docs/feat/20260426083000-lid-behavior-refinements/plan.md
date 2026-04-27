@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Refine Cocaine's menu and lid/display settings so the main keep-awake feature stays intact, checkboxes stay open while toggled, lid sounds depend on lid-close prevention, forced lock UI is removed, helper repair UI is removed, and Launch at Login is exposed.
+**Goal:** Refine Insomnia's menu and lid/display settings so the main keep-awake feature stays intact, checkboxes stay open while toggled, lid sounds depend on lid-close prevention, forced lock UI is removed, helper repair UI is removed, and Launch at Login is exposed.
 
 **Architecture:** Keep `AppCoordinator` as the sleep-prevention source of truth. Remove the active lock-screen responder path, gate sound playback in `LidEventSoundController`, add a small testable `LaunchAtLoginController` around `SMAppService`, and refactor `MenuBarController` to build custom checkbox row views for preferences.
 
@@ -12,16 +12,16 @@
 
 ## File Structure
 
-- `Sources/CocaineCore/LidEventSoundController.swift` — keep monitoring/sound ownership; add `preventLidCloseSleep` gate before playback.
-- `Sources/CocaineCore/LaunchAtLoginController.swift` — new testable controller and service abstraction for `SMAppService.mainApp`.
-- `Sources/CocaineCore/ScreenLocker.swift` — delete; forced screen locking is no longer a product behavior.
-- `Sources/CocaineCore/LidCloseLockResponder.swift` — delete; forced lid-close locking is no longer a product behavior.
-- `Sources/Cocaine/AppDelegate.swift` — unwire deleted lock components; wire `LaunchAtLoginController` into menu controller.
-- `Sources/Cocaine/MenuBarController.swift` — remove lock and repair menu rows; add launch-at-login row; switch preference rows to custom views; disable sound row when lid-close prevention is off.
-- `Sources/Cocaine/CheckboxMenuItemView.swift` — new focused AppKit view for a checkbox menu row whose click does not dismiss the menu.
-- `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` — update sound tests for lid-close dependency.
-- `Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift` — new tests for launch-at-login status and toggling.
-- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — delete with removed feature.
+- `Sources/InsomniaCore/LidEventSoundController.swift` — keep monitoring/sound ownership; add `preventLidCloseSleep` gate before playback.
+- `Sources/InsomniaCore/LaunchAtLoginController.swift` — new testable controller and service abstraction for `SMAppService.mainApp`.
+- `Sources/InsomniaCore/ScreenLocker.swift` — delete; forced screen locking is no longer a product behavior.
+- `Sources/InsomniaCore/LidCloseLockResponder.swift` — delete; forced lid-close locking is no longer a product behavior.
+- `Sources/Insomnia/AppDelegate.swift` — unwire deleted lock components; wire `LaunchAtLoginController` into menu controller.
+- `Sources/Insomnia/MenuBarController.swift` — remove lock and repair menu rows; add launch-at-login row; switch preference rows to custom views; disable sound row when lid-close prevention is off.
+- `Sources/Insomnia/CheckboxMenuItemView.swift` — new focused AppKit view for a checkbox menu row whose click does not dismiss the menu.
+- `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift` — update sound tests for lid-close dependency.
+- `Tests/InsomniaCoreTests/LaunchAtLoginControllerTests.swift` — new tests for launch-at-login status and toggling.
+- `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift` — delete with removed feature.
 - `README.md` — update visible behavior table and native macOS lock explanation.
 - `docs/feat/20260426083000-lid-behavior-refinements/context.md` — record implementation progress.
 
@@ -30,10 +30,10 @@
 ## Task 1: Remove forced lock-screen feature wiring
 
 **Files:**
-- Modify: `Sources/Cocaine/AppDelegate.swift`
-- Delete: `Sources/CocaineCore/ScreenLocker.swift`
-- Delete: `Sources/CocaineCore/LidCloseLockResponder.swift`
-- Delete: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
+- Modify: `Sources/Insomnia/AppDelegate.swift`
+- Delete: `Sources/InsomniaCore/ScreenLocker.swift`
+- Delete: `Sources/InsomniaCore/LidCloseLockResponder.swift`
+- Delete: `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift`
 
 - [x] **Step 1: Run the focused test that currently covers the feature being removed**
 
@@ -47,11 +47,11 @@ Expected before deletion: PASS. This confirms the soon-to-be-removed forced lock
 
 - [x] **Step 2: Unwire the lock responder from the app delegate**
 
-Replace the contents of `Sources/Cocaine/AppDelegate.swift` with:
+Replace the contents of `Sources/Insomnia/AppDelegate.swift` with:
 
 ```swift
 import AppKit
-import CocaineCore
+import InsomniaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var preferences: PreferencesStore?
@@ -108,7 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 Run:
 
 ```bash
-rm Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift
+rm Sources/InsomniaCore/ScreenLocker.swift Sources/InsomniaCore/LidCloseLockResponder.swift Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift
 ```
 
 Expected: files are removed locally.
@@ -136,7 +136,7 @@ Expected: build succeeds.
 - [x] **Step 6: Commit Task 1**
 
 ```bash
-git add Sources/Cocaine/AppDelegate.swift Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift
+git add Sources/Insomnia/AppDelegate.swift Sources/InsomniaCore/ScreenLocker.swift Sources/InsomniaCore/LidCloseLockResponder.swift Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift
 git commit -m "refactor: remove forced lid-close locking"
 ```
 
@@ -145,12 +145,12 @@ git commit -m "refactor: remove forced lid-close locking"
 ## Task 2: Gate lid event sounds on lid-close prevention
 
 **Files:**
-- Modify: `Sources/CocaineCore/LidEventSoundController.swift`
-- Modify: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
+- Modify: `Sources/InsomniaCore/LidEventSoundController.swift`
+- Modify: `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`
 
 - [x] **Step 1: Add the failing regression test**
 
-In `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`, add this test inside `final class LidEventSoundControllerTests`:
+In `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`, add this test inside `final class LidEventSoundControllerTests`:
 
 ```swift
 func testPreventLidCloseSleepOffSilencesEventsEvenWhenSoundsEnabled() {
@@ -211,7 +211,7 @@ Expected before implementation: FAIL because the controller currently checks onl
 
 - [x] **Step 4: Implement the lid-close-prevention gate**
 
-In `Sources/CocaineCore/LidEventSoundController.swift`, replace the `handle(_:)` method with:
+In `Sources/InsomniaCore/LidEventSoundController.swift`, replace the `handle(_:)` method with:
 
 ```swift
 private func handle(_ lidState: LidState) {
@@ -244,7 +244,7 @@ Expected: all `LidEventSoundControllerTests` pass.
 - [x] **Step 6: Commit Task 2**
 
 ```bash
-git add Sources/CocaineCore/LidEventSoundController.swift Tests/CocaineCoreTests/LidEventSoundControllerTests.swift
+git add Sources/InsomniaCore/LidEventSoundController.swift Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift
 git commit -m "fix: gate lid sounds on lid-close prevention"
 ```
 
@@ -253,16 +253,16 @@ git commit -m "fix: gate lid sounds on lid-close prevention"
 ## Task 3: Add testable Launch at Login controller
 
 **Files:**
-- Create: `Sources/CocaineCore/LaunchAtLoginController.swift`
-- Create: `Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift`
+- Create: `Sources/InsomniaCore/LaunchAtLoginController.swift`
+- Create: `Tests/InsomniaCoreTests/LaunchAtLoginControllerTests.swift`
 
 - [x] **Step 1: Write failing launch-at-login tests**
 
-Create `Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift` with:
+Create `Tests/InsomniaCoreTests/LaunchAtLoginControllerTests.swift` with:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 private final class FakeLoginItemService: LoginItemServicing {
@@ -400,7 +400,7 @@ Expected before implementation: FAIL to compile because `LaunchAtLoginController
 
 - [x] **Step 3: Add the launch-at-login controller**
 
-Create `Sources/CocaineCore/LaunchAtLoginController.swift` with:
+Create `Sources/InsomniaCore/LaunchAtLoginController.swift` with:
 
 ```swift
 import Foundation
@@ -505,7 +505,7 @@ Expected: all `LaunchAtLoginControllerTests` pass.
 - [x] **Step 5: Commit Task 3**
 
 ```bash
-git add Sources/CocaineCore/LaunchAtLoginController.swift Tests/CocaineCoreTests/LaunchAtLoginControllerTests.swift
+git add Sources/InsomniaCore/LaunchAtLoginController.swift Tests/InsomniaCoreTests/LaunchAtLoginControllerTests.swift
 git commit -m "feat: add launch at login controller"
 ```
 
@@ -514,13 +514,13 @@ git commit -m "feat: add launch at login controller"
 ## Task 4: Refactor menu checkboxes to stay open and match the new menu
 
 **Files:**
-- Create: `Sources/Cocaine/CheckboxMenuItemView.swift`
-- Modify: `Sources/Cocaine/MenuBarController.swift`
-- Modify: `Sources/Cocaine/AppDelegate.swift`
+- Create: `Sources/Insomnia/CheckboxMenuItemView.swift`
+- Modify: `Sources/Insomnia/MenuBarController.swift`
+- Modify: `Sources/Insomnia/AppDelegate.swift`
 
 - [x] **Step 1: Add the custom checkbox row view**
 
-Create `Sources/Cocaine/CheckboxMenuItemView.swift` with:
+Create `Sources/Insomnia/CheckboxMenuItemView.swift` with:
 
 ```swift
 import AppKit
@@ -575,12 +575,12 @@ final class CheckboxMenuItemView: NSView {
 
 - [x] **Step 2: Replace `MenuBarController` with the new menu implementation**
 
-Replace `Sources/Cocaine/MenuBarController.swift` with:
+Replace `Sources/Insomnia/MenuBarController.swift` with:
 
 ```swift
 import AppKit
 import Combine
-import CocaineCore
+import InsomniaCore
 
 @MainActor
 final class MenuBarController: NSObject {
@@ -656,7 +656,7 @@ final class MenuBarController: NSObject {
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Cocaine")
+        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Insomnia")
         image?.isTemplate = true
         return image
     }
@@ -730,14 +730,14 @@ final class MenuBarController: NSObject {
     }
 
     private var tooltipText: String {
-        if state.isBusy { return "Cocaine is changing sleep prevention state" }
+        if state.isBusy { return "Insomnia is changing sleep prevention state" }
         if state.isActive {
             return preferences.preventLidCloseSleep
-                ? "Cocaine is preventing sleep, including lid-close sleep"
-                : "Cocaine is preventing sleep"
+                ? "Insomnia is preventing sleep, including lid-close sleep"
+                : "Insomnia is preventing sleep"
         }
-        if let error = state.lastErrorMessage { return "Cocaine is off: \(error)" }
-        return "Cocaine is off"
+        if let error = state.lastErrorMessage { return "Insomnia is off: \(error)" }
+        return "Insomnia is off"
     }
 
     @objc
@@ -771,7 +771,7 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
-        let aboutItem = NSMenuItem(title: "About Cocaine", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: "About Insomnia", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
@@ -951,7 +951,7 @@ final class MenuBarController: NSObject {
 
 - [x] **Step 3: Wire the new launch-at-login controller in `AppDelegate`**
 
-If Task 1 has not already changed `Sources/Cocaine/AppDelegate.swift`, update the `MenuBarController` construction to:
+If Task 1 has not already changed `Sources/Insomnia/AppDelegate.swift`, update the `MenuBarController` construction to:
 
 ```swift
 self.menuBarController = MenuBarController(
@@ -976,7 +976,7 @@ self.lidCloseLockResponder = lidCloseLockResponder
 Run:
 
 ```bash
-rg -n "Lock screen when lid closes|Repair / Install Helper|toggleLockScreenOnLidClose|repairHelper" Sources/Cocaine Sources/CocaineCore
+rg -n "Lock screen when lid closes|Repair / Install Helper|toggleLockScreenOnLidClose|repairHelper" Sources/Insomnia Sources/InsomniaCore
 ```
 
 Expected: no output.
@@ -986,7 +986,7 @@ Expected: no output.
 Run:
 
 ```bash
-swift build --product Cocaine
+swift build --product Insomnia
 ```
 
 Expected: build succeeds.
@@ -994,7 +994,7 @@ Expected: build succeeds.
 - [x] **Step 6: Commit Task 4**
 
 ```bash
-git add Sources/Cocaine/CheckboxMenuItemView.swift Sources/Cocaine/MenuBarController.swift Sources/Cocaine/AppDelegate.swift
+git add Sources/Insomnia/CheckboxMenuItemView.swift Sources/Insomnia/MenuBarController.swift Sources/Insomnia/AppDelegate.swift
 git commit -m "feat: keep preference menu open while toggling"
 ```
 
@@ -1012,7 +1012,7 @@ In `README.md`, replace the current `## Behavior` section with:
 ```markdown
 ## Behavior
 
-- **Left-click menu bar icon:** toggle Cocaine off ↔ on. While on, Cocaine prevents system sleep and enforces your current preferences.
+- **Left-click menu bar icon:** toggle Insomnia off ↔ on. While on, Insomnia prevents system sleep and enforces your current preferences.
 - **Right-click menu bar icon:** opens a menu with checkbox preferences. Preference checkbox clicks keep the menu open so multiple settings can be changed quickly.
 
   | Preference | Default | What it does |
@@ -1020,16 +1020,16 @@ In `README.md`, replace the current `## Behavior` section with:
   | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. If off, the computer stays awake but the display may sleep and macOS lock-screen settings may apply. |
   | Prevent sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and the existing safety confirmation. |
   | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open only while lid-close sleep prevention is enabled. The menu row is disabled when lid-close prevention is off. |
-  | Launch at login | OFF | Registers Cocaine as a macOS login item. The checkbox reflects the actual system login-item state. |
+  | Launch at login | OFF | Registers Insomnia as a macOS login item. The checkbox reflects the actual system login-item state. |
 
-- **When Cocaine is off:** all preferences are inert. No assertions are held and no helper calls are made.
-- **When Cocaine is on and lid-close prevention is off:** closing the lid follows normal macOS behavior, including native sleep/lock behavior configured in System Settings.
-- **When Cocaine is on and lid-close prevention is on:** the helper keeps the Mac awake with the lid closed. Do not put it in a bag in this state.
+- **When Insomnia is off:** all preferences are inert. No assertions are held and no helper calls are made.
+- **When Insomnia is on and lid-close prevention is off:** closing the lid follows normal macOS behavior, including native sleep/lock behavior configured in System Settings.
+- **When Insomnia is on and lid-close prevention is on:** the helper keeps the Mac awake with the lid closed. Do not put it in a bag in this state.
 ```
 
 - [x] **Step 2: Update the README summary**
 
-Replace the opening paragraph under `# Cocaine` with:
+Replace the opening paragraph under `# Insomnia` with:
 
 ```markdown
 macOS menu bar app with one on/off icon. When on, it prevents system sleep using public IOKit assertions. Optional preferences extend that to display sleep, lid-close sleep prevention, lid event sounds, and launching at login.
@@ -1077,7 +1077,7 @@ Run:
 make app
 ```
 
-Expected: `build/Cocaine.app` is created successfully.
+Expected: `build/Insomnia.app` is created successfully.
 
 - [x] **Step 3: Run stale-reference checks**
 
@@ -1091,7 +1091,7 @@ Expected: no stale production/test/doc references except historical text inside 
 
 - [ ] **Step 4: Manual app checks**
 
-Launch `build/Cocaine.app` and verify:
+Launch `build/Insomnia.app` and verify:
 
 1. Right-click menu opens.
 2. Toggling `Prevent display sleep` does not close the menu.
@@ -1100,7 +1100,7 @@ Launch `build/Cocaine.app` and verify:
 5. `Lock screen when lid closes` is absent.
 6. `Repair / Install Helper` is absent.
 7. `Launch at login` appears and reflects the system login-item state.
-8. Left-click still toggles Cocaine's main keep-awake behavior.
+8. Left-click still toggles Insomnia's main keep-awake behavior.
 
 - [x] **Step 5: Update task record**
 

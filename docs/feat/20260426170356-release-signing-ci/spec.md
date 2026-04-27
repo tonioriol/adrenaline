@@ -2,14 +2,14 @@
 
 ## Goal
 
-Prepare Cocaine for public GitHub release artifacts by removing personal-use wording and adding a minimal GitHub Actions workflow that builds, signs, notarizes, staples, and uploads a macOS app zip when a version tag is pushed.
+Prepare Insomnia for public GitHub release artifacts by removing personal-use wording and adding a minimal GitHub Actions workflow that builds, signs, notarizes, staples, and uploads a macOS app zip when a version tag is pushed.
 
 ## Scope
 
 - Remove wording that frames the app as personal-only from user-facing docs and existing project docs.
 - Add one tag-triggered GitHub Actions workflow for notarized macOS release artifacts.
 - Add an AGPL license file and reference it from the README.
-- Keep packaging as a zip of `Cocaine.app`; do not add DMG generation.
+- Keep packaging as a zip of `Insomnia.app`; do not add DMG generation.
 - Keep the implementation small: no separate release script unless the workflow becomes unreadable.
 
 ## Release Trigger
@@ -33,10 +33,10 @@ The workflow will create a temporary keychain, import the certificate, configure
 
 The app and privileged helper already use explicit signing requirement strings for the `SMJobBless` trust boundary. The implementation should update those strings from the current Apple Development certificate wording to Developer ID wording, and keep these locations consistent:
 
-- `Sources/CocaineCore/CocaineHelperProtocol.swift`
-- `Resources/Cocaine/Info.plist`
-- `Resources/CocaineHelper/Info.plist`
-- `Tests/CocaineCoreTests/CocaineHelperConstantsTests.swift`
+- `Sources/InsomniaCore/InsomniaHelperProtocol.swift`
+- `Resources/Insomnia/Info.plist`
+- `Resources/InsomniaHelper/Info.plist`
+- `Tests/InsomniaCoreTests/InsomniaHelperConstantsTests.swift`
 
 The expected requirement shape should use the bundle identifier plus Developer ID Application certificate constraints for the configured Team ID. Tests should assert the source constants and plist values stay aligned.
 

@@ -4,7 +4,7 @@
 
 **Goal:** Add a macOS app bundle icon that uses the current diagonal capsule menu bar motif in a proper rounded-square app icon.
 
-**Architecture:** Generate a checked-in `Resources/Cocaine/Cocaine.icns` from a small Swift/AppKit icon generator so the icon is reproducible without Xcode asset catalogs. Declare the icon in `Resources/Cocaine/Info.plist` and update `Makefile` to copy it into `build/Cocaine.app/Contents/Resources` before signing.
+**Architecture:** Generate a checked-in `Resources/Insomnia/Insomnia.icns` from a small Swift/AppKit icon generator so the icon is reproducible without Xcode asset catalogs. Declare the icon in `Resources/Insomnia/Info.plist` and update `Makefile` to copy it into `build/Insomnia.app/Contents/Resources` before signing.
 
 **Tech Stack:** Swift 5.9, AppKit/CoreGraphics image drawing, `iconutil`, `sips`, SwiftPM, Makefile, macOS app bundle `Info.plist` metadata.
 
@@ -13,9 +13,9 @@
 ## File Structure
 
 - Create `Scripts/generate-app-icon.swift` — reproducible one-off Swift/AppKit generator for the capsule app icon `.icns`.
-- Create `Resources/Cocaine/Cocaine.icns` — generated app bundle icon consumed by macOS.
-- Modify `Resources/Cocaine/Info.plist` — add `CFBundleIconFile` pointing at the icon resource.
-- Modify `Makefile` — create `Contents/Resources`, copy `Cocaine.icns`, and add a `generate-app-icon` helper target.
+- Create `Resources/Insomnia/Insomnia.icns` — generated app bundle icon consumed by macOS.
+- Modify `Resources/Insomnia/Info.plist` — add `CFBundleIconFile` pointing at the icon resource.
+- Modify `Makefile` — create `Contents/Resources`, copy `Insomnia.icns`, and add a `generate-app-icon` helper target.
 - Update `docs/feat/20260426163053-app-icon-capsule/context.md` — track implementation files and plan cursor.
 
 ## Task 1: Add reproducible capsule icon generator
@@ -32,11 +32,11 @@ Create `Scripts/generate-app-icon.swift` with this exact content:
 import AppKit
 import Foundation
 
-let outputPath = CommandLine.arguments.dropFirst().first ?? "Resources/Cocaine/Cocaine.icns"
+let outputPath = CommandLine.arguments.dropFirst().first ?? "Resources/Insomnia/Insomnia.icns"
 let fileManager = FileManager.default
 let temporaryDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
-    .appendingPathComponent("cocaine-app-icon-\(UUID().uuidString)", isDirectory: true)
-let iconsetDirectory = temporaryDirectory.appendingPathComponent("Cocaine.iconset", isDirectory: true)
+    .appendingPathComponent("insomnia-app-icon-\(UUID().uuidString)", isDirectory: true)
+let iconsetDirectory = temporaryDirectory.appendingPathComponent("Insomnia.iconset", isDirectory: true)
 
 try fileManager.createDirectory(at: iconsetDirectory, withIntermediateDirectories: true)
 defer { try? fileManager.removeItem(at: temporaryDirectory) }
@@ -87,7 +87,7 @@ func writePNG(size: CGFloat, filename: String) throws {
     guard let tiffData = image.tiffRepresentation,
           let bitmap = NSBitmapImageRep(data: tiffData),
           let pngData = bitmap.representation(using: .png, properties: [:]) else {
-        throw NSError(domain: "CocaineIconGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to render \(filename)"])
+        throw NSError(domain: "InsomniaIconGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to render \(filename)"])
     }
     try pngData.write(to: iconsetDirectory.appendingPathComponent(filename))
 }
@@ -118,7 +118,7 @@ try process.run()
 process.waitUntilExit()
 
 guard process.terminationStatus == 0 else {
-    throw NSError(domain: "CocaineIconGenerator", code: Int(process.terminationStatus), userInfo: [NSLocalizedDescriptionKey: "iconutil failed"])
+    throw NSError(domain: "InsomniaIconGenerator", code: Int(process.terminationStatus), userInfo: [NSLocalizedDescriptionKey: "iconutil failed"])
 }
 ```
 
@@ -127,17 +127,17 @@ guard process.terminationStatus == 0 else {
 Run:
 
 ```bash
-swift Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
+swift Scripts/generate-app-icon.swift Resources/Insomnia/Insomnia.icns
 ```
 
-Expected: command exits 0 and creates `Resources/Cocaine/Cocaine.icns`.
+Expected: command exits 0 and creates `Resources/Insomnia/Insomnia.icns`.
 
 - [x] **Step 3: Inspect generated icon metadata**
 
 Run:
 
 ```bash
-sips -g pixelWidth -g pixelHeight Resources/Cocaine/Cocaine.icns
+sips -g pixelWidth -g pixelHeight Resources/Insomnia/Insomnia.icns
 ```
 
 Expected: command exits 0 and reports icon dimensions without an error.
@@ -147,7 +147,7 @@ Expected: command exits 0 and reports icon dimensions without an error.
 Run:
 
 ```bash
-git add Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
+git add Scripts/generate-app-icon.swift Resources/Insomnia/Insomnia.icns
 git -c commit.gpgsign=false commit -m "build: add capsule app icon asset"
 ```
 
@@ -156,16 +156,16 @@ Expected: commit succeeds.
 ## Task 2: Wire icon into app bundle metadata and packaging
 
 **Files:**
-- Modify: `Resources/Cocaine/Info.plist`
+- Modify: `Resources/Insomnia/Info.plist`
 - Modify: `Makefile`
 
 - [x] **Step 1: Add the bundle icon declaration**
 
-In `Resources/Cocaine/Info.plist`, insert this key/value pair after `CFBundleExecutable`:
+In `Resources/Insomnia/Info.plist`, insert this key/value pair after `CFBundleExecutable`:
 
 ```xml
   <key>CFBundleIconFile</key>
-  <string>Cocaine</string>
+  <string>Insomnia</string>
 ```
 
 - [x] **Step 2: Update Makefile resource packaging**
@@ -182,10 +182,10 @@ and the `app` recipe creates/copies resources like this:
 app: build
 	rm -rf $(APP_DIR)
 	mkdir -p $(MACOS_DIR) $(LAUNCH_SERVICES_DIR) $(RESOURCES_DIR)
-	cp Resources/Cocaine/Info.plist $(CONTENTS_DIR)/Info.plist
-	cp Resources/Cocaine/Cocaine.icns $(RESOURCES_DIR)/Cocaine.icns
-	cp $(SWIFT_BIN_DIR)/Cocaine $(MACOS_DIR)/Cocaine
-	cp $(SWIFT_BIN_DIR)/CocaineHelper $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
+	cp Resources/Insomnia/Info.plist $(CONTENTS_DIR)/Info.plist
+	cp Resources/Insomnia/Insomnia.icns $(RESOURCES_DIR)/Insomnia.icns
+	cp $(SWIFT_BIN_DIR)/Insomnia $(MACOS_DIR)/Insomnia
+	cp $(SWIFT_BIN_DIR)/InsomniaHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper
 	$(MAKE) sign
 ```
 
@@ -197,7 +197,7 @@ Update `.PHONY` and add this target to `Makefile`:
 .PHONY: test build generate-app-icon app sign reinstall run clean verify-helper-sections
 
 generate-app-icon:
-	swift Scripts/generate-app-icon.swift Resources/Cocaine/Cocaine.icns
+	swift Scripts/generate-app-icon.swift Resources/Insomnia/Insomnia.icns
 ```
 
 - [x] **Step 4: Verify the generator target**
@@ -208,14 +208,14 @@ Run:
 make generate-app-icon
 ```
 
-Expected: command exits 0 and refreshes `Resources/Cocaine/Cocaine.icns`.
+Expected: command exits 0 and refreshes `Resources/Insomnia/Insomnia.icns`.
 
 - [x] **Step 5: Commit metadata and packaging**
 
 Run:
 
 ```bash
-git add Resources/Cocaine/Info.plist Makefile Resources/Cocaine/Cocaine.icns
+git add Resources/Insomnia/Info.plist Makefile Resources/Insomnia/Insomnia.icns
 git -c commit.gpgsign=false commit -m "build: package capsule app icon"
 ```
 
@@ -224,8 +224,8 @@ Expected: commit succeeds.
 ## Task 3: Verify bundle output
 
 **Files:**
-- Verify: `build/Cocaine.app/Contents/Info.plist`
-- Verify: `build/Cocaine.app/Contents/Resources/Cocaine.icns`
+- Verify: `build/Insomnia.app/Contents/Info.plist`
+- Verify: `build/Insomnia.app/Contents/Resources/Insomnia.icns`
 
 - [x] **Step 1: Run tests**
 
@@ -245,14 +245,14 @@ Run:
 make app
 ```
 
-Expected: PASS and `build/Cocaine.app` exists.
+Expected: PASS and `build/Insomnia.app` exists.
 
 - [x] **Step 3: Verify icon file is in the bundle**
 
 Run:
 
 ```bash
-test -f build/Cocaine.app/Contents/Resources/Cocaine.icns && echo "icon copied"
+test -f build/Insomnia.app/Contents/Resources/Insomnia.icns && echo "icon copied"
 ```
 
 Expected: prints `icon copied`.
@@ -262,10 +262,10 @@ Expected: prints `icon copied`.
 Run:
 
 ```bash
-/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/Cocaine.app/Contents/Info.plist
+/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build/Insomnia.app/Contents/Info.plist
 ```
 
-Expected: prints `Cocaine`.
+Expected: prints `Insomnia`.
 
 - [x] **Step 5: Commit final verification updates if any**
 

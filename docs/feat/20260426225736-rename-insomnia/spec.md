@@ -29,13 +29,13 @@ The rename must update code, resources, tests, scripts, CI, and docs. It should 
 
 Required moves/renames include:
 
-- `Sources/Cocaine/` → `Sources/Insomnia/`
-- `Sources/CocaineCore/` → `Sources/InsomniaCore/`
-- `Sources/CocaineHelper/` → `Sources/InsomniaHelper/`
-- `Tests/CocaineCoreTests/` → `Tests/InsomniaCoreTests/`
-- `Resources/Cocaine/` → `Resources/Insomnia/`
-- `Resources/CocaineHelper/` → `Resources/InsomniaHelper/`
-- `Resources/Cocaine/Cocaine.icns` → `Resources/Insomnia/Insomnia.icns`
+- `Sources/Insomnia/` → `Sources/Insomnia/`
+- `Sources/InsomniaCore/` → `Sources/InsomniaCore/`
+- `Sources/InsomniaHelper/` → `Sources/InsomniaHelper/`
+- `Tests/InsomniaCoreTests/` → `Tests/InsomniaCoreTests/`
+- `Resources/Insomnia/` → `Resources/Insomnia/`
+- `Resources/InsomniaHelper/` → `Resources/InsomniaHelper/`
+- `Resources/Insomnia/Insomnia.icns` → `Resources/Insomnia/Insomnia.icns`
 
 The icon artwork can stay visually the same for this rename; only file names, generated iconset names, and app metadata need to change.
 
@@ -73,7 +73,7 @@ Final verification must include:
 - `swift test` passes.
 - `make app CONFIGURATION=release` passes with the available local signing identity, or fails only for an explicitly documented signing identity limitation.
 - `make release-zip CONFIGURATION=release` creates `build/Insomnia.zip` when signing is available.
-- `rg -n 'Cocaine|cocaine|COCAINE' . --glob '!build/**' --glob '!.build/**' --glob '!.git/**'` returns no matches.
+- `rg -n 'Insomnia|insomnia|INSOMNIA' . --glob '!build/**' --glob '!.build/**' --glob '!.git/**'` returns no matches.
 - `rg -n 'Insomnia|insomnia|INSOMNIA' Package.swift Makefile README.md NOTICE.md .github/workflows/release.yml Resources Sources Tests docs` shows expected renamed references.
 - Plist checks confirm the app bundle identifier is `com.tonioriol.insomnia` and helper identifier is `com.tonioriol.insomnia.helper`.
 

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add passive app-side lid event monitoring that plays Hero when the lid closes and Basso when the lid opens while Cocaine is active.
+**Goal:** Add passive app-side lid event monitoring that plays Hero when the lid closes and Basso when the lid opens while Insomnia is active.
 
-**Architecture:** Keep lid sounds as app-side feedback. `CocaineCore` owns the testable lid event policy and passive IOKit lid monitor; the app executable owns the AppKit `NSSound` wrapper and lifecycle wiring. The privileged helper remains unchanged and continues only managing lid-close sleep prevention.
+**Architecture:** Keep lid sounds as app-side feedback. `InsomniaCore` owns the testable lid event policy and passive IOKit lid monitor; the app executable owns the AppKit `NSSound` wrapper and lifecycle wiring. The privileged helper remains unchanged and continues only managing lid-close sleep prevention.
 
 **Tech Stack:** Swift 5.9, SwiftPM, XCTest, Combine, AppKit `NSSound`, IOKit general-interest notifications from `IOPMrootDomain`.
 
@@ -12,12 +12,12 @@
 
 ## File Structure
 
-- Create `Sources/CocaineCore/LidEventSoundController.swift` — defines normalized lid state, testable monitor/player protocols, and active-state sound policy.
-- Create `Sources/CocaineCore/LidStateMonitor.swift` — concrete passive IOKit monitor for clamshell state changes.
-- Create `Sources/Cocaine/SystemSoundPlayer.swift` — AppKit `NSSound` wrapper for built-in macOS sound names.
-- Modify `Sources/Cocaine/AppDelegate.swift` — instantiate and retain the lid sound controller next to existing app services.
-- Create `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` — policy tests with fake monitor and fake sound player.
-- Create `Tests/CocaineCoreTests/LidStateMonitorTests.swift` — deterministic tests for clamshell message decoding constants.
+- Create `Sources/InsomniaCore/LidEventSoundController.swift` — defines normalized lid state, testable monitor/player protocols, and active-state sound policy.
+- Create `Sources/InsomniaCore/LidStateMonitor.swift` — concrete passive IOKit monitor for clamshell state changes.
+- Create `Sources/Insomnia/SystemSoundPlayer.swift` — AppKit `NSSound` wrapper for built-in macOS sound names.
+- Modify `Sources/Insomnia/AppDelegate.swift` — instantiate and retain the lid sound controller next to existing app services.
+- Create `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift` — policy tests with fake monitor and fake sound player.
+- Create `Tests/InsomniaCoreTests/LidStateMonitorTests.swift` — deterministic tests for clamshell message decoding constants.
 - Modify `README.md` — document Hero close sound and Basso open sound.
 
 ---
@@ -25,16 +25,16 @@
 ### Task 1: Lid Event Sound Policy
 
 **Files:**
-- Create: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
-- Create: `Sources/CocaineCore/LidEventSoundController.swift`
+- Create: `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`
+- Create: `Sources/InsomniaCore/LidEventSoundController.swift`
 
 - [x] **Step 1: Write failing policy tests**
 
-Create `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`:
+Create `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 private final class FakeLidStateMonitor: LidStateMonitoring {
@@ -193,7 +193,7 @@ Expected: FAIL because `LidStateMonitoring`, `LidState`, `LidSoundPlaying`, and 
 
 - [x] **Step 3: Implement lid event sound policy**
 
-Create `Sources/CocaineCore/LidEventSoundController.swift`:
+Create `Sources/InsomniaCore/LidEventSoundController.swift`:
 
 ```swift
 import Combine
@@ -302,7 +302,7 @@ Expected: PASS for all existing and new tests.
 Run:
 
 ```bash
-git add Sources/CocaineCore/LidEventSoundController.swift Tests/CocaineCoreTests/LidEventSoundControllerTests.swift
+git add Sources/InsomniaCore/LidEventSoundController.swift Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift
 git commit -m "feat: add lid event sound policy"
 ```
 
@@ -313,16 +313,16 @@ Expected: commit succeeds.
 ### Task 2: Passive IOKit Lid State Monitor
 
 **Files:**
-- Create: `Tests/CocaineCoreTests/LidStateMonitorTests.swift`
-- Create: `Sources/CocaineCore/LidStateMonitor.swift`
+- Create: `Tests/InsomniaCoreTests/LidStateMonitorTests.swift`
+- Create: `Sources/InsomniaCore/LidStateMonitor.swift`
 
 - [x] **Step 1: Write failing lid monitor decoding tests**
 
-Create `Tests/CocaineCoreTests/LidStateMonitorTests.swift`:
+Create `Tests/InsomniaCoreTests/LidStateMonitorTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 final class LidStateMonitorTests: XCTestCase {
     func testClamshellArgumentWithoutStateBitMeansOpen() {
@@ -378,7 +378,7 @@ Expected: FAIL because `LidStateMonitor` does not exist.
 
 - [x] **Step 3: Implement passive IOKit monitor**
 
-Create `Sources/CocaineCore/LidStateMonitor.swift`:
+Create `Sources/InsomniaCore/LidStateMonitor.swift`:
 
 ```swift
 import Foundation
@@ -548,7 +548,7 @@ Expected: PASS.
 Run:
 
 ```bash
-git add Sources/CocaineCore/LidStateMonitor.swift Tests/CocaineCoreTests/LidStateMonitorTests.swift
+git add Sources/InsomniaCore/LidStateMonitor.swift Tests/InsomniaCoreTests/LidStateMonitorTests.swift
 git commit -m "feat: monitor lid state changes"
 ```
 
@@ -559,16 +559,16 @@ Expected: commit succeeds.
 ### Task 3: AppKit Sound Playback and App Wiring
 
 **Files:**
-- Create: `Sources/Cocaine/SystemSoundPlayer.swift`
-- Modify: `Sources/Cocaine/AppDelegate.swift`
+- Create: `Sources/Insomnia/SystemSoundPlayer.swift`
+- Modify: `Sources/Insomnia/AppDelegate.swift`
 
 - [x] **Step 1: Wire lid sounds in the app delegate before adding the sound player**
 
-Modify `Sources/Cocaine/AppDelegate.swift` to this exact content:
+Modify `Sources/Insomnia/AppDelegate.swift` to this exact content:
 
 ```swift
 import AppKit
-import CocaineCore
+import InsomniaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
@@ -617,11 +617,11 @@ Expected: FAIL because `SystemSoundPlayer` does not exist.
 
 - [x] **Step 3: Add the AppKit sound player wrapper**
 
-Create `Sources/Cocaine/SystemSoundPlayer.swift`:
+Create `Sources/Insomnia/SystemSoundPlayer.swift`:
 
 ```swift
 import AppKit
-import CocaineCore
+import InsomniaCore
 
 final class SystemSoundPlayer: LidSoundPlaying {
     func play(named soundName: String) {
@@ -658,14 +658,14 @@ Run:
 make app
 ```
 
-Expected: PASS and `build/Cocaine.app` is created.
+Expected: PASS and `build/Insomnia.app` is created.
 
 - [x] **Step 7: Commit app wiring**
 
 Run:
 
 ```bash
-git add Sources/Cocaine/AppDelegate.swift Sources/Cocaine/SystemSoundPlayer.swift
+git add Sources/Insomnia/AppDelegate.swift Sources/Insomnia/SystemSoundPlayer.swift
 git commit -m "feat: wire lid event sounds"
 ```
 
@@ -683,13 +683,13 @@ Expected: commit succeeds.
 Modify `README.md` to this exact content:
 
 ```markdown
-# Cocaine
+# Insomnia
 
 macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
 
 ## Safety
 
-Do not put a closed MacBook into a bag while Cocaine is on. Lid-close sleep prevention can leave the machine running and may cause overheating.
+Do not put a closed MacBook into a bag while Insomnia is on. Lid-close sleep prevention can leave the machine running and may cause overheating.
 
 ## Build
 
@@ -698,7 +698,7 @@ make test
 make app
 ```
 
-The app bundle is created at `build/Cocaine.app`.
+The app bundle is created at `build/Insomnia.app`.
 
 ## Run
 
@@ -781,16 +781,16 @@ make run
 
 Manual checks:
 
-1. Activate Cocaine from the menu bar icon.
+1. Activate Insomnia from the menu bar icon.
 2. Close the MacBook lid while near the machine.
 3. Expected: Hero plays once.
 4. Open the lid.
 5. Expected: Basso plays once.
 6. Close and open again.
 7. Expected: Hero and Basso each play once per real transition.
-8. Turn Cocaine off.
+8. Turn Insomnia off.
 9. Close or open the lid.
-10. Expected: no Cocaine lid event sound is played while off.
+10. Expected: no Insomnia lid event sound is played while off.
 
 - [x] **Step 4: Append verification result to task memory**
 

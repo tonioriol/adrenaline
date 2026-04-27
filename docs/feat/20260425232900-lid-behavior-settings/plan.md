@@ -2,59 +2,59 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace Cocaine's bundled "on = idle + lid-close" toggle with an opt-in, persisted preference model exposed as inline checkboxes in the right-click menu, while reconciling actual behavior live when settings change.
+**Goal:** Replace Insomnia's bundled "on = idle + lid-close" toggle with an opt-in, persisted preference model exposed as inline checkboxes in the right-click menu, while reconciling actual behavior live when settings change.
 
 **Architecture:** Add a `PreferencesStore` (UserDefaults-backed observable) that all consumers read; refactor `AwakeController` to take a `preventDisplaySleep` flag with live reconciliation; refactor `AppCoordinator` to consult the store and skip the helper when lid-close prevention is off; gate `LidEventSoundController` on a sound preference; add a sibling `LidCloseLockResponder` driven by a `ScreenLocker` protocol; extend `MenuBarController` with checkbox menu items, a first-time confirmation alert, and routing of clicks to either the store or the coordinator.
 
-**Tech Stack:** Swift 5.9, SwiftPM, AppKit, Combine, IOKit power assertions, `UserDefaults`, private `login` framework via `dlopen`/`dlsym` for `SACLockScreenImmediate`, XCTest. Targets: `CocaineCore` (library), `Cocaine` (app executable), `CocaineHelper` (privileged helper, untouched), `CocaineCoreTests` (XCTest).
+**Tech Stack:** Swift 5.9, SwiftPM, AppKit, Combine, IOKit power assertions, `UserDefaults`, private `login` framework via `dlopen`/`dlsym` for `SACLockScreenImmediate`, XCTest. Targets: `InsomniaCore` (library), `Insomnia` (app executable), `InsomniaHelper` (privileged helper, untouched), `InsomniaCoreTests` (XCTest).
 
 ---
 
 ## File Structure
 
 **Create:**
-- `Sources/CocaineCore/PreferencesStore.swift` — observable settings store + protocol + snapshot type.
-- `Sources/CocaineCore/ScreenLocker.swift` — `ScreenLocking` protocol + concrete `LoginFrameworkScreenLocker` impl.
-- `Sources/CocaineCore/LidCloseLockResponder.swift` — observes `LidStateMonitoring`, gates lock on prefs + active state.
-- `Tests/CocaineCoreTests/PreferencesStoreTests.swift` — defaults, round-trip, publishing, suite isolation.
-- `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift` — gating matrix + open-never-locks + lock-throws-no-crash.
+- `Sources/InsomniaCore/PreferencesStore.swift` — observable settings store + protocol + snapshot type.
+- `Sources/InsomniaCore/ScreenLocker.swift` — `ScreenLocking` protocol + concrete `LoginFrameworkScreenLocker` impl.
+- `Sources/InsomniaCore/LidCloseLockResponder.swift` — observes `LidStateMonitoring`, gates lock on prefs + active state.
+- `Tests/InsomniaCoreTests/PreferencesStoreTests.swift` — defaults, round-trip, publishing, suite isolation.
+- `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift` — gating matrix + open-never-locks + lock-throws-no-crash.
 
 **Modify:**
-- `Sources/CocaineCore/AwakeController.swift` — `enable(preventDisplaySleep:)`, `setPreventDisplaySleep(_:)`, internal split of system / display assertion IDs.
-- `Sources/CocaineCore/AppCoordinator.swift` — accept `PreferencesProviding`, conditional lid-close engagement, `setPreventDisplaySleep(_:)` and `setPreventLidCloseSleep(_:)` reconciliation methods, track engaged scope.
-- `Sources/CocaineCore/AppState.swift` — add `recordErrorWhileActive(_:)` for live-reconciliation failures that should not flip `isActive`.
-- `Sources/CocaineCore/LidEventSoundController.swift` — accept `PreferencesProviding`, gate `play(named:)` calls on `playLidEventSounds`.
-- `Sources/Cocaine/AppDelegate.swift` — construct `PreferencesStore`, `ScreenLocker`, `LidCloseLockResponder`; inject store into coordinator + sound controller + menu bar controller.
-- `Sources/Cocaine/MenuBarController.swift` — accept `PreferencesStore`; build extended checkbox menu; route clicks; first-time confirmation alert.
-- `Tests/CocaineCoreTests/AppStateTests.swift` — extend with `recordErrorWhileActive` test.
-- `Tests/CocaineCoreTests/AwakeControllerTests.swift` — extend with display-flag tests and live reconciliation tests.
-- `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — extend with prefs-aware tests and live reconciliation tests; existing tests get a default `FakePreferencesStore` injected.
-- `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift` — extend with sound-pref gating tests; existing tests get a default `FakePreferencesStore` injected.
+- `Sources/InsomniaCore/AwakeController.swift` — `enable(preventDisplaySleep:)`, `setPreventDisplaySleep(_:)`, internal split of system / display assertion IDs.
+- `Sources/InsomniaCore/AppCoordinator.swift` — accept `PreferencesProviding`, conditional lid-close engagement, `setPreventDisplaySleep(_:)` and `setPreventLidCloseSleep(_:)` reconciliation methods, track engaged scope.
+- `Sources/InsomniaCore/AppState.swift` — add `recordErrorWhileActive(_:)` for live-reconciliation failures that should not flip `isActive`.
+- `Sources/InsomniaCore/LidEventSoundController.swift` — accept `PreferencesProviding`, gate `play(named:)` calls on `playLidEventSounds`.
+- `Sources/Insomnia/AppDelegate.swift` — construct `PreferencesStore`, `ScreenLocker`, `LidCloseLockResponder`; inject store into coordinator + sound controller + menu bar controller.
+- `Sources/Insomnia/MenuBarController.swift` — accept `PreferencesStore`; build extended checkbox menu; route clicks; first-time confirmation alert.
+- `Tests/InsomniaCoreTests/AppStateTests.swift` — extend with `recordErrorWhileActive` test.
+- `Tests/InsomniaCoreTests/AwakeControllerTests.swift` — extend with display-flag tests and live reconciliation tests.
+- `Tests/InsomniaCoreTests/AppCoordinatorTests.swift` — extend with prefs-aware tests and live reconciliation tests; existing tests get a default `FakePreferencesStore` injected.
+- `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift` — extend with sound-pref gating tests; existing tests get a default `FakePreferencesStore` injected.
 - `README.md` — document the new menu items, defaults, and the safety regression for upgraders.
 
-**Untouched:** `Sources/CocaineHelper/**`, `Sources/CocaineCore/CocaineHelperProtocol.swift`, `Sources/CocaineCore/PrivilegedHelperClient.swift`, `Sources/CocaineCore/LidCloseController.swift`, `Sources/CocaineCore/LidStateMonitor.swift`, `Sources/CocaineCore/PowerAssertionClient.swift`, `Resources/**`, `Makefile`, `Package.swift` (no new targets — `ScreenLocker` uses `dlopen` so no new framework link is required).
+**Untouched:** `Sources/InsomniaHelper/**`, `Sources/InsomniaCore/InsomniaHelperProtocol.swift`, `Sources/InsomniaCore/PrivilegedHelperClient.swift`, `Sources/InsomniaCore/LidCloseController.swift`, `Sources/InsomniaCore/LidStateMonitor.swift`, `Sources/InsomniaCore/PowerAssertionClient.swift`, `Resources/**`, `Makefile`, `Package.swift` (no new targets — `ScreenLocker` uses `dlopen` so no new framework link is required).
 
 ---
 
 ## Task 1: PreferencesStore — protocol, snapshot, and concrete UserDefaults impl
 
 **Files:**
-- Create: `Sources/CocaineCore/PreferencesStore.swift`
-- Test: `Tests/CocaineCoreTests/PreferencesStoreTests.swift`
+- Create: `Sources/InsomniaCore/PreferencesStore.swift`
+- Test: `Tests/InsomniaCoreTests/PreferencesStoreTests.swift`
 
 - [x] **Step 1: Write the failing test**
 
-Create `Tests/CocaineCoreTests/PreferencesStoreTests.swift`:
+Create `Tests/InsomniaCoreTests/PreferencesStoreTests.swift`:
 
 ```swift
 import Combine
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 final class PreferencesStoreTests: XCTestCase {
     private func makeIsolatedDefaults(file: StaticString = #file, line: UInt = #line) -> UserDefaults {
-        let suiteName = "CocaineTests.\(UUID().uuidString)"
+        let suiteName = "InsomniaTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             XCTFail("Could not create test UserDefaults suite", file: file, line: line)
             return UserDefaults.standard
@@ -132,7 +132,7 @@ Expected: FAIL — `cannot find 'PreferencesStore' in scope`.
 
 - [x] **Step 3: Write minimal implementation**
 
-Create `Sources/CocaineCore/PreferencesStore.swift`:
+Create `Sources/InsomniaCore/PreferencesStore.swift`:
 
 ```swift
 import Combine
@@ -176,11 +176,11 @@ public protocol PreferencesProviding: AnyObject {
 @MainActor
 public final class PreferencesStore: ObservableObject, PreferencesProviding {
     public enum Key {
-        public static let preventDisplaySleep = "Cocaine.preventDisplaySleep"
-        public static let preventLidCloseSleep = "Cocaine.preventLidCloseSleep"
-        public static let lockScreenOnLidClose = "Cocaine.lockScreenOnLidClose"
-        public static let playLidEventSounds = "Cocaine.playLidEventSounds"
-        public static let lidClosePreventionConfirmed = "Cocaine.lidClosePreventionConfirmed"
+        public static let preventDisplaySleep = "Insomnia.preventDisplaySleep"
+        public static let preventLidCloseSleep = "Insomnia.preventLidCloseSleep"
+        public static let lockScreenOnLidClose = "Insomnia.lockScreenOnLidClose"
+        public static let playLidEventSounds = "Insomnia.playLidEventSounds"
+        public static let lidClosePreventionConfirmed = "Insomnia.lidClosePreventionConfirmed"
     }
 
     private let defaults: UserDefaults
@@ -258,8 +258,8 @@ Expected: PASS — existing tests still green (44 + 4 = 48).
 - [x] **Step 6: Commit**
 
 ```bash
-git add Sources/CocaineCore/PreferencesStore.swift Tests/CocaineCoreTests/PreferencesStoreTests.swift
-git -c commit.gpgsign=false commit -m "feat: add PreferencesStore for Cocaine settings"
+git add Sources/InsomniaCore/PreferencesStore.swift Tests/InsomniaCoreTests/PreferencesStoreTests.swift
+git -c commit.gpgsign=false commit -m "feat: add PreferencesStore for Insomnia settings"
 ```
 
 ---
@@ -267,12 +267,12 @@ git -c commit.gpgsign=false commit -m "feat: add PreferencesStore for Cocaine se
 ## Task 2: AwakeController — display flag and live reconciliation
 
 **Files:**
-- Modify: `Sources/CocaineCore/AwakeController.swift`
-- Modify: `Tests/CocaineCoreTests/AwakeControllerTests.swift`
+- Modify: `Sources/InsomniaCore/AwakeController.swift`
+- Modify: `Tests/InsomniaCoreTests/AwakeControllerTests.swift`
 
 - [x] **Step 1: Write the failing tests**
 
-Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final class AwakeControllerTests`):
+Append to `Tests/InsomniaCoreTests/AwakeControllerTests.swift` (inside `final class AwakeControllerTests`):
 
 ```swift
     func testEnableWithoutDisplayFlagCreatesOnlyNoIdleAssertion() throws {
@@ -281,7 +281,7 @@ Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final cla
 
         try controller.enable(preventDisplaySleep: false)
 
-        XCTAssertEqual(client.createdReasons, ["Cocaine is active"])
+        XCTAssertEqual(client.createdReasons, ["Insomnia is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -291,7 +291,7 @@ Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final cla
 
         try controller.enable(preventDisplaySleep: true)
 
-        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -313,7 +313,7 @@ Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final cla
         try controller.enable(preventDisplaySleep: false)
         try controller.setPreventDisplaySleep(true)
 
-        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -335,7 +335,7 @@ Append to `Tests/CocaineCoreTests/AwakeControllerTests.swift` (inside `final cla
         client.displayCreateError = TestError(errorDescription: "display failed")
         XCTAssertThrowsError(try controller.setPreventDisplaySleep(true))
 
-        XCTAssertEqual(client.createdReasons, ["Cocaine is active"])
+        XCTAssertEqual(client.createdReasons, ["Insomnia is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 ```
@@ -349,7 +349,7 @@ Expected: FAIL — `cannot find 'enable(preventDisplaySleep:)' in scope` and `ca
 
 - [x] **Step 3: Replace the implementation**
 
-Replace `Sources/CocaineCore/AwakeController.swift` with:
+Replace `Sources/InsomniaCore/AwakeController.swift` with:
 
 ```swift
 import Foundation
@@ -374,12 +374,12 @@ public final class AwakeController: AwakeControlling {
 
         var rolledBackIDs: [UInt32] = []
         do {
-            let systemID = try client.createNoIdleSleepAssertion(reason: "Cocaine is active")
+            let systemID = try client.createNoIdleSleepAssertion(reason: "Insomnia is active")
             rolledBackIDs.append(systemID)
             systemAssertionID = systemID
 
             if preventDisplaySleep {
-                let displayID = try client.createDisplaySleepAssertion(reason: "Cocaine is active")
+                let displayID = try client.createDisplaySleepAssertion(reason: "Insomnia is active")
                 rolledBackIDs.append(displayID)
                 displayAssertionID = displayID
             }
@@ -398,7 +398,7 @@ public final class AwakeController: AwakeControlling {
 
         if enabled {
             guard displayAssertionID == nil else { return }
-            let displayID = try client.createDisplaySleepAssertion(reason: "Cocaine is active")
+            let displayID = try client.createDisplaySleepAssertion(reason: "Insomnia is active")
             displayAssertionID = displayID
         } else {
             guard let id = displayAssertionID else { return }
@@ -420,7 +420,7 @@ public final class AwakeController: AwakeControlling {
 }
 ```
 
-Note: the protocol `AwakeControlling` (defined in [`AppCoordinator.swift`](Sources/CocaineCore/AppCoordinator.swift:3)) only requires `enable()` and `disable()`. `enable(preventDisplaySleep:)` and `setPreventDisplaySleep(_:)` are public extensions on the concrete class. The protocol is widened in Task 3.
+Note: the protocol `AwakeControlling` (defined in [`AppCoordinator.swift`](Sources/InsomniaCore/AppCoordinator.swift:3)) only requires `enable()` and `disable()`. `enable(preventDisplaySleep:)` and `setPreventDisplaySleep(_:)` are public extensions on the concrete class. The protocol is widened in Task 3.
 
 - [x] **Step 4: Run tests to verify they pass**
 
@@ -435,7 +435,7 @@ Expected: PASS — 54 total.
 - [x] **Step 6: Commit**
 
 ```bash
-git add Sources/CocaineCore/AwakeController.swift Tests/CocaineCoreTests/AwakeControllerTests.swift
+git add Sources/InsomniaCore/AwakeController.swift Tests/InsomniaCoreTests/AwakeControllerTests.swift
 git -c commit.gpgsign=false commit -m "feat: add display-sleep flag and live reconciliation to AwakeController"
 ```
 
@@ -444,16 +444,16 @@ git -c commit.gpgsign=false commit -m "feat: add display-sleep flag and live rec
 ## Task 3: AppCoordinator — read prefs, conditional helper, live reconciliation
 
 **Files:**
-- Modify: `Sources/CocaineCore/AppState.swift`
-- Modify: `Sources/CocaineCore/AppCoordinator.swift`
-- Modify: `Tests/CocaineCoreTests/AppStateTests.swift`
-- Modify: `Tests/CocaineCoreTests/AppCoordinatorTests.swift`
+- Modify: `Sources/InsomniaCore/AppState.swift`
+- Modify: `Sources/InsomniaCore/AppCoordinator.swift`
+- Modify: `Tests/InsomniaCoreTests/AppStateTests.swift`
+- Modify: `Tests/InsomniaCoreTests/AppCoordinatorTests.swift`
 
 - [x] **Step 0: Add `recordErrorWhileActive(_:)` to `AppState`**
 
-The existing [`AppState.recordError(_:)`](Sources/CocaineCore/AppState.swift:54) flips `isActive` to `false`, which is correct for full activation failures but wrong for live reconciliation failures where awake stays engaged. Add a sibling method that records the error message without disturbing `isActive`.
+The existing [`AppState.recordError(_:)`](Sources/InsomniaCore/AppState.swift:54) flips `isActive` to `false`, which is correct for full activation failures but wrong for live reconciliation failures where awake stays engaged. Add a sibling method that records the error message without disturbing `isActive`.
 
-Append a new test inside `final class AppStateTests` (file: `Tests/CocaineCoreTests/AppStateTests.swift`):
+Append a new test inside `final class AppStateTests` (file: `Tests/InsomniaCoreTests/AppStateTests.swift`):
 
 ```swift
     func testRecordErrorWhileActiveKeepsActiveButSetsErrorAndHelperFailed() {
@@ -470,7 +470,7 @@ Append a new test inside `final class AppStateTests` (file: `Tests/CocaineCoreTe
 Run: `swift test --filter AppStateTests 2>&1 | tail -20`
 Expected: FAIL — `cannot find 'recordErrorWhileActive' in scope`.
 
-In `Sources/CocaineCore/AppState.swift`, append (inside the `AppState` class, just after `recordError`):
+In `Sources/InsomniaCore/AppState.swift`, append (inside the `AppState` class, just after `recordError`):
 
 ```swift
     public func recordErrorWhileActive(_ message: String) {
@@ -486,13 +486,13 @@ Expected: PASS — existing AppState tests plus the new one.
 Commit:
 
 ```bash
-git add Sources/CocaineCore/AppState.swift Tests/CocaineCoreTests/AppStateTests.swift
+git add Sources/InsomniaCore/AppState.swift Tests/InsomniaCoreTests/AppStateTests.swift
 git -c commit.gpgsign=false commit -m "feat: add recordErrorWhileActive for live reconciliation failures"
 ```
 
 - [x] **Step 1: Widen `AwakeControlling` protocol and add a fake-prefs helper to the existing tests**
 
-In `Sources/CocaineCore/AppCoordinator.swift`, replace the `AwakeControlling` protocol declaration:
+In `Sources/InsomniaCore/AppCoordinator.swift`, replace the `AwakeControlling` protocol declaration:
 
 ```swift
 public protocol AwakeControlling: AnyObject {
@@ -506,7 +506,7 @@ public protocol AwakeControlling: AnyObject {
 Run: `swift build 2>&1 | tail -20`
 Expected: FAIL on `FakeAwakeController` in tests not conforming. We address it next.
 
-In `Tests/CocaineCoreTests/AppCoordinatorTests.swift`, replace the existing `private final class FakeAwakeController: AwakeControlling` block with the prefs-aware version:
+In `Tests/InsomniaCoreTests/AppCoordinatorTests.swift`, replace the existing `private final class FakeAwakeController: AwakeControlling` block with the prefs-aware version:
 
 ```swift
 private final class FakeAwakeController: AwakeControlling {
@@ -546,7 +546,7 @@ Expected: build succeeds (test target builds with new fake conforming).
 
 - [x] **Step 2: Add a `FakePreferencesStore` and write the failing prefs-aware tests**
 
-Append at the top of `Tests/CocaineCoreTests/AppCoordinatorTests.swift` (after the existing `SuspendedEnableLidCloseController` block, before `private struct TestError`):
+Append at the top of `Tests/InsomniaCoreTests/AppCoordinatorTests.swift` (after the existing `SuspendedEnableLidCloseController` block, before `private struct TestError`):
 
 ```swift
 @MainActor
@@ -923,7 +923,7 @@ Expected: FAIL — `extra argument 'preferences' in call`, `cannot find 'setPrev
 
 - [x] **Step 4: Replace AppCoordinator implementation**
 
-Replace `Sources/CocaineCore/AppCoordinator.swift` with:
+Replace `Sources/InsomniaCore/AppCoordinator.swift` with:
 
 ```swift
 import Foundation
@@ -1175,7 +1175,7 @@ Expected: PASS — 61 total. _Actual: 63 (cascade from above)._
 - [x] **Step 7: Commit**
 
 ```bash
-git add Sources/CocaineCore/AppCoordinator.swift Tests/CocaineCoreTests/AppCoordinatorTests.swift
+git add Sources/InsomniaCore/AppCoordinator.swift Tests/InsomniaCoreTests/AppCoordinatorTests.swift
 git -c commit.gpgsign=false commit -m "feat: drive AppCoordinator from PreferencesStore with live reconciliation"
 ```
 
@@ -1184,12 +1184,12 @@ git -c commit.gpgsign=false commit -m "feat: drive AppCoordinator from Preferenc
 ## Task 4: LidEventSoundController — gate sounds on preferences
 
 **Files:**
-- Modify: `Sources/CocaineCore/LidEventSoundController.swift`
-- Modify: `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`
+- Modify: `Sources/InsomniaCore/LidEventSoundController.swift`
+- Modify: `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`
 
 - [x] **Step 1: Write failing tests**
 
-Append the `FakePreferencesStore` definition (same shape as in Task 3) to `Tests/CocaineCoreTests/LidEventSoundControllerTests.swift`. Add `import Combine` to the top if missing.
+Append the `FakePreferencesStore` definition (same shape as in Task 3) to `Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift`. Add `import Combine` to the top if missing.
 
 ```swift
 @MainActor
@@ -1261,7 +1261,7 @@ Expected: FAIL — `extra argument 'preferences' in call`.
 
 - [x] **Step 3: Update the source**
 
-Replace `Sources/CocaineCore/LidEventSoundController.swift` with:
+Replace `Sources/InsomniaCore/LidEventSoundController.swift` with:
 
 ```swift
 import Combine
@@ -1366,7 +1366,7 @@ Expected: PASS — 63 total. _Actual after follow-up: 66._
 - [x] **Step 6: Commit**
 
 ```bash
-git add Sources/CocaineCore/LidEventSoundController.swift Tests/CocaineCoreTests/LidEventSoundControllerTests.swift
+git add Sources/InsomniaCore/LidEventSoundController.swift Tests/InsomniaCoreTests/LidEventSoundControllerTests.swift
 git -c commit.gpgsign=false commit -m "feat: gate lid event sounds on preferences"
 ```
 
@@ -1375,18 +1375,18 @@ git -c commit.gpgsign=false commit -m "feat: gate lid event sounds on preference
 ## Task 5: ScreenLocker protocol + LidCloseLockResponder
 
 **Files:**
-- Create: `Sources/CocaineCore/ScreenLocker.swift`
-- Create: `Sources/CocaineCore/LidCloseLockResponder.swift`
-- Test: `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`
+- Create: `Sources/InsomniaCore/ScreenLocker.swift`
+- Create: `Sources/InsomniaCore/LidCloseLockResponder.swift`
+- Test: `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift`
 
 - [x] **Step 1: Write failing tests**
 
-Create `Tests/CocaineCoreTests/LidCloseLockResponderTests.swift`:
+Create `Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift`:
 
 ```swift
 import Combine
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 private final class FakeLidStateMonitor: LidStateMonitoring {
@@ -1512,7 +1512,7 @@ Expected: FAIL — `cannot find 'ScreenLocking' in scope`, `cannot find 'LidClos
 
 - [x] **Step 3: Create ScreenLocker source**
 
-Create `Sources/CocaineCore/ScreenLocker.swift`:
+Create `Sources/InsomniaCore/ScreenLocker.swift`:
 
 ```swift
 import Foundation
@@ -1539,7 +1539,7 @@ public enum ScreenLockerError: Error, LocalizedError {
 
 @MainActor
 public final class LoginFrameworkScreenLocker: ScreenLocking {
-    private static let log = OSLog(subsystem: "com.tr0n.Cocaine", category: "ScreenLocker")
+    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "ScreenLocker")
     private static let frameworkPath =
         "/System/Library/PrivateFrameworks/login.framework/Versions/A/login"
 
@@ -1601,7 +1601,7 @@ Note: `CGSession -suspend` is the documented public command-line lock-session te
 
 - [x] **Step 4: Create LidCloseLockResponder source**
 
-Create `Sources/CocaineCore/LidCloseLockResponder.swift`:
+Create `Sources/InsomniaCore/LidCloseLockResponder.swift`:
 
 ```swift
 import Combine
@@ -1610,7 +1610,7 @@ import os.log
 
 @MainActor
 public final class LidCloseLockResponder {
-    private static let log = OSLog(subsystem: "com.tr0n.Cocaine", category: "LidCloseLockResponder")
+    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "LidCloseLockResponder")
 
     private let state: AppState
     private let monitor: LidStateMonitoring
@@ -1668,7 +1668,7 @@ Expected: PASS — 69 total. _Actual after review fix: 73 total._
 - [x] **Step 7: Commit**
 
 ```bash
-git add Sources/CocaineCore/ScreenLocker.swift Sources/CocaineCore/LidCloseLockResponder.swift Tests/CocaineCoreTests/LidCloseLockResponderTests.swift
+git add Sources/InsomniaCore/ScreenLocker.swift Sources/InsomniaCore/LidCloseLockResponder.swift Tests/InsomniaCoreTests/LidCloseLockResponderTests.swift
 git -c commit.gpgsign=false commit -m "feat: add ScreenLocker and LidCloseLockResponder"
 ```
 
@@ -1677,21 +1677,21 @@ git -c commit.gpgsign=false commit -m "feat: add ScreenLocker and LidCloseLockRe
 ## Task 6: Wire prefs, screen locker, and lock responder in AppDelegate
 
 **Files:**
-- Modify: `Sources/Cocaine/AppDelegate.swift`
-- Modify: `Sources/CocaineCore/AppCoordinator.swift` (remove the transitional 3-arg convenience init added in Task 3)
-- Modify: `Sources/CocaineCore/LidEventSoundController.swift` (remove the transitional 3-arg convenience init added in Task 4)
+- Modify: `Sources/Insomnia/AppDelegate.swift`
+- Modify: `Sources/InsomniaCore/AppCoordinator.swift` (remove the transitional 3-arg convenience init added in Task 3)
+- Modify: `Sources/InsomniaCore/LidEventSoundController.swift` (remove the transitional 3-arg convenience init added in Task 4)
 
-> **Construction order matters.** [`LidCloseLockResponder`](Sources/CocaineCore/LidCloseLockResponder.swift:1) chains itself onto the existing `monitor.onLidStateChange` closure inside its initializer, so the sound controller (which sets the first closure) MUST be constructed before the lock responder (which wraps it). The replacement file below already orders the two correctly.
+> **Construction order matters.** [`LidCloseLockResponder`](Sources/InsomniaCore/LidCloseLockResponder.swift:1) chains itself onto the existing `monitor.onLidStateChange` closure inside its initializer, so the sound controller (which sets the first closure) MUST be constructed before the lock responder (which wraps it). The replacement file below already orders the two correctly.
 
-> **Cleanup obligation:** Tasks 3 and 4 added transitional `public convenience init` overloads on `AppCoordinator` (~lines 52–63 of `Sources/CocaineCore/AppCoordinator.swift`) and `LidEventSoundController` (~lines 57–68 of `Sources/CocaineCore/LidEventSoundController.swift`) so the executable target kept compiling while the app delegate still used the old signatures. **This task must remove both convenience inits** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit primary inits everywhere. Verify with `grep -n "convenience init" Sources/CocaineCore/*.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/CocaineCore/AppCoordinator.swift` and `Sources/CocaineCore/LidEventSoundController.swift` along with `Sources/Cocaine/AppDelegate.swift`.
+> **Cleanup obligation:** Tasks 3 and 4 added transitional `public convenience init` overloads on `AppCoordinator` (~lines 52–63 of `Sources/InsomniaCore/AppCoordinator.swift`) and `LidEventSoundController` (~lines 57–68 of `Sources/InsomniaCore/LidEventSoundController.swift`) so the executable target kept compiling while the app delegate still used the old signatures. **This task must remove both convenience inits** in the same commit as the AppDelegate rewrite, since the rewritten delegate uses the explicit primary inits everywhere. Verify with `grep -n "convenience init" Sources/InsomniaCore/*.swift` returning no matches after the change. The Step 5 commit message and `git add` invocation must include `Sources/InsomniaCore/AppCoordinator.swift` and `Sources/InsomniaCore/LidEventSoundController.swift` along with `Sources/Insomnia/AppDelegate.swift`.
 
 - [x] **Step 1: Replace AppDelegate**
 
-Replace `Sources/Cocaine/AppDelegate.swift` with:
+Replace `Sources/Insomnia/AppDelegate.swift` with:
 
 ```swift
 import AppKit
-import CocaineCore
+import InsomniaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var preferences: PreferencesStore?
@@ -1764,18 +1764,18 @@ Expected: FAIL — `MenuBarController` does not yet accept a `preferences:` argu
 ## Task 7: MenuBarController — checkbox menu items, click routing, confirmation alert
 
 **Files:**
-- Modify: `Sources/Cocaine/MenuBarController.swift`
+- Modify: `Sources/Insomnia/MenuBarController.swift`
 
 This task makes `swift build` green again after Task 6.
 
 - [x] **Step 1: Replace MenuBarController**
 
-Replace `Sources/Cocaine/MenuBarController.swift` with:
+Replace `Sources/Insomnia/MenuBarController.swift` with:
 
 ```swift
 import AppKit
 import Combine
-import CocaineCore
+import InsomniaCore
 
 @MainActor
 final class MenuBarController: NSObject {
@@ -1828,7 +1828,7 @@ final class MenuBarController: NSObject {
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Cocaine")
+        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Insomnia")
         image?.isTemplate = true
         return image
     }
@@ -1902,14 +1902,14 @@ final class MenuBarController: NSObject {
     }
 
     private var tooltipText: String {
-        if state.isBusy { return "Cocaine is changing sleep prevention state" }
+        if state.isBusy { return "Insomnia is changing sleep prevention state" }
         if state.isActive {
             return preferences.preventLidCloseSleep
-                ? "Cocaine is preventing sleep, including lid-close sleep"
-                : "Cocaine is preventing sleep"
+                ? "Insomnia is preventing sleep, including lid-close sleep"
+                : "Insomnia is preventing sleep"
         }
-        if let error = state.lastErrorMessage { return "Cocaine is off: \(error)" }
-        return "Cocaine is off"
+        if let error = state.lastErrorMessage { return "Insomnia is off: \(error)" }
+        return "Insomnia is off"
     }
 
     @objc
@@ -1935,7 +1935,7 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
-        let aboutItem = NSMenuItem(title: "About Cocaine", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: "About Insomnia", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
@@ -2070,7 +2070,7 @@ Expected: PASS.
 - [x] **Step 3: Build the app bundle**
 
 Run: `make app 2>&1 | tail -10`
-Expected: PASS — `build/Cocaine.app` created.
+Expected: PASS — `build/Insomnia.app` created.
 
 - [x] **Step 4: Run the full test suite**
 
@@ -2080,7 +2080,7 @@ Expected: PASS — 69 total.
 - [x] **Step 5: Commit**
 
 ```bash
-git add Sources/Cocaine/AppDelegate.swift Sources/Cocaine/MenuBarController.swift
+git add Sources/Insomnia/AppDelegate.swift Sources/Insomnia/MenuBarController.swift
 git -c commit.gpgsign=false commit -m "feat: surface preference checkboxes in menu bar with confirmation alert"
 ```
 
@@ -2096,7 +2096,7 @@ git -c commit.gpgsign=false commit -m "feat: surface preference checkboxes in me
 Replace `README.md` with:
 
 ```markdown
-# Cocaine
+# Insomnia
 
 macOS menu bar app with one on/off icon. When on, it prevents idle sleep using public IOKit assertions. Optional preferences extend that to display sleep, full lid-close sleep prevention, and screen locking on lid close.
 
@@ -2111,7 +2111,7 @@ make test
 make app
 ```
 
-The app bundle is created at `build/Cocaine.app`.
+The app bundle is created at `build/Insomnia.app`.
 
 ## Run
 
@@ -2123,7 +2123,7 @@ The first time you enable **Prevent sleep with lid closed**, macOS asks for admi
 
 ## Behavior
 
-- **Left-click menu bar icon:** toggle Cocaine off ↔ on. While on, your current preferences are enforced.
+- **Left-click menu bar icon:** toggle Insomnia off ↔ on. While on, your current preferences are enforced.
 - **Right-click menu bar icon:** opens a menu with these checkbox preferences (saved across launches):
 
   | Preference | Default | What it does |
@@ -2131,10 +2131,10 @@ The first time you enable **Prevent sleep with lid closed**, macOS asks for admi
   | Prevent display sleep | ON | Holds a display-sleep assertion in addition to the no-idle assertion. Mostly meaningful for external displays while the lid is open. |
   | Prevent sleep with lid closed | OFF | Engages the privileged helper to keep the Mac awake when the lid closes. Requires one-time admin authorization and a confirmation alert. |
   | Lock screen when lid closes | ON | When lid-close prevention is on, locks your session as soon as the lid closes (Mac stays awake, screen blanks, session locked). |
-  | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Cocaine is on. |
+  | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Insomnia is on. |
 
-- **When Cocaine is off:** all preferences are inert. No assertions are held, no helper calls are made, no lock action fires.
-- **When Cocaine is on and lid-close prevention is off:** the Mac sleeps normally on lid close (no sounds, no lock — there is no event to react to).
+- **When Insomnia is off:** all preferences are inert. No assertions are held, no helper calls are made, no lock action fires.
+- **When Insomnia is on and lid-close prevention is off:** the Mac sleeps normally on lid close (no sounds, no lock — there is no event to react to).
 - **Repair / Install Helper:** appears in the menu when helper setup or communication has failed.
 
 ## Upgrading from earlier versions
@@ -2168,22 +2168,22 @@ Expected: PASS — at least 69 XCTest tests.
 - [x] **Step 2: App bundle build**
 
 Run: `make app 2>&1 | tail -10`
-Expected: PASS — `build/Cocaine.app` created and signed.
+Expected: PASS — `build/Insomnia.app` created and signed.
 
 - [x] **Step 3: Smoke-launch the bundle**
 
-Run: `open build/Cocaine.app && sleep 2 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine`
+Run: `open build/Insomnia.app && sleep 2 && pgrep -lf Insomnia.app/Contents/MacOS/Insomnia`
 Expected: PID printed.
 
 - [x] **Step 4: Quit cleanly**
 
-Run: `pkill -f 'Cocaine.app/Contents/MacOS/Cocaine' && sleep 1 && pgrep -lf Cocaine.app/Contents/MacOS/Cocaine ; echo "exit=$?"`
+Run: `pkill -f 'Insomnia.app/Contents/MacOS/Insomnia' && sleep 1 && pgrep -lf Insomnia.app/Contents/MacOS/Insomnia ; echo "exit=$?"`
 Expected: `exit=1` (no process — pgrep prints nothing and exits 1).
 
-- [x] **Step 5: Confirm no lingering Cocaine power assertions**
+- [x] **Step 5: Confirm no lingering Insomnia power assertions**
 
-Run: `pmset -g assertions | grep -i cocaine ; echo "exit=$?"`
-Expected: `exit=1` (no Cocaine-named assertion remains).
+Run: `pmset -g assertions | grep -i insomnia ; echo "exit=$?"`
+Expected: `exit=1` (no Insomnia-named assertion remains).
 
 - [x] **Step 6: Print the manual validation checklist**
 
@@ -2194,11 +2194,11 @@ Manual validation steps requiring physical hardware (out of scope for automated 
 
 1. Right-click menu shows the four checkboxes with defaults: display=on, lid-close=off, lock=on, sounds=on.
 2. Toggling lid-close-prevention on → confirmation alert appears once; cancelling leaves preference unchecked.
-3. Cocaine on, lid-close on, lock-on-close on, close lid → reopen → finds lock screen.
-4. Cocaine on, lid-close on, lock-on-close off, close lid → reopen → finds session unlocked.
-5. Cocaine on, lid-close on → toggle Cocaine off via icon → SleepDisabled returns to false (verify with `pmset -g | grep SleepDisabled`).
+3. Insomnia on, lid-close on, lock-on-close on, close lid → reopen → finds lock screen.
+4. Insomnia on, lid-close on, lock-on-close off, close lid → reopen → finds session unlocked.
+5. Insomnia on, lid-close on → toggle Insomnia off via icon → SleepDisabled returns to false (verify with `pmset -g | grep SleepDisabled`).
 6. Quit while lid-close on → relaunch → checkbox still on, but actual `SleepDisabled` only re-engages on next turn-on.
-7. Cocaine on with lid-close off, close lid → Mac sleeps normally (no sounds, no lock).
+7. Insomnia on with lid-close off, close lid → Mac sleeps normally (no sounds, no lock).
 ```
 
 - [x] **Step 7: No commit needed for verification-only task**

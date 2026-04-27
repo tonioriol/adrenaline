@@ -1,8 +1,8 @@
-# Cocaine macOS Keep-Awake App Spec
+# Insomnia macOS Keep-Awake App Spec
 
 ## Summary
 
-Build `Cocaine`, a macOS menu bar app at `/Users/tr0n/Code/cocaine`. It should behave like the simplest useful version of Caffeine: one visible menu bar icon, one click to turn on, one click to turn off. When on, it prevents normal idle/display sleep and also prevents sleep when the MacBook lid is closed. When off, it restores all normal sleep behavior.
+Build `Insomnia`, a macOS menu bar app at `/Users/tr0n/Code/insomnia`. It should behave like the simplest useful version of Caffeine: one visible menu bar icon, one click to turn on, one click to turn off. When on, it prevents normal idle/display sleep and also prevents sleep when the MacBook lid is closed. When off, it restores all normal sleep behavior.
 
 The app will be a clean Swift/SwiftUI reimplementation. Caffeine and Fermata are references for behavior and platform mechanisms, not bases to fork wholesale.
 
@@ -12,7 +12,7 @@ The app will be a clean Swift/SwiftUI reimplementation. Caffeine and Fermata are
 - In the on state, prevent ordinary idle/display sleep using public IOKit power assertions.
 - In the on state, prevent lid-close sleep using a privileged helper/admin-authorized mechanism modeled after Fermata.
 - In the off state, release all ordinary sleep assertions and restore normal lid-close sleep.
-- Keep the visible product name `Cocaine`.
+- Keep the visible product name `Insomnia`.
 - Keep the codebase small and understandable, with focused services instead of a large app-delegate controller.
 - Include attribution/license material for upstream behavioral references where code or patterns are reused.
 
@@ -43,7 +43,7 @@ A left click toggles the state immediately:
 
 The primary UI is the click toggle. A secondary menu may exist only for app lifecycle and recovery items:
 
-- About Cocaine
+- About Insomnia
 - Repair/Install Helper, shown or enabled only when helper setup fails or needs reinstallation
 - Quit
 
@@ -63,7 +63,7 @@ The app target owns UI, state, normal IOKit assertions, and XPC communication wi
 
 Recommended components:
 
-- `CocaineApp`: SwiftUI app entry point.
+- `InsomniaApp`: SwiftUI app entry point.
 - `AppDelegate`: small bridge for menu bar app lifecycle and accessory activation policy.
 - `MenuBarController`: owns `NSStatusItem`, click handling, icon updates, and minimal menu.
 - `AppState`: observable state containing whether the app is off/on, helper status, and the most recent error.

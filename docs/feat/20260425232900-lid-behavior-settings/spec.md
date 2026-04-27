@@ -2,7 +2,7 @@
 
 ## Summary
 
-Replace Cocaine's bundled "on = idle + lid-close prevention" toggle with a smaller, opt-in model driven by user-visible checkboxes in the right-click menu. The left-click icon continues to mean "Cocaine on or off", but **on** now means only the safe baseline behavior (idle/CPU sleep prevention, plus optionally display sleep prevention). Lid-close sleep prevention becomes an explicit opt-in checkbox, off by default. A new "Lock screen when lid closes" preference protects unattended clamshelled Macs. Lid event sounds become a toggle.
+Replace Insomnia's bundled "on = idle + lid-close prevention" toggle with a smaller, opt-in model driven by user-visible checkboxes in the right-click menu. The left-click icon continues to mean "Insomnia on or off", but **on** now means only the safe baseline behavior (idle/CPU sleep prevention, plus optionally display sleep prevention). Lid-close sleep prevention becomes an explicit opt-in checkbox, off by default. A new "Lock screen when lid closes" preference protects unattended clamshelled Macs. Lid event sounds become a toggle.
 
 The change preserves the existing one-click UX for the safe case, makes the dangerous lid-close behavior intentional, and gives the user a single right-click surface to see and adjust everything that matters.
 
@@ -15,7 +15,7 @@ The change preserves the existing one-click UX for the safe case, makes the dang
 - Let the user mute lid event sounds (default ON, as today).
 - Persist preferences across launches via `UserDefaults`.
 - Keep all settings reachable through inline checkbox items in the existing right-click menu — no separate Preferences window.
-- Reconcile actual behavior live when the user toggles a preference while Cocaine is on.
+- Reconcile actual behavior live when the user toggles a preference while Insomnia is on.
 - Preserve all existing safety invariants (clean shutdown, helper repair path, no silent lid-close prevention).
 
 ## Non-goals
@@ -33,13 +33,13 @@ The change preserves the existing one-click UX for the safe case, makes the dang
 
 ### Menu bar icon (unchanged)
 
-- Left-click toggles Cocaine off ↔ on. "On" now means "current preferences are being enforced".
+- Left-click toggles Insomnia off ↔ on. "On" now means "current preferences are being enforced".
 - The icon's on/off rendering is unchanged from today.
 
 ### Right-click menu (extended)
 
 ```
-About Cocaine
+About Insomnia
 ─────────────────
 ☐ Prevent display sleep            (default ON)
 ☐ Prevent sleep with lid closed ⚠  (default OFF)
@@ -55,7 +55,7 @@ Quit
 - "Lock screen when lid closes" is visually nested (indented) under "Prevent sleep with lid closed" and is disabled (greyed out) when lid-close prevention is unchecked, since it has no event to fire on.
 - "Play lid event sounds" gates both the close (Hero) and open (Basso) sounds.
 
-### Behavior matrix when Cocaine is ON and lid closes
+### Behavior matrix when Insomnia is ON and lid closes
 
 | `Prevent lid-close sleep` | `Lock screen on lid close` | Result |
 |---|---|---|
@@ -63,7 +63,7 @@ Quit
 | ON | OFF | Mac stays awake, internal screen blanks per macOS, session remains unlocked. |
 | ON | ON | Mac stays awake, screen blanks, session locked. |
 
-### Behavior when Cocaine is OFF
+### Behavior when Insomnia is OFF
 
 All preferences are inert. No assertions are held, no helper calls are made, no lock action fires. Preferences are armed but not firing.
 
@@ -73,9 +73,9 @@ Whenever the user checks "Prevent sleep with lid closed" while it was previously
 
 > Preventing lid-close sleep can leave a closed MacBook running. Don't put it in a bag while this is enabled — it may overheat. Continue?
 
-Buttons: **Cancel** (preference stays off) / **Enable** (preference is set; if Cocaine is currently on, helper engagement begins immediately, otherwise it will engage on the next turn-on).
+Buttons: **Cancel** (preference stays off) / **Enable** (preference is set; if Insomnia is currently on, helper engagement begins immediately, otherwise it will engage on the next turn-on).
 
-The alert appears regardless of whether Cocaine is on or off, since the meaningful event is the user opting in to the dangerous behavior, not the moment it physically engages. After acceptance, the alert is suppressed by a persisted "confirmed" flag (see Implementation Notes); the flag is cleared when the preference is unchecked, so unchecking and re-checking re-shows the alert.
+The alert appears regardless of whether Insomnia is on or off, since the meaningful event is the user opting in to the dangerous behavior, not the moment it physically engages. After acceptance, the alert is suppressed by a persisted "confirmed" flag (see Implementation Notes); the flag is cleared when the preference is unchecked, so unchecking and re-checking re-shows the alert.
 
 ## Architecture
 
@@ -121,10 +121,10 @@ MenuBarController ────► reads/writes PreferencesStore
 ### Preferences (`PreferencesStore`)
 
 ```swift
-preventDisplaySleep:   Bool    // default true,  key "Cocaine.preventDisplaySleep"
-preventLidCloseSleep:  Bool    // default false, key "Cocaine.preventLidCloseSleep"
-lockScreenOnLidClose:  Bool    // default true,  key "Cocaine.lockScreenOnLidClose"
-playLidEventSounds:    Bool    // default true,  key "Cocaine.playLidEventSounds"
+preventDisplaySleep:   Bool    // default true,  key "Insomnia.preventDisplaySleep"
+preventLidCloseSleep:  Bool    // default false, key "Insomnia.preventLidCloseSleep"
+lockScreenOnLidClose:  Bool    // default true,  key "Insomnia.lockScreenOnLidClose"
+playLidEventSounds:    Bool    // default true,  key "Insomnia.playLidEventSounds"
 ```
 
 All four are independent. They are stored under stable string keys in `UserDefaults.standard`. Missing keys read as defaults.
@@ -168,7 +168,7 @@ The coordinator tracks, per active session, whether lid-close prevention was act
 
 ## Live Reconciliation Flows
 
-When the user toggles a preference checkbox while Cocaine is on, the coordinator reconciles actual state to match the new preference. All reconciliations run through the existing `runTransition` busy-guard.
+When the user toggles a preference checkbox while Insomnia is on, the coordinator reconciles actual state to match the new preference. All reconciliations run through the existing `runTransition` busy-guard.
 
 | Toggled preference | Was → Now | Action |
 |---|---|---|
@@ -179,7 +179,7 @@ When the user toggles a preference checkbox while Cocaine is on, the coordinator
 | `lockScreenOnLidClose` | * | No live action. Affects only the next lid-close event. |
 | `playLidEventSounds` | * | No live action. Affects only the next lid event. |
 
-When Cocaine is OFF, toggling any preference simply persists it. No controllers are touched.
+When Insomnia is OFF, toggling any preference simply persists it. No controllers are touched.
 
 ## Lid Event Flows (when ON and `preventLidCloseSleep == true`)
 
@@ -196,8 +196,8 @@ When `preventLidCloseSleep == false`, the helper is not engaged and the Mac slee
 
 ### Invariants
 
-1. `preventLidCloseSleep == false` (default) implies the helper-side `SleepDisabled` is `false`. Cocaine never silently engages lid-close prevention.
-2. Cocaine OFF implies no power assertions held and `SleepDisabled == false`.
+1. `preventLidCloseSleep == false` (default) implies the helper-side `SleepDisabled` is `false`. Insomnia never silently engages lid-close prevention.
+2. Insomnia OFF implies no power assertions held and `SleepDisabled == false`.
 3. Quit always cleans up, regardless of which preferences were active.
 4. Menu checkbox state always matches `PreferencesStore`. Reverts after failed reconciliation are reflected in the menu on the next render.
 
@@ -207,13 +207,13 @@ When `preventLidCloseSleep == false`, the helper is not engaged and the Mac slee
 |---|---|
 | Helper not installed when enabling lid-close live | First-time bless attempt with admin auth. On user cancel: revert preference, record error, "Repair / Install Helper" stays/becomes available. |
 | Helper communication fails enabling lid-close (auth granted) | Revert preference, record error, ensure helper-side state is disabled, leave awake controller as-is. |
-| Helper disable fails on turn-off | Cocaine still goes OFF (assertions released), `lastErrorMessage` records the helper failure, "Repair / Install Helper" appears. Safety: lid-close prevention must not linger. |
+| Helper disable fails on turn-off | Insomnia still goes OFF (assertions released), `lastErrorMessage` records the helper failure, "Repair / Install Helper" appears. Safety: lid-close prevention must not linger. |
 | Display assertion creation fails on live toggle | Revert preference, record error. No-idle assertion unaffected. |
 | `ScreenLocker.lock()` fails | Best-effort; logged via `os_log`, no user-visible error, sleep prevention unaffected. |
 | Sound playback fails | Silent, as today. |
 | `UserDefaults` read fails / corrupted | Use built-in defaults, never crash. |
 | Settings changed externally between snapshot and apply | Reconciliation reads its own snapshot at apply time; the busy-guard serializes transitions. |
-| User changes `SleepDisabled` from outside Cocaine | Out of scope. Cocaine only manages what it set. |
+| User changes `SleepDisabled` from outside Insomnia | Out of scope. Insomnia only manages what it set. |
 
 ### Safety regression vs. today
 
@@ -222,7 +222,7 @@ After upgrading, lid-close prevention defaults to OFF. Existing users who relied
 ## Implementation Notes
 
 - `PreferencesStore` should accept an injected `UserDefaults` instance so tests use a `UserDefaults(suiteName:)` namespace and never pollute the real one.
-- The "first-time confirmation shown" flag is itself a `UserDefaults` key (`Cocaine.lidClosePreventionConfirmed`, default `false`), set to `true` after the user accepts the alert. It is reset to `false` whenever the preference is unchecked, so disabling and re-enabling triggers the alert again.
+- The "first-time confirmation shown" flag is itself a `UserDefaults` key (`Insomnia.lidClosePreventionConfirmed`, default `false`), set to `true` after the user accepts the alert. It is reset to `false` whenever the preference is unchecked, so disabling and re-enabling triggers the alert again.
 - `ScreenLocker` should not link the private `login` framework directly. Use `dlopen("/System/Library/PrivateFrameworks/login.framework/login", RTLD_LAZY)` and `dlsym` for `SACLockScreenImmediate`. If the symbol is unavailable, fall back to `osascript -e 'tell application "loginwindow" to «event aevtrlck»'` via `Process`.
 - `MenuBarController` should rebuild the menu lazily (in `showMenu()`) so checkbox states reflect the latest preferences each time the menu opens. Live preference observation only needs to drive the icon and tooltip, not menu state (which is rebuilt on display).
 - Keep coordinator concurrency invariants: all reconciliations go through `runTransition`, so concurrent menu clicks during a transition are dropped (matching the existing toggle behavior).
@@ -269,11 +269,11 @@ After upgrading, lid-close prevention defaults to OFF. Existing users who relied
 1. Fresh install → right-click menu shows checkboxes with expected defaults (display=on, lid-close=off, lock=on, sounds=on).
 2. Toggle lid-close-prevention on → confirmation dialog appears once.
 3. Toggle lid-close-prevention on, cancel dialog → preference stays off, no helper call.
-4. Cocaine on, toggle display-sleep prevention off live → external monitor dims, Mac stays awake.
-5. Cocaine on, lid-close on, lock-on-close on, close lid → reopen → finds lock screen.
-6. Cocaine on, lid-close on, lock-on-close off, close lid → reopen → finds session unlocked.
+4. Insomnia on, toggle display-sleep prevention off live → external monitor dims, Mac stays awake.
+5. Insomnia on, lid-close on, lock-on-close on, close lid → reopen → finds lock screen.
+6. Insomnia on, lid-close on, lock-on-close off, close lid → reopen → finds session unlocked.
 7. Quit while lid-close on → relaunch → preference still on, but actual `SleepDisabled` is false until next turn-on.
-8. Cocaine on with lid-close on → toggle Cocaine off via icon → `SleepDisabled` returns to false; menu checkbox stays checked (preference vs. actual state distinction).
+8. Insomnia on with lid-close on → toggle Insomnia off via icon → `SleepDisabled` returns to false; menu checkbox stays checked (preference vs. actual state distinction).
 
 ### Tests deliberately skipped
 
@@ -293,5 +293,5 @@ After upgrading, lid-close prevention defaults to OFF. Existing users who relied
 - **Separate Preferences window with a SwiftUI `Settings` scene.** Rejected for v1 in favor of inline menu checkboxes; revisit if the settings list grows past four to six items.
 - **Three-state click cycle (Off / Idle-only / Idle + lid-close).** Rejected in favor of an opt-in preference, because cycling makes it easy to land on the dangerous state by accident.
 - **Bundling lock-screen behavior into `LidEventSoundController`.** Rejected to keep that controller focused on audio. Lock and sound are sibling lid-event consumers.
-- **Skipping live reconciliation (settings only apply on next off→on).** Rejected because users will expect a checkbox flip to take effect immediately while Cocaine is on, especially for the dangerous lid-close toggle.
+- **Skipping live reconciliation (settings only apply on next off→on).** Rejected because users will expect a checkbox flip to take effect immediately while Insomnia is on, especially for the dangerous lid-close toggle.
 - **Auto-revert versus persist on failed lid-close enable live.** Auto-revert chosen so the menu checkbox always matches actual behavior; persisting checked-but-failed risks the user thinking lid-close is engaged when it isn't.

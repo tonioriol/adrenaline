@@ -1,10 +1,10 @@
-# Cocaine Implementation Plan
+# Insomnia Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use subagent-driven-development (recommended) or executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a macOS menu bar app named Cocaine with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.
+**Goal:** Build a macOS menu bar app named Insomnia with one clickable off/on icon; on prevents ordinary sleep and lid-close sleep, off restores normal sleep behavior.
 
-**Architecture:** Use a new SwiftPM-based codebase with a testable `CocaineCore` library, an AppKit menu bar executable, and a small privileged helper executable. The app coordinator owns the one-toggle state machine; UI code only forwards clicks and renders state; privileged lid-close behavior is isolated behind a helper client and XPC protocol.
+**Architecture:** Use a new SwiftPM-based codebase with a testable `InsomniaCore` library, an AppKit menu bar executable, and a small privileged helper executable. The app coordinator owns the one-toggle state machine; UI code only forwards clicks and renders state; privileged lid-close behavior is isolated behind a helper client and XPC protocol.
 
 **Tech Stack:** Swift 5.9+, SwiftPM, XCTest, AppKit, Combine, IOKit power assertions, Foundation XPC, ServiceManagement `SMJobBless`, Makefile app bundling/signing.
 
@@ -20,25 +20,25 @@ The approved spec contains one product surface: a single-toggle macOS keep-awake
 - Create `Makefile` — build/test/package commands for the app bundle and privileged helper.
 - Create `README.md` — local build/run/safety notes.
 - Create `NOTICE.md` — upstream attribution for Caffeine and Fermata references.
-- Create `Resources/Cocaine/Info.plist` — app bundle metadata and helper authorization requirement.
-- Create `Resources/CocaineHelper/Info.plist` — embedded helper metadata and authorized app requirement.
-- Create `Resources/CocaineHelper/launchd.plist` — helper launchd Mach service metadata.
-- Create `Sources/Cocaine/main.swift` — app executable entry point.
-- Create `Sources/Cocaine/AppDelegate.swift` — accessory app lifecycle bridge.
-- Create `Sources/Cocaine/MenuBarController.swift` — `NSStatusItem`, click handling, minimal menu, icons.
-- Create `Sources/CocaineCore/AppState.swift` — observable user-facing state.
-- Create `Sources/CocaineCore/AppCoordinator.swift` — one-toggle orchestration and rollback.
-- Create `Sources/CocaineCore/AwakeController.swift` — ordinary sleep assertion owner.
-- Create `Sources/CocaineCore/PowerAssertionClient.swift` — IOKit assertion wrapper with fakeable protocol.
-- Create `Sources/CocaineCore/LidCloseController.swift` — lid-close enable/disable/status orchestration.
-- Create `Sources/CocaineCore/CocaineHelperProtocol.swift` — shared XPC protocol and helper constants.
-- Create `Sources/CocaineCore/PrivilegedHelperClient.swift` — helper install, XPC connection, async wrappers.
-- Create `Sources/CocaineHelper/ApplePowerSettings.swift` — private power setting bridge isolated to helper.
-- Create `Sources/CocaineHelper/main.swift` — helper XPC listener implementation.
-- Create `Tests/CocaineCoreTests/AppStateTests.swift` — state defaults and transitions.
-- Create `Tests/CocaineCoreTests/AppCoordinatorTests.swift` — toggle success/failure/rollback tests.
-- Create `Tests/CocaineCoreTests/AwakeControllerTests.swift` — assertion create/release tests.
-- Create `Tests/CocaineCoreTests/LidCloseControllerTests.swift` — helper delegation/status tests.
+- Create `Resources/Insomnia/Info.plist` — app bundle metadata and helper authorization requirement.
+- Create `Resources/InsomniaHelper/Info.plist` — embedded helper metadata and authorized app requirement.
+- Create `Resources/InsomniaHelper/launchd.plist` — helper launchd Mach service metadata.
+- Create `Sources/Insomnia/main.swift` — app executable entry point.
+- Create `Sources/Insomnia/AppDelegate.swift` — accessory app lifecycle bridge.
+- Create `Sources/Insomnia/MenuBarController.swift` — `NSStatusItem`, click handling, minimal menu, icons.
+- Create `Sources/InsomniaCore/AppState.swift` — observable user-facing state.
+- Create `Sources/InsomniaCore/AppCoordinator.swift` — one-toggle orchestration and rollback.
+- Create `Sources/InsomniaCore/AwakeController.swift` — ordinary sleep assertion owner.
+- Create `Sources/InsomniaCore/PowerAssertionClient.swift` — IOKit assertion wrapper with fakeable protocol.
+- Create `Sources/InsomniaCore/LidCloseController.swift` — lid-close enable/disable/status orchestration.
+- Create `Sources/InsomniaCore/InsomniaHelperProtocol.swift` — shared XPC protocol and helper constants.
+- Create `Sources/InsomniaCore/PrivilegedHelperClient.swift` — helper install, XPC connection, async wrappers.
+- Create `Sources/InsomniaHelper/ApplePowerSettings.swift` — private power setting bridge isolated to helper.
+- Create `Sources/InsomniaHelper/main.swift` — helper XPC listener implementation.
+- Create `Tests/InsomniaCoreTests/AppStateTests.swift` — state defaults and transitions.
+- Create `Tests/InsomniaCoreTests/AppCoordinatorTests.swift` — toggle success/failure/rollback tests.
+- Create `Tests/InsomniaCoreTests/AwakeControllerTests.swift` — assertion create/release tests.
+- Create `Tests/InsomniaCoreTests/LidCloseControllerTests.swift` — helper delegation/status tests.
 
 ---
 
@@ -47,16 +47,16 @@ The approved spec contains one product surface: a single-toggle macOS keep-awake
 **Files:**
 - Create: `Package.swift`
 - Create: `Makefile`
-- Create: `Sources/CocaineCore/AppState.swift`
-- Create: `Tests/CocaineCoreTests/AppStateTests.swift`
+- Create: `Sources/InsomniaCore/AppState.swift`
+- Create: `Tests/InsomniaCoreTests/AppStateTests.swift`
 
 - [x] **Step 1: Write the failing state tests**
 
-Create `Tests/CocaineCoreTests/AppStateTests.swift`:
+Create `Tests/InsomniaCoreTests/AppStateTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 @MainActor
 final class AppStateTests: XCTestCase {
@@ -94,7 +94,7 @@ final class AppStateTests: XCTestCase {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test
+cd /Users/tr0n/Code/insomnia && swift test
 ```
 
 Expected: FAIL because `Package.swift` and `AppState` do not exist yet.
@@ -108,16 +108,16 @@ Create `Package.swift`:
 import PackageDescription
 
 let package = Package(
-    name: "Cocaine",
+    name: "Insomnia",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "Cocaine", targets: ["Cocaine"]),
-        .executable(name: "CocaineHelper", targets: ["CocaineHelper"]),
-        .library(name: "CocaineCore", targets: ["CocaineCore"]),
+        .executable(name: "Insomnia", targets: ["Insomnia"]),
+        .executable(name: "InsomniaHelper", targets: ["InsomniaHelper"]),
+        .library(name: "InsomniaCore", targets: ["InsomniaCore"]),
     ],
     targets: [
         .target(
-            name: "CocaineCore",
+            name: "InsomniaCore",
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -125,16 +125,16 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "Cocaine",
-            dependencies: ["CocaineCore"],
+            name: "Insomnia",
+            dependencies: ["InsomniaCore"],
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("Foundation"),
             ]
         ),
         .executableTarget(
-            name: "CocaineHelper",
-            dependencies: ["CocaineCore"],
+            name: "InsomniaHelper",
+            dependencies: ["InsomniaCore"],
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -142,17 +142,17 @@ let package = Package(
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Resources/CocaineHelper/Info.plist",
+                    "-Xlinker", "Resources/InsomniaHelper/Info.plist",
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__launchd_plist",
-                    "-Xlinker", "Resources/CocaineHelper/launchd.plist",
+                    "-Xlinker", "Resources/InsomniaHelper/launchd.plist",
                 ]),
             ]
         ),
         .testTarget(
-            name: "CocaineCoreTests",
-            dependencies: ["CocaineCore"]
+            name: "InsomniaCoreTests",
+            dependencies: ["InsomniaCore"]
         ),
     ]
 )
@@ -160,7 +160,7 @@ let package = Package(
 
 - [x] **Step 3: Create the state model implementation**
 
-Create `Sources/CocaineCore/AppState.swift`:
+Create `Sources/InsomniaCore/AppState.swift`:
 
 ```swift
 import Combine
@@ -247,7 +247,7 @@ clean:
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make test
+cd /Users/tr0n/Code/insomnia && make test
 ```
 
 Expected: PASS with 3 tests.
@@ -255,7 +255,7 @@ Expected: PASS with 3 tests.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git init && git add Package.swift Makefile Sources Tests && git commit -m "feat: add core state model"
+cd /Users/tr0n/Code/insomnia && git init && git add Package.swift Makefile Sources Tests && git commit -m "feat: add core state model"
 ```
 
 ---
@@ -263,16 +263,16 @@ cd /Users/tr0n/Code/cocaine && git init && git add Package.swift Makefile Source
 ### Task 2: One-Toggle Coordinator
 
 **Files:**
-- Create: `Sources/CocaineCore/AppCoordinator.swift`
-- Create: `Tests/CocaineCoreTests/AppCoordinatorTests.swift`
+- Create: `Sources/InsomniaCore/AppCoordinator.swift`
+- Create: `Tests/InsomniaCoreTests/AppCoordinatorTests.swift`
 
 - [x] **Step 1: Write failing coordinator tests**
 
-Create `Tests/CocaineCoreTests/AppCoordinatorTests.swift`:
+Create `Tests/InsomniaCoreTests/AppCoordinatorTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 private final class FakeAwakeController: AwakeControlling {
     var isEnabled = false
@@ -392,14 +392,14 @@ final class AppCoordinatorTests: XCTestCase {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter AppCoordinatorTests
+cd /Users/tr0n/Code/insomnia && swift test --filter AppCoordinatorTests
 ```
 
 Expected: FAIL because coordinator and protocols do not exist.
 
 - [x] **Step 2: Implement coordinator and protocols**
 
-Create `Sources/CocaineCore/AppCoordinator.swift`:
+Create `Sources/InsomniaCore/AppCoordinator.swift`:
 
 ```swift
 import Foundation
@@ -496,7 +496,7 @@ public final class AppCoordinator {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter AppCoordinatorTests && make test
+cd /Users/tr0n/Code/insomnia && swift test --filter AppCoordinatorTests && make test
 ```
 
 Expected: PASS.
@@ -504,7 +504,7 @@ Expected: PASS.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/AppCoordinator.swift Tests/CocaineCoreTests/AppCoordinatorTests.swift && git commit -m "feat: add one-toggle coordinator"
+cd /Users/tr0n/Code/insomnia && git add Sources/InsomniaCore/AppCoordinator.swift Tests/InsomniaCoreTests/AppCoordinatorTests.swift && git commit -m "feat: add one-toggle coordinator"
 ```
 
 ---
@@ -512,17 +512,17 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/AppCoordinator.swift 
 ### Task 3: Ordinary Sleep Prevention
 
 **Files:**
-- Create: `Sources/CocaineCore/PowerAssertionClient.swift`
-- Create: `Sources/CocaineCore/AwakeController.swift`
-- Create: `Tests/CocaineCoreTests/AwakeControllerTests.swift`
+- Create: `Sources/InsomniaCore/PowerAssertionClient.swift`
+- Create: `Sources/InsomniaCore/AwakeController.swift`
+- Create: `Tests/InsomniaCoreTests/AwakeControllerTests.swift`
 
 - [x] **Step 1: Write failing ordinary assertion tests**
 
-Create `Tests/CocaineCoreTests/AwakeControllerTests.swift`:
+Create `Tests/InsomniaCoreTests/AwakeControllerTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 private final class FakePowerAssertionClient: PowerAssertionClient {
     var nextID: UInt32 = 41
@@ -557,7 +557,7 @@ final class AwakeControllerTests: XCTestCase {
 
         try controller.enable()
 
-        XCTAssertEqual(client.createdReasons, ["Cocaine is active", "Cocaine is active"])
+        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -588,14 +588,14 @@ final class AwakeControllerTests: XCTestCase {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter AwakeControllerTests
+cd /Users/tr0n/Code/insomnia && swift test --filter AwakeControllerTests
 ```
 
 Expected: FAIL because `AwakeController` and `PowerAssertionClient` do not exist.
 
 - [x] **Step 2: Implement IOKit assertion wrapper and awake controller**
 
-Create `Sources/CocaineCore/PowerAssertionClient.swift`:
+Create `Sources/InsomniaCore/PowerAssertionClient.swift`:
 
 ```swift
 import Foundation
@@ -644,7 +644,7 @@ public final class IOKitPowerAssertionClient: PowerAssertionClient {
 }
 ```
 
-Create `Sources/CocaineCore/AwakeController.swift`:
+Create `Sources/InsomniaCore/AwakeController.swift`:
 
 ```swift
 import Foundation
@@ -665,8 +665,8 @@ public final class AwakeController: AwakeControlling {
         guard !isEnabled else { return }
 
         do {
-            let systemID = try client.createNoIdleSleepAssertion(reason: "Cocaine is active")
-            let displayID = try client.createDisplaySleepAssertion(reason: "Cocaine is active")
+            let systemID = try client.createNoIdleSleepAssertion(reason: "Insomnia is active")
+            let displayID = try client.createDisplaySleepAssertion(reason: "Insomnia is active")
             assertionIDs = [systemID, displayID]
             isEnabled = true
         } catch {
@@ -694,7 +694,7 @@ public final class AwakeController: AwakeControlling {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter AwakeControllerTests && make test
+cd /Users/tr0n/Code/insomnia && swift test --filter AwakeControllerTests && make test
 ```
 
 Expected: PASS.
@@ -702,7 +702,7 @@ Expected: PASS.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PowerAssertionClient.swift Sources/CocaineCore/AwakeController.swift Tests/CocaineCoreTests/AwakeControllerTests.swift && git commit -m "feat: add ordinary sleep assertions"
+cd /Users/tr0n/Code/insomnia && git add Sources/InsomniaCore/PowerAssertionClient.swift Sources/InsomniaCore/AwakeController.swift Tests/InsomniaCoreTests/AwakeControllerTests.swift && git commit -m "feat: add ordinary sleep assertions"
 ```
 
 ---
@@ -710,18 +710,18 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PowerAssertionClient.
 ### Task 4: Lid-Close Controller Contract
 
 **Files:**
-- Create: `Sources/CocaineCore/CocaineHelperProtocol.swift`
-- Create: `Sources/CocaineCore/LidCloseController.swift`
-- Create: `Sources/CocaineCore/PrivilegedHelperClient.swift`
-- Create: `Tests/CocaineCoreTests/LidCloseControllerTests.swift`
+- Create: `Sources/InsomniaCore/InsomniaHelperProtocol.swift`
+- Create: `Sources/InsomniaCore/LidCloseController.swift`
+- Create: `Sources/InsomniaCore/PrivilegedHelperClient.swift`
+- Create: `Tests/InsomniaCoreTests/LidCloseControllerTests.swift`
 
 - [x] **Step 1: Write failing lid-close controller tests**
 
-Create `Tests/CocaineCoreTests/LidCloseControllerTests.swift`:
+Create `Tests/InsomniaCoreTests/LidCloseControllerTests.swift`:
 
 ```swift
 import XCTest
-@testable import CocaineCore
+@testable import InsomniaCore
 
 private final class FakePrivilegedHelperClient: PrivilegedHelperClientProtocol {
     var installed = false
@@ -799,26 +799,26 @@ final class LidCloseControllerTests: XCTestCase {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter LidCloseControllerTests
+cd /Users/tr0n/Code/insomnia && swift test --filter LidCloseControllerTests
 ```
 
 Expected: FAIL because lid-close controller types do not exist.
 
 - [x] **Step 2: Implement helper protocol constants and controller with stub client**
 
-Create `Sources/CocaineCore/CocaineHelperProtocol.swift`:
+Create `Sources/InsomniaCore/InsomniaHelperProtocol.swift`:
 
 ```swift
 import Foundation
 
-public enum CocaineHelperConstants {
-    public static let appBundleIdentifier = "com.tr0n.Cocaine"
-    public static let helperBundleIdentifier = "com.tr0n.Cocaine.Helper"
+public enum InsomniaHelperConstants {
+    public static let appBundleIdentifier = "com.tonioriol.insomnia"
+    public static let helperBundleIdentifier = "com.tonioriol.insomnia.helper"
     public static let helperVersion = 1
 }
 
-@objc(CocaineHelperProtocol)
-public protocol CocaineHelperProtocol {
+@objc(InsomniaHelperProtocol)
+public protocol InsomniaHelperProtocol {
     func enableLidClosePrevention(reply: @escaping (NSNumber, NSString?) -> Void)
     func disableLidClosePrevention(reply: @escaping (NSNumber, NSString?) -> Void)
     func readLidClosePreventionStatus(reply: @escaping (NSNumber, NSString?) -> Void)
@@ -833,7 +833,7 @@ public protocol PrivilegedHelperClientProtocol: AnyObject {
 }
 ```
 
-Create `Sources/CocaineCore/LidCloseController.swift`:
+Create `Sources/InsomniaCore/LidCloseController.swift`:
 
 ```swift
 import Foundation
@@ -860,7 +860,7 @@ public final class LidCloseController: LidCloseControlling {
 }
 ```
 
-Create `Sources/CocaineCore/PrivilegedHelperClient.swift`:
+Create `Sources/InsomniaCore/PrivilegedHelperClient.swift`:
 
 ```swift
 import Foundation
@@ -914,7 +914,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift test --filter LidCloseControllerTests && make test
+cd /Users/tr0n/Code/insomnia && swift test --filter LidCloseControllerTests && make test
 ```
 
 Expected: PASS.
@@ -922,7 +922,7 @@ Expected: PASS.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/CocaineHelperProtocol.swift Sources/CocaineCore/LidCloseController.swift Sources/CocaineCore/PrivilegedHelperClient.swift Tests/CocaineCoreTests/LidCloseControllerTests.swift && git commit -m "feat: add lid-close controller contract"
+cd /Users/tr0n/Code/insomnia && git add Sources/InsomniaCore/InsomniaHelperProtocol.swift Sources/InsomniaCore/LidCloseController.swift Sources/InsomniaCore/PrivilegedHelperClient.swift Tests/InsomniaCoreTests/LidCloseControllerTests.swift && git commit -m "feat: add lid-close controller contract"
 ```
 
 ---
@@ -930,15 +930,15 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/CocaineHelperProtocol
 ### Task 5: Privileged Helper Implementation
 
 **Files:**
-- Modify: `Sources/CocaineCore/PrivilegedHelperClient.swift`
-- Create: `Sources/CocaineHelper/ApplePowerSettings.swift`
-- Create: `Sources/CocaineHelper/main.swift`
-- Create: `Resources/CocaineHelper/Info.plist`
-- Create: `Resources/CocaineHelper/launchd.plist`
+- Modify: `Sources/InsomniaCore/PrivilegedHelperClient.swift`
+- Create: `Sources/InsomniaHelper/ApplePowerSettings.swift`
+- Create: `Sources/InsomniaHelper/main.swift`
+- Create: `Resources/InsomniaHelper/Info.plist`
+- Create: `Resources/InsomniaHelper/launchd.plist`
 
 - [x] **Step 1: Replace helper client stub with SMJobBless/XPC implementation**
 
-Replace `Sources/CocaineCore/PrivilegedHelperClient.swift` with:
+Replace `Sources/InsomniaCore/PrivilegedHelperClient.swift` with:
 
 ```swift
 import Foundation
@@ -971,12 +971,12 @@ public enum PrivilegedHelperClientError: Error, LocalizedError, Equatable {
 public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     private let helperIdentifier: String
 
-    public init(helperIdentifier: String = CocaineHelperConstants.helperBundleIdentifier) {
+    public init(helperIdentifier: String = InsomniaHelperConstants.helperBundleIdentifier) {
         self.helperIdentifier = helperIdentifier
     }
 
     public func installOrUpdateHelperIfNeeded() async throws {
-        if let version = try? await helperVersion(), version == CocaineHelperConstants.helperVersion {
+        if let version = try? await helperVersion(), version == InsomniaHelperConstants.helperVersion {
             return
         }
         try blessHelper()
@@ -1010,7 +1010,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     }
 
     private func callBooleanCommand(
-        _ command: @escaping (CocaineHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void
+        _ command: @escaping (InsomniaHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void
     ) async throws -> Bool {
         let helper = try makeRemoteHelperProxy()
         return try await withCheckedThrowingContinuation { continuation in
@@ -1024,14 +1024,14 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
         }
     }
 
-    private func makeRemoteHelperProxy() throws -> CocaineHelperProtocol {
+    private func makeRemoteHelperProxy() throws -> InsomniaHelperProtocol {
         let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
-        connection.remoteObjectInterface = NSXPCInterface(with: CocaineHelperProtocol.self)
+        connection.remoteObjectInterface = NSXPCInterface(with: InsomniaHelperProtocol.self)
         connection.resume()
 
         guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
-            NSLog("Cocaine helper XPC error: \(error.localizedDescription)")
-        }) as? CocaineHelperProtocol else {
+            NSLog("Insomnia helper XPC error: \(error.localizedDescription)")
+        }) as? InsomniaHelperProtocol else {
             connection.invalidate()
             throw PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")
         }
@@ -1062,7 +1062,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
 
 - [x] **Step 2: Implement helper power setting bridge**
 
-Create `Sources/CocaineHelper/ApplePowerSettings.swift`:
+Create `Sources/InsomniaHelper/ApplePowerSettings.swift`:
 
 ```swift
 import CoreFoundation
@@ -1113,17 +1113,17 @@ final class ApplePowerSettings {
 
 - [x] **Step 3: Implement helper XPC listener**
 
-Create `Sources/CocaineHelper/main.swift`:
+Create `Sources/InsomniaHelper/main.swift`:
 
 ```swift
 import Foundation
-import CocaineCore
+import InsomniaCore
 
-final class HelperDelegate: NSObject, NSXPCListenerDelegate, CocaineHelperProtocol {
+final class HelperDelegate: NSObject, NSXPCListenerDelegate, InsomniaHelperProtocol {
     private let powerSettings = ApplePowerSettings()
 
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
-        connection.exportedInterface = NSXPCInterface(with: CocaineHelperProtocol.self)
+        connection.exportedInterface = NSXPCInterface(with: InsomniaHelperProtocol.self)
         connection.exportedObject = self
         connection.resume()
         return true
@@ -1147,7 +1147,7 @@ final class HelperDelegate: NSObject, NSXPCListenerDelegate, CocaineHelperProtoc
     }
 
     func helperVersion(reply: @escaping (NSNumber) -> Void) {
-        reply(NSNumber(value: CocaineHelperConstants.helperVersion))
+        reply(NSNumber(value: InsomniaHelperConstants.helperVersion))
     }
 
     private func setLidClosePrevention(_ enabled: Bool, reply: @escaping (NSNumber, NSString?) -> Void) {
@@ -1162,7 +1162,7 @@ final class HelperDelegate: NSObject, NSXPCListenerDelegate, CocaineHelperProtoc
 }
 
 let delegate = HelperDelegate()
-let listener = NSXPCListener(machServiceName: CocaineHelperConstants.helperBundleIdentifier)
+let listener = NSXPCListener(machServiceName: InsomniaHelperConstants.helperBundleIdentifier)
 listener.delegate = delegate
 listener.resume()
 RunLoop.current.run()
@@ -1170,7 +1170,7 @@ RunLoop.current.run()
 
 - [x] **Step 4: Add helper embedded metadata**
 
-Create `Resources/CocaineHelper/Info.plist`:
+Create `Resources/InsomniaHelper/Info.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1178,22 +1178,22 @@ Create `Resources/CocaineHelper/Info.plist`:
 <plist version="1.0">
 <dict>
   <key>CFBundleIdentifier</key>
-  <string>com.tr0n.Cocaine.Helper</string>
+  <string>com.tonioriol.insomnia.helper</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>CocaineHelper</string>
+  <string>InsomniaHelper</string>
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>SMAuthorizedClients</key>
   <array>
-    <string>identifier com.tr0n.Cocaine</string>
+    <string>identifier com.tonioriol.insomnia</string>
   </array>
 </dict>
 </plist>
 ```
 
-Create `Resources/CocaineHelper/launchd.plist`:
+Create `Resources/InsomniaHelper/launchd.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1201,10 +1201,10 @@ Create `Resources/CocaineHelper/launchd.plist`:
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.tr0n.Cocaine.Helper</string>
+  <string>com.tonioriol.insomnia.helper</string>
   <key>MachServices</key>
   <dict>
-    <key>com.tr0n.Cocaine.Helper</key>
+    <key>com.tonioriol.insomnia.helper</key>
     <true/>
   </dict>
 </dict>
@@ -1216,7 +1216,7 @@ Create `Resources/CocaineHelper/launchd.plist`:
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && swift build
+cd /Users/tr0n/Code/insomnia && swift build
 ```
 
 Expected: PASS and both app/helper executables compile.
@@ -1224,7 +1224,7 @@ Expected: PASS and both app/helper executables compile.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PrivilegedHelperClient.swift Sources/CocaineHelper Resources/CocaineHelper Package.swift && git commit -m "feat: add privileged helper implementation"
+cd /Users/tr0n/Code/insomnia && git add Sources/InsomniaCore/PrivilegedHelperClient.swift Sources/InsomniaHelper Resources/InsomniaHelper Package.swift && git commit -m "feat: add privileged helper implementation"
 ```
 
 ---
@@ -1233,11 +1233,11 @@ cd /Users/tr0n/Code/cocaine && git add Sources/CocaineCore/PrivilegedHelperClien
 
 **Files:**
 - Modify: `Makefile`
-- Create: `Resources/Cocaine/Info.plist`
+- Create: `Resources/Insomnia/Info.plist`
 
 - [x] **Step 1: Add app bundle metadata**
 
-Create `Resources/Cocaine/Info.plist`:
+Create `Resources/Insomnia/Info.plist`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1247,13 +1247,13 @@ Create `Resources/Cocaine/Info.plist`:
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>Cocaine</string>
+  <string>Insomnia</string>
   <key>CFBundleIdentifier</key>
-  <string>com.tr0n.Cocaine</string>
+  <string>com.tonioriol.insomnia</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Cocaine</string>
+  <string>Insomnia</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
@@ -1270,8 +1270,8 @@ Create `Resources/Cocaine/Info.plist`:
   <string>NSApplication</string>
   <key>SMPrivilegedExecutables</key>
   <dict>
-    <key>com.tr0n.Cocaine.Helper</key>
-    <string>identifier com.tr0n.Cocaine.Helper</string>
+    <key>com.tonioriol.insomnia.helper</key>
+    <string>identifier com.tonioriol.insomnia.helper</string>
   </dict>
 </dict>
 </plist>
@@ -1286,7 +1286,7 @@ SHELL := /bin/zsh
 CONFIGURATION ?= debug
 SWIFT_BUILD_FLAGS := -c $(CONFIGURATION)
 BUILD_DIR := build
-APP_DIR := $(BUILD_DIR)/Cocaine.app
+APP_DIR := $(BUILD_DIR)/Insomnia.app
 CONTENTS_DIR := $(APP_DIR)/Contents
 MACOS_DIR := $(CONTENTS_DIR)/MacOS
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
@@ -1304,18 +1304,18 @@ build:
 app: build
 	rm -rf $(APP_DIR)
 	mkdir -p $(MACOS_DIR) $(LAUNCH_SERVICES_DIR)
-	cp Resources/Cocaine/Info.plist $(CONTENTS_DIR)/Info.plist
-	cp $(SWIFT_BIN_DIR)/Cocaine $(MACOS_DIR)/Cocaine
-	cp $(SWIFT_BIN_DIR)/CocaineHelper $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
+	cp Resources/Insomnia/Info.plist $(CONTENTS_DIR)/Info.plist
+	cp $(SWIFT_BIN_DIR)/Insomnia $(MACOS_DIR)/Insomnia
+	cp $(SWIFT_BIN_DIR)/InsomniaHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper
 	$(MAKE) sign
 
 sign:
-	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tr0n.Cocaine.Helper
+	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper
 	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
 
 verify-helper-sections:
-	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/CocaineHelper >/dev/null
-	otool -s __TEXT __launchd_plist $(SWIFT_BIN_DIR)/CocaineHelper >/dev/null
+	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/InsomniaHelper >/dev/null
+	otool -s __TEXT __launchd_plist $(SWIFT_BIN_DIR)/InsomniaHelper >/dev/null
 
 run: app
 	open $(APP_DIR)
@@ -1329,7 +1329,7 @@ clean:
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make build && make verify-helper-sections
+cd /Users/tr0n/Code/insomnia && make build && make verify-helper-sections
 ```
 
 Expected: PASS. `otool` exits 0 for both embedded helper plist sections.
@@ -1339,17 +1339,17 @@ Expected: PASS. `otool` exits 0 for both embedded helper plist sections.
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make app
+cd /Users/tr0n/Code/insomnia && make app
 ```
 
-Expected: PASS and `build/Cocaine.app/Contents/MacOS/Cocaine` plus `build/Cocaine.app/Contents/Library/LaunchServices/com.tr0n.Cocaine.Helper` exist.
+Expected: PASS and `build/Insomnia.app/Contents/MacOS/Insomnia` plus `build/Insomnia.app/Contents/Library/LaunchServices/com.tonioriol.insomnia.helper` exist.
 
 - [x] **Step 5: Commit bundling work**
 
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Makefile Resources/Cocaine/Info.plist && git commit -m "build: package app bundle with helper"
+cd /Users/tr0n/Code/insomnia && git add Makefile Resources/Insomnia/Info.plist && git commit -m "build: package app bundle with helper"
 ```
 
 ---
@@ -1357,13 +1357,13 @@ cd /Users/tr0n/Code/cocaine && git add Makefile Resources/Cocaine/Info.plist && 
 ### Task 7: Menu Bar App UI
 
 **Files:**
-- Create: `Sources/Cocaine/main.swift`
-- Create: `Sources/Cocaine/AppDelegate.swift`
-- Create: `Sources/Cocaine/MenuBarController.swift`
+- Create: `Sources/Insomnia/main.swift`
+- Create: `Sources/Insomnia/AppDelegate.swift`
+- Create: `Sources/Insomnia/MenuBarController.swift`
 
 - [x] **Step 1: Implement app entry point**
 
-Create `Sources/Cocaine/main.swift`:
+Create `Sources/Insomnia/main.swift`:
 
 ```swift
 import AppKit
@@ -1377,11 +1377,11 @@ app.run()
 
 - [x] **Step 2: Implement app delegate**
 
-Create `Sources/Cocaine/AppDelegate.swift`:
+Create `Sources/Insomnia/AppDelegate.swift`:
 
 ```swift
 import AppKit
-import CocaineCore
+import InsomniaCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -1411,12 +1411,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 - [x] **Step 3: Implement status item controller**
 
-Create `Sources/Cocaine/MenuBarController.swift`:
+Create `Sources/Insomnia/MenuBarController.swift`:
 
 ```swift
 import AppKit
 import Combine
-import CocaineCore
+import InsomniaCore
 
 @MainActor
 final class MenuBarController: NSObject {
@@ -1461,17 +1461,17 @@ final class MenuBarController: NSObject {
             symbolName = "cup.and.saucer"
         }
 
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Cocaine")
+        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Insomnia")
         image?.isTemplate = true
         button.image = image
         button.toolTip = tooltipText
     }
 
     private var tooltipText: String {
-        if state.isBusy { return "Cocaine is changing sleep prevention state" }
-        if state.isActive { return "Cocaine is preventing sleep, including lid-close sleep" }
-        if let error = state.lastErrorMessage { return "Cocaine is off: \(error)" }
-        return "Cocaine is off"
+        if state.isBusy { return "Insomnia is changing sleep prevention state" }
+        if state.isActive { return "Insomnia is preventing sleep, including lid-close sleep" }
+        if let error = state.lastErrorMessage { return "Insomnia is off: \(error)" }
+        return "Insomnia is off"
     }
 
     @objc
@@ -1497,7 +1497,7 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
-        let aboutItem = NSMenuItem(title: "About Cocaine", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: "About Insomnia", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
@@ -1544,7 +1544,7 @@ final class MenuBarController: NSObject {
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make app
+cd /Users/tr0n/Code/insomnia && make app
 ```
 
 Expected: PASS.
@@ -1552,7 +1552,7 @@ Expected: PASS.
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add Sources/Cocaine && git commit -m "feat: add one-click menu bar UI"
+cd /Users/tr0n/Code/insomnia && git add Sources/Insomnia && git commit -m "feat: add one-click menu bar UI"
 ```
 
 ---
@@ -1569,13 +1569,13 @@ cd /Users/tr0n/Code/cocaine && git add Sources/Cocaine && git commit -m "feat: a
 Create `README.md`:
 
 ```markdown
-# Cocaine
+# Insomnia
 
 macOS menu bar app with one on/off icon. When on, it prevents ordinary sleep and lid-close sleep. When off, it restores normal sleep behavior.
 
 ## Safety
 
-Do not put a closed MacBook into a bag while Cocaine is on. Lid-close sleep prevention can leave the machine running and may cause overheating.
+Do not put a closed MacBook into a bag while Insomnia is on. Lid-close sleep prevention can leave the machine running and may cause overheating.
 
 ## Build
 
@@ -1584,7 +1584,7 @@ make test
 make app
 ```
 
-The app bundle is created at `build/Cocaine.app`.
+The app bundle is created at `build/Insomnia.app`.
 
 ## Run
 
@@ -1609,7 +1609,7 @@ Create `NOTICE.md`:
 ```markdown
 # Notices
 
-Cocaine is a clean reimplementation informed by these open-source macOS utilities:
+Insomnia is a clean reimplementation informed by these open-source macOS utilities:
 
 - Caffeine: https://github.com/domzilla/Caffeine — MIT License. Used as a behavioral reference for simple menu bar keep-awake UX and ordinary IOKit sleep assertions.
 - Fermata: https://github.com/iccir/Fermata — MIT License or BSD-1-Clause. Used as a behavioral/platform reference for privileged lid-close sleep prevention.
@@ -1622,7 +1622,7 @@ If code is copied directly from either project in future changes, preserve the u
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make clean && make test && make app
+cd /Users/tr0n/Code/insomnia && make clean && make test && make app
 ```
 
 Expected: PASS.
@@ -1632,7 +1632,7 @@ Expected: PASS.
 Run:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && make run
+cd /Users/tr0n/Code/insomnia && make run
 ```
 
 Expected:
@@ -1660,7 +1660,7 @@ Append this entry to `docs/feat/20260424192541-merge-fermatta-caffeine/context.m
 Commit:
 
 ```bash
-cd /Users/tr0n/Code/cocaine && git add README.md NOTICE.md docs/feat/20260424192541-merge-fermatta-caffeine/context.md && git commit -m "docs: add build and verification notes"
+cd /Users/tr0n/Code/insomnia && git add README.md NOTICE.md docs/feat/20260424192541-merge-fermatta-caffeine/context.md && git commit -m "docs: add build and verification notes"
 ```
 
 ---
@@ -1679,4 +1679,4 @@ Spec coverage:
 
 Placeholder scan: no deferred implementation placeholders are intended; every task names exact files, commands, expected outcomes, and code content for new implementation files.
 
-Type consistency: `AppCoordinator`, `AppState`, `AwakeController`, `LidCloseController`, `PrivilegedHelperClient`, and `CocaineHelperProtocol` names/signatures are consistent across tasks.
+Type consistency: `AppCoordinator`, `AppState`, `AwakeController`, `LidCloseController`, `PrivilegedHelperClient`, and `InsomniaHelperProtocol` names/signatures are consistent across tasks.
