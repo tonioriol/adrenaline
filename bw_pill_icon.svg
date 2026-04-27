@@ -1,8 +1,0 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <title>Black and white pill icon</title>
-  <rect width="1024" height="1024" rx="220" fill="#ffffff"/>
-  <g transform="translate(512 512) rotate(-30)">
-    <rect x="-270" y="-105" width="540" height="210" rx="105" fill="#000000"/>
-    <rect x="-35" y="-125" width="70" height="250" fill="#ffffff"/>
-  </g>
-</svg>

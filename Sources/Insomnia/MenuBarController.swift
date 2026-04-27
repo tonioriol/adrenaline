@@ -362,7 +362,7 @@ final class MenuBarController: NSObject {
     private func showAbout() {
         NSApp.activate(ignoringOtherApps: true)
         NSApp.orderFrontStandardAboutPanel(options: [
-            .credits: NSAttributedString(string: "Personal keep-awake utility inspired by Caffeine and Fermata."),
+            .credits: NSAttributedString(string: "macOS menu bar sleep prevention utility."),
         ])
     }
 
