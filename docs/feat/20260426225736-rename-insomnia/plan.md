@@ -37,7 +37,7 @@
 - Modify: all Swift files under `Sources/Insomnia/`, `Sources/InsomniaCore/`, `Sources/InsomniaHelper/`, and `Tests/InsomniaCoreTests/`
 - Modify: plist files under `Resources/Insomnia/` and `Resources/InsomniaHelper/`
 
-- [ ] **Step 1: Move source, test, and resource directories**
+- [x] **Step 1: Move source, test, and resource directories**
 
 Run:
 
@@ -56,7 +56,7 @@ git mv "Tests/InsomniaCoreTests/${OLD_CAP}HelperConstantsTests.swift" Tests/Inso
 
 Expected: all `git mv` commands exit 0.
 
-- [ ] **Step 2: Apply implementation rename mappings**
+- [x] **Step 2: Apply implementation rename mappings**
 
 Run:
 
@@ -102,7 +102,7 @@ PY
 
 Expected: command exits 0 and updates implementation files only.
 
-- [ ] **Step 3: Confirm key renamed identifiers**
+- [x] **Step 3: Confirm key renamed identifiers**
 
 Run:
 
@@ -128,7 +128,7 @@ PY
 
 Expected: prints `renamed identifiers verified`.
 
-- [ ] **Step 4: Run focused signing tests after rename**
+- [x] **Step 4: Run focused signing tests after rename**
 
 Run:
 
@@ -138,7 +138,7 @@ swift test --filter InsomniaHelperConstantsTests
 
 Expected: PASS with the renamed helper constants tests.
 
-- [ ] **Step 5: Commit implementation identity rename**
+- [x] **Step 5: Commit implementation identity rename**
 
 Run:
 

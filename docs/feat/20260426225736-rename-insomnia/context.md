@@ -34,7 +34,7 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — rename implementation identity
+**Cursor:** Task 2 — rename documentation and local workspace text
 
 **Status:** ready
 
