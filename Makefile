@@ -8,8 +8,8 @@ MACOS_DIR := $(CONTENTS_DIR)/MacOS
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
 SWIFT_BIN_DIR := .build/$(CONFIGURATION)
-TEAM_ID ?= A79T83GM42
-CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/A79T83GM42/ {print $$2; exit}')
+TEAM_ID ?= B65K228Z97
+CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/B65K228Z97/ {print $$2; exit}')
 INSTALL_APP_DIR ?= /Applications/Insomnia.app
 RELEASE_ZIP ?= $(BUILD_DIR)/Insomnia.zip
 
