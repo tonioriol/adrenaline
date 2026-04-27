@@ -38,8 +38,8 @@ sign:
 		echo "No Apple Development codesigning identity found for Team ID $(TEAM_ID)"; \
 		exit 1; \
 	fi
-	codesign --force --sign "$(CODE_SIGN_IDENTITY)" $(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper
-	codesign --force --sign "$(CODE_SIGN_IDENTITY)" --deep $(APP_DIR)
+	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper"
+	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" --deep "$(APP_DIR)"
 
 release-zip: app
 	rm -f "$(RELEASE_ZIP)"
