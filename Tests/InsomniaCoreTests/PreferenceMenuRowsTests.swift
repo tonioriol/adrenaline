@@ -6,7 +6,6 @@ final class PreferenceMenuRowsTests: XCTestCase {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: false,
             preventLidCloseSleep: true,
-            lockScreenOnLidClose: false,
             playLidEventSounds: false
         )
 
@@ -29,7 +28,6 @@ final class PreferenceMenuRowsTests: XCTestCase {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: true,
             preventLidCloseSleep: false,
-            lockScreenOnLidClose: true,
             playLidEventSounds: true
         )
 

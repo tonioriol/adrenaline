@@ -22,7 +22,6 @@ final class PreferencesStoreTests: XCTestCase {
 
         XCTAssertTrue(store.preventDisplaySleep)
         XCTAssertFalse(store.preventLidCloseSleep)
-        XCTAssertTrue(store.lockScreenOnLidClose)
         XCTAssertTrue(store.playLidEventSounds)
         XCTAssertFalse(store.lidClosePreventionConfirmed)
     }
@@ -33,14 +32,12 @@ final class PreferencesStoreTests: XCTestCase {
 
         store.preventDisplaySleep = false
         store.preventLidCloseSleep = true
-        store.lockScreenOnLidClose = false
         store.playLidEventSounds = false
         store.lidClosePreventionConfirmed = true
 
         let reloaded = PreferencesStore(defaults: defaults)
         XCTAssertFalse(reloaded.preventDisplaySleep)
         XCTAssertTrue(reloaded.preventLidCloseSleep)
-        XCTAssertFalse(reloaded.lockScreenOnLidClose)
         XCTAssertFalse(reloaded.playLidEventSounds)
         XCTAssertTrue(reloaded.lidClosePreventionConfirmed)
     }
@@ -51,13 +48,11 @@ final class PreferencesStoreTests: XCTestCase {
 
         store.preventDisplaySleep = false
         store.preventLidCloseSleep = true
-        store.lockScreenOnLidClose = false
         store.playLidEventSounds = false
 
         let snapshot = store.snapshot()
         XCTAssertFalse(snapshot.preventDisplaySleep)
         XCTAssertTrue(snapshot.preventLidCloseSleep)
-        XCTAssertFalse(snapshot.lockScreenOnLidClose)
         XCTAssertFalse(snapshot.playLidEventSounds)
     }
 
