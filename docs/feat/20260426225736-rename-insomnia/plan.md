@@ -276,7 +276,7 @@ Expected: commit succeeds. If `.vscode/launch.json` is intentionally untracked a
 - Modify: `docs/feat/20260426225736-rename-insomnia/context.md`
 - Modify: `docs/feat/20260426225736-rename-insomnia/plan.md`
 
-- [ ] **Step 1: Clean generated artifacts**
+- [x] **Step 1: Clean generated artifacts**
 
 Run:
 
@@ -286,7 +286,7 @@ make clean
 
 Expected: `.build` and `build` are removed.
 
-- [ ] **Step 2: Run full tests**
+- [x] **Step 2: Run full tests**
 
 Run:
 
@@ -296,7 +296,7 @@ swift test
 
 Expected: PASS with the renamed `InsomniaCoreTests` target.
 
-- [ ] **Step 3: Build the app bundle**
+- [x] **Step 3: Build the app bundle**
 
 Run:
 
@@ -306,7 +306,7 @@ make app CONFIGURATION=release
 
 Expected: PASS when a usable local signing identity is available. The created app bundle path is `build/Insomnia.app`.
 
-- [ ] **Step 4: Build the release zip**
+- [x] **Step 4: Build the release zip**
 
 Run:
 
@@ -316,7 +316,7 @@ make release-zip CONFIGURATION=release
 
 Expected: PASS when a usable local signing identity is available and `build/Insomnia.zip` exists.
 
-- [ ] **Step 5: Verify bundle identifiers**
+- [x] **Step 5: Verify bundle identifiers**
 
 Run:
 
@@ -334,7 +334,7 @@ com.tonioriol.insomnia.helper
 com.tonioriol.insomnia.helper
 ```
 
-- [ ] **Step 6: Verify no legacy content tokens remain**
+- [x] **Step 6: Verify no legacy content tokens remain**
 
 Run:
 
@@ -347,7 +347,7 @@ rg -n "${OLD_CAP}|${OLD_LOW}|${OLD_UP}" . --glob '!build/**' --glob '!.build/**'
 
 Expected: no matches; `rg` exits 1 with empty output.
 
-- [ ] **Step 7: Verify no legacy path tokens remain**
+- [x] **Step 7: Verify no legacy path tokens remain**
 
 Run:
 
@@ -360,7 +360,7 @@ fd -H . . -E .git -E .build -E build | rg "${OLD_CAP}|${OLD_LOW}|${OLD_UP}"
 
 Expected: no matches; `rg` exits 1 with empty output.
 
-- [ ] **Step 8: Verify expected Insomnia references exist**
+- [x] **Step 8: Verify expected Insomnia references exist**
 
 Run:
 
@@ -370,11 +370,11 @@ rg -n 'Insomnia|insomnia|INSOMNIA' Package.swift Makefile README.md NOTICE.md .g
 
 Expected: output shows renamed package, build, docs, bundle ID, helper ID, and test references.
 
-- [ ] **Step 9: Update task memory completion state**
+- [x] **Step 9: Update task memory completion state**
 
 Append one final LOG entry to `docs/feat/20260426225736-rename-insomnia/context.md` with verification evidence and any local-only leftovers, then mark this plan's checkboxes complete.
 
-- [ ] **Step 10: Commit verification record**
+- [x] **Step 10: Commit verification record**
 
 Run:
 

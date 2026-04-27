@@ -1,6 +1,6 @@
 ---
 title: "Rename app to Insomnia"
-status: active
+status: done
 repos: [insomnia]
 tags: [macos, spm]
 created: 2026-04-26
@@ -34,9 +34,9 @@ created: 2026-04-26
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 3 — final verification and cleanup
+**Cursor:** Complete — all rename tasks verified
 
-**Status:** ready
+**Status:** done
 
 ## LOG
 
@@ -77,3 +77,10 @@ created: 2026-04-26
 - Why: Review found duplicate VS Code launch entries, invalid launch pre-tasks without a tasks file, no-op spec path mappings after the no-traces rewrite, and contradictory verification wording.
 - How: Kept one launch configuration for each Insomnia app/helper debug/release target, removed launch pre-tasks, rewrote the spec scope to describe legacy-name intent without literal legacy tokens, and clarified that constructed legacy-token searches should be empty while Insomnia searches should show expected renamed references.
 - Decision: Accepted all Task 2 quality findings as documentation/workspace correctness fixes; no behavior or build-system changes were needed.
+
+### 2026-04-27 06:38 — Task 3 final verification and cleanup
+
+- Files changed: `docs/feat/20260426225736-rename-insomnia/context.md` and `docs/feat/20260426225736-rename-insomnia/plan.md` only.
+- Commands run: `make clean` (PASS: removed generated `.build` and `build` artifacts); `swift test` (PASS: 106 tests, 0 failures); `make app CONFIGURATION=release` (PASS: built and signed `build/Insomnia.app` with local Apple Development identity); `make release-zip CONFIGURATION=release` (PASS: created `build/Insomnia.zip`); PlistBuddy bundle identifier checks (PASS: `com.tonioriol.insomnia`, `com.tonioriol.insomnia.helper`, `com.tonioriol.insomnia.helper`); constructed-token content verification with `rg` (PASS: no matches, exit 1); constructed-token filename verification with `fd` and `rg` (PASS: no matches, exit 1); Insomnia reference sample with `rg` (PASS: renamed package, build, docs, bundle ID, helper ID, and test references present).
+- Local-only leftovers: generated `.build/`, `build/Insomnia.app`, and `build/Insomnia.zip` exist after the release verification by design and remain ignored build artifacts; no remote state was mutated.
+- Decision: Marked Task 2 and Task 3 complete and set the plan cursor/status to terminal because all required verification commands passed.
