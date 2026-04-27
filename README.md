@@ -52,10 +52,11 @@ The first time you enable **Prevent system sleep with lid closed**, macOS asks f
    | Play lid event sounds | ON | Plays the macOS Hero sound on lid close and Basso on lid open while Insomnia is on and lid-close sleep prevention is enabled. The row is disabled while lid-close sleep prevention is off. |
    | Launch at login | OFF | Registers Insomnia as a macOS login item. The checkbox reflects the actual login-item state reported by macOS. |
 
-- **When Insomnia is off:** all preferences are inert. No assertions are held, no helper calls are made, and Insomnia does not run a separate lock action.
-- **When Insomnia is on and lid-close prevention is off:** closing the lid follows native macOS behavior. The Mac may sleep and lock according to your system settings.
-- **When lid-close prevention is on and display sleep is prevented:** Insomnia keeps the Mac awake and intentionally suppresses the native display-off path, so it does not run a separate lid-close lock timer.
-- **When lid-close prevention is on and display sleep is allowed:** Insomnia mirrors macOS lock policy. If **Require password** is **Never**, Insomnia does not lock on lid close. Otherwise, it locks after the active display-off timer plus the Require Password delay, and cancels that pending lock if the lid reopens first.
+- **When Insomnia is off:** all preferences are inert. No assertions are held, no helper calls are made, and native macOS owns lid-close locking and sleep.
+- **When Insomnia is on and Prevent display sleep is off:** closing the lid locks immediately if macOS **Require password** is enabled. This mirrors native macOS lid-close behavior and is independent of **Prevent system sleep with lid closed**.
+- **When Insomnia is on and Prevent display sleep is on:** Insomnia intentionally keeps the display awake, so it does not run the immediate lid-close lock path.
+- **Prevent system sleep with lid closed:** controls whether Insomnia keeps the CPU awake after the lid closes. It does not control whether lid close locks the screen.
+- **Require password disabled in macOS:** Insomnia does not force a lock on lid close.
 
 ## Upgrading from earlier versions
 
