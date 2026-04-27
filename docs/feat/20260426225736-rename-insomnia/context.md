@@ -71,3 +71,9 @@ created: 2026-04-26
 - Files changed: `README.md`, `NOTICE.md`, `docs/feat/`, `docs/scratch.md`, and `.vscode/launch.json` if present.
 - Commands run: Task 2 Python documentation/workspace rename mapping; constructed-token content verification with `rg` (PASS: no matches, exit 1); constructed-token filename verification with `fd` and `rg` (PASS: no matches, exit 1); new docs verification with `rg -n 'Insomnia|build/Insomnia\.app|Insomnia is licensed|launch Insomnia at login' README.md NOTICE.md` (PASS: README title, app bundle path, license line, launch-at-login wording, and NOTICE attribution present).
 - Decision: Rewrote docs and local workspace text, including the planning records, so tracked/local text contains only the Insomnia identity while ignored build artifacts and Git internals remain out of scope.
+
+### 2026-04-27 06:32 — Task 2 quality follow-up
+
+- Why: Review found duplicate VS Code launch entries, invalid launch pre-tasks without a tasks file, no-op spec path mappings after the no-traces rewrite, and contradictory verification wording.
+- How: Kept one launch configuration for each Insomnia app/helper debug/release target, removed launch pre-tasks, rewrote the spec scope to describe legacy-name intent without literal legacy tokens, and clarified that constructed legacy-token searches should be empty while Insomnia searches should show expected renamed references.
+- Decision: Accepted all Task 2 quality findings as documentation/workspace correctness fixes; no behavior or build-system changes were needed.
