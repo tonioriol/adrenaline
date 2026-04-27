@@ -57,7 +57,6 @@ jobs:
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
           codesign --verify --deep --strict --verbose=2 build/Insomnia.app
-          spctl --assess --type execute --verbose=4 build/Insomnia.app
 
       - name: Notarize app zip
         env:
@@ -67,6 +66,7 @@ jobs:
           xcrun notarytool submit build/Insomnia.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
           xcrun stapler staple build/Insomnia.app
           xcrun stapler validate build/Insomnia.app
+          spctl --assess --type execute --verbose=4 build/Insomnia.app
           rm -f build/Insomnia.zip
           ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
 
