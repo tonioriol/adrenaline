@@ -5,5 +5,70 @@
         <link>https://github.com/tonioriol/insomnia</link>
         <description>Insomnia macOS app updates</description>
         <language>en</language>
+            <item>
+    <title>Insomnia 0.1.0</title>
+    <pubDate>Tue, 28 Apr 2026 21:52:51 +0000</pubDate>
+    <sparkle:version>0.1.0</sparkle:version>
+    <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <description><![CDATA[## [v0.1.0](https://github.com/tonioriol/insomnia/compare/bf0b9245081037a1c38e0ec5b3d95dc19d9e7fbb..v0.1.0) - 2026-04-28
+#### Refinements
+- reduce pill icon size - ([525bef1](https://github.com/tonioriol/insomnia/commit/525bef1d6f08ee478b9090ba4ea9c7eca4a2dd82)) - Toni Oriol
+#### Features
+- delay lid-close lock to match macos policy - ([6fb3ed8](https://github.com/tonioriol/insomnia/commit/6fb3ed84c27f728e3dd27619df5aa785ed95266d)) - Toni Oriol
+- read macos lock timing policy - ([bc179e3](https://github.com/tonioriol/insomnia/commit/bc179e38fee19e54760f316b2f3d32ef6e1dd901)) - Toni Oriol
+- lock screen on lid close while keeping system awake - ([1b980eb](https://github.com/tonioriol/insomnia/commit/1b980ebe87b48da19e0b1159b086d8468b37c03d)) - Toni Oriol
+- rename lid-close row to Prevent system sleep with lid closed - ([a782936](https://github.com/tonioriol/insomnia/commit/a782936adf071cc19a6b7cf5d506136b790ddbba)) - Toni Oriol
+- nest lid sounds row under lid-close prevention - ([2db329f](https://github.com/tonioriol/insomnia/commit/2db329fa28bae86690eef494ff23d116d948f081)) - Toni Oriol
+- keep preference menu open while toggling - ([a27ecee](https://github.com/tonioriol/insomnia/commit/a27ecee8d489a4d35d6424c7f004e319f4a65a3d)) - Toni Oriol
+- add launch at login controller - ([e5a1476](https://github.com/tonioriol/insomnia/commit/e5a14768be83f9af0d82d72880e87221355dd517)) - Toni Oriol
+- surface preference checkboxes in menu bar with confirmation alert - ([fe525c3](https://github.com/tonioriol/insomnia/commit/fe525c3ab0687da3520696385eba04a9bc7db923)) - Toni Oriol
+- add ScreenLocker and LidCloseLockResponder - ([b1240df](https://github.com/tonioriol/insomnia/commit/b1240dfa5b3b2d95798106b3d5c69b50421318b0)) - Toni Oriol
+- gate lid event sounds on preferences - ([3dac9d4](https://github.com/tonioriol/insomnia/commit/3dac9d47931e607f67997a66ab0e7cb5e97bed59)) - Toni Oriol
+- drive AppCoordinator from PreferencesStore with live reconciliation - ([a2c35b7](https://github.com/tonioriol/insomnia/commit/a2c35b7c1e70e26d7e6b9938dd911f6bfbc27d88)) - Toni Oriol
+- add recordErrorWhileActive for live reconciliation failures - ([29cb22c](https://github.com/tonioriol/insomnia/commit/29cb22cbb18a925189dc8de4720bb79233de083e)) - Toni Oriol
+- add display-sleep flag and live reconciliation to AwakeController - ([7b7e051](https://github.com/tonioriol/insomnia/commit/7b7e05188958f835d0db263ad8a852d7f0f1dc1c)) - Toni Oriol
+- add PreferencesStore for Insomnia settings - ([3d4bce4](https://github.com/tonioriol/insomnia/commit/3d4bce49d762a8e34e7460da2887d69d3681d438)) - Toni Oriol
+- wire lid event sounds - ([5a71fac](https://github.com/tonioriol/insomnia/commit/5a71fac06d03e07bf0a3311c3efd47cc597c57dd)) - Toni Oriol
+- monitor lid state changes - ([3d849e2](https://github.com/tonioriol/insomnia/commit/3d849e2aa27b870829c7408de66a35758c85839a)) - Toni Oriol
+- add lid event sound policy - ([8a53dc4](https://github.com/tonioriol/insomnia/commit/8a53dc4185199280748eca05fdd1f894538bd57b)) - Toni Oriol
+- add one-click menu bar UI - ([58232b2](https://github.com/tonioriol/insomnia/commit/58232b27cc0aed970ddcdf4e45a901966d93227b)) - Toni Oriol
+- add privileged helper implementation - ([2ee77b2](https://github.com/tonioriol/insomnia/commit/2ee77b2171e7898f0e65bbbf29fdf37136a3256a)) - Toni Oriol
+- add lid-close controller contract - ([ac7b29f](https://github.com/tonioriol/insomnia/commit/ac7b29f33592b9caae2ef9df46ad9362e36672b6)) - Toni Oriol
+- add ordinary sleep assertions - ([563896d](https://github.com/tonioriol/insomnia/commit/563896dce1b92d36089ec0718e10b7d93807656a)) - Toni Oriol
+- add one-toggle coordinator - ([d92f625](https://github.com/tonioriol/insomnia/commit/d92f62566aa2641b4fa0f29656dacc7690626a7b)) - Toni Oriol
+- add core state model - ([bf0b924](https://github.com/tonioriol/insomnia/commit/bf0b9245081037a1c38e0ec5b3d95dc19d9e7fbb)) - Toni Oriol
+#### Bug Fixes
+- add cocogitto changelog separator marker - ([de7ece8](https://github.com/tonioriol/insomnia/commit/de7ece8514a5a7e67a1f3ea2e14640b0a7a0c5e6)) - Toni Oriol
+- strip cog tag prefix from decide-job output - ([ab6b0a4](https://github.com/tonioriol/insomnia/commit/ab6b0a43e21e94e426da767b62cef52acc0c48f2)) - Toni Oriol
+- install cocogitto via brew on macOS runner - ([69fd256](https://github.com/tonioriol/insomnia/commit/69fd25609680458f37ded24e4d15a4c974087171)) - Toni Oriol
+- enable hardened runtime for notarization - ([22d1e51](https://github.com/tonioriol/insomnia/commit/22d1e51ea0f4aa4c2089e3df44d11172e99a5409)) - Toni Oriol
+- move spctl check after notarization - ([b27f67b](https://github.com/tonioriol/insomnia/commit/b27f67b56d8cedfc55b72ee3570a826b030dd9a7)) - Toni Oriol
+- use provided pill app icon - ([c0a249a](https://github.com/tonioriol/insomnia/commit/c0a249adf015530b5b85fe3619ca0baabaffc9e6)) - Toni Oriol
+- make app icon generation pixel-stable - ([fbdf7b7](https://github.com/tonioriol/insomnia/commit/fbdf7b7cd05a9acae35ec32f9833b176fb1f3902)) - Toni Oriol
+- align app icon generator with plan - ([501aa2b](https://github.com/tonioriol/insomnia/commit/501aa2b85d414a4beeaac37b2228504c0c091777)) - Toni Oriol
+- tighten delayed lid lock cleanup coverage - ([a21e003](https://github.com/tonioriol/insomnia/commit/a21e003804a7ddef61de50593f34d6db134ed7c7)) - Toni Oriol
+- remove implicit lid lock policy wiring - ([7182b9c](https://github.com/tonioriol/insomnia/commit/7182b9c054fa745978f08533fc65ec7e3e8b1f50)) - Toni Oriol
+- remove explicit lock row and keep lid lock computed - ([abe95d8](https://github.com/tonioriol/insomnia/commit/abe95d8ccee74ea61a4e7590e051eacc38477344)) - Toni Oriol
+- restore lid-close lock preference - ([c3299af](https://github.com/tonioriol/insomnia/commit/c3299afa21c0571ed980a7ecfc6c2a75e5861728)) - Toni Oriol
+- gate lid-close lock on display sleep preference - ([bc736e4](https://github.com/tonioriol/insomnia/commit/bc736e4ce93404e2dff3bf03983920bf05f491bb)) - Toni Oriol
+- suppress spurious lid sound on display dim/wake; widen menu row - ([8f7930f](https://github.com/tonioriol/insomnia/commit/8f7930f7f437ad9c450a4dea736fa3f9c56185a0)) - Toni Oriol
+- gate lid sounds on lid-close prevention - ([90e7a19](https://github.com/tonioriol/insomnia/commit/90e7a199c3eaa4464664513cd8308171ef1374a6)) - Toni Oriol
+- keep live lid-close disable failures active - ([d6f398c](https://github.com/tonioriol/insomnia/commit/d6f398c7d77865191db0ca529a9613aa65673cb5)) - Toni Oriol
+- keep lid-close warning and tooltip in sync - ([fbb9caf](https://github.com/tonioriol/insomnia/commit/fbb9cafc06651d282073959463bd1e7a12b6418a)) - Toni Oriol
+- harden screen locker fallback and callback coverage - ([e0fb550](https://github.com/tonioriol/insomnia/commit/e0fb550da38f1e805a0a3bdfaad6255c00502557)) - Toni Oriol
+- clean up lid monitor on deinit - ([4eb1312](https://github.com/tonioriol/insomnia/commit/4eb1312b90204f83028f28c84ec805b0a72eadf1)) - Toni Oriol
+- align helper trust and refine menu bar icon - ([c6a8fb7](https://github.com/tonioriol/insomnia/commit/c6a8fb78c336222184f120e3e52a8f494b09b2df)) - Toni Oriol
+- serialize shutdown cleanup - ([9b30faf](https://github.com/tonioriol/insomnia/commit/9b30faf08c7d37951765e201960ac7dc7ab485cc)) - Toni Oriol
+- ensure shutdown cleanup runs - ([c03df7a](https://github.com/tonioriol/insomnia/commit/c03df7aab8a5244646dac1810774c7fdc2c43edb)) - Toni Oriol
+- tighten helper signing requirements - ([0d80481](https://github.com/tonioriol/insomnia/commit/0d804816b1ca07d99c4cb548664d3c3855d5bcb0)) - Toni Oriol
+- harden privileged helper client - ([84cd444](https://github.com/tonioriol/insomnia/commit/84cd4441f5778ffa9f231503caf742398704407d)) - Toni Oriol
+- align helper contract resources - ([40ee7da](https://github.com/tonioriol/insomnia/commit/40ee7da02f98f6571dc4ab2cf9d8604979835ccf)) - Toni Oriol
+- release partial awake assertions - ([270d0e0](https://github.com/tonioriol/insomnia/commit/270d0e0158d7708cd6f3f8f9ecf199863e3157a2)) - Toni Oriol
+- harden coordinator state transitions - ([720]]></description>
+    <enclosure url="https://github.com/tonioriol/insomnia/releases/download/v0.1.0/Insomnia-v0.1.0.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="zZmZDLucT07oLfM0wznN/yrCiSmBr034ik4Ju3G3tX83mfzCvm4Ea6RJSdRYFvO4uPPimUgIC/PTGYIPEDlUBg==" length="1373870" />
+</item>
     </channel>
 </rss>
