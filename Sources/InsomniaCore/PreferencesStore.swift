@@ -4,18 +4,15 @@ import Foundation
 public struct PreferencesSnapshot: Equatable, Sendable {
     public var preventDisplaySleep: Bool
     public var preventLidCloseSleep: Bool
-    public var lockScreenOnLidClose: Bool
     public var playLidEventSounds: Bool
 
     public init(
         preventDisplaySleep: Bool,
         preventLidCloseSleep: Bool,
-        lockScreenOnLidClose: Bool,
         playLidEventSounds: Bool
     ) {
         self.preventDisplaySleep = preventDisplaySleep
         self.preventLidCloseSleep = preventLidCloseSleep
-        self.lockScreenOnLidClose = lockScreenOnLidClose
         self.playLidEventSounds = playLidEventSounds
     }
 }
@@ -24,13 +21,12 @@ public struct PreferencesSnapshot: Equatable, Sendable {
 public protocol PreferencesProviding: AnyObject {
     var preventDisplaySleep: Bool { get set }
     var preventLidCloseSleep: Bool { get set }
-    var lockScreenOnLidClose: Bool { get set }
     var playLidEventSounds: Bool { get set }
     var lidClosePreventionConfirmed: Bool { get set }
+    var wasActive: Bool { get set }
 
     var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { get }
     var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { get }
-    var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> { get }
     var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { get }
 
     func snapshot() -> PreferencesSnapshot
@@ -41,9 +37,9 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
     public enum Key {
         public static let preventDisplaySleep = "Insomnia.preventDisplaySleep"
         public static let preventLidCloseSleep = "Insomnia.preventLidCloseSleep"
-        public static let lockScreenOnLidClose = "Insomnia.lockScreenOnLidClose"
         public static let playLidEventSounds = "Insomnia.playLidEventSounds"
         public static let lidClosePreventionConfirmed = "Insomnia.lidClosePreventionConfirmed"
+        public static let wasActive = "Insomnia.wasActive"
     }
 
     private let defaults: UserDefaults
@@ -56,10 +52,6 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         didSet { defaults.set(preventLidCloseSleep, forKey: Key.preventLidCloseSleep) }
     }
 
-    @Published public var lockScreenOnLidClose: Bool {
-        didSet { defaults.set(lockScreenOnLidClose, forKey: Key.lockScreenOnLidClose) }
-    }
-
     @Published public var playLidEventSounds: Bool {
         didSet { defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds) }
     }
@@ -68,13 +60,17 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
 
+    @Published public var wasActive: Bool {
+        didSet { defaults.set(wasActive, forKey: Key.wasActive) }
+    }
+
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.preventDisplaySleep = Self.readBool(from: defaults, key: Key.preventDisplaySleep, default: true)
         self.preventLidCloseSleep = Self.readBool(from: defaults, key: Key.preventLidCloseSleep, default: false)
-        self.lockScreenOnLidClose = Self.readBool(from: defaults, key: Key.lockScreenOnLidClose, default: true)
         self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
+        self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
     }
 
     public var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> {
@@ -85,10 +81,6 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         $preventLidCloseSleep.eraseToAnyPublisher()
     }
 
-    public var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> {
-        $lockScreenOnLidClose.eraseToAnyPublisher()
-    }
-
     public var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> {
         $playLidEventSounds.eraseToAnyPublisher()
     }
@@ -97,7 +89,6 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         PreferencesSnapshot(
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
-            lockScreenOnLidClose: lockScreenOnLidClose,
             playLidEventSounds: playLidEventSounds
         )
     }
