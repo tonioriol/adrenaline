@@ -6,6 +6,35 @@ macOS menu bar app with one on/off icon. When on, it prevents system sleep using
 
 Do not put a closed MacBook into a bag with **Prevent system sleep with lid closed** enabled. Lid-close sleep prevention can leave the machine running and may cause overheating.
 
+## Install
+
+### Homebrew
+
+```bash
+brew tap tonioriol/insomnia https://github.com/tonioriol/insomnia.git
+brew install --cask insomnia
+```
+
+After install, `brew upgrade --cask insomnia` updates to the latest. Sparkle's in-app updater handles updates automatically too — they're equivalent paths to the same signed binary.
+
+### Direct download
+
+Grab the latest signed `.zip` from the [Releases page](https://github.com/tonioriol/insomnia/releases/latest), unzip, drag to Applications.
+
+### Uninstall
+
+```bash
+brew uninstall --zap --cask insomnia
+```
+
+The `--zap` flag removes user preferences and caches. To also remove the privileged helper (which runs as root and is omitted from the cask's `zap` because Homebrew can't prompt for sudo):
+
+```bash
+sudo launchctl bootout system/com.tonioriol.insomnia.helper 2>/dev/null
+sudo rm -f /Library/PrivilegedHelperTools/com.tonioriol.insomnia.helper
+sudo rm -f /Library/LaunchDaemons/com.tonioriol.insomnia.helper.plist
+```
+
 ## Build
 
 ```bash
