@@ -2,18 +2,66 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  build-sign-notarize:
-    runs-on: macos-14
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      will_release: ${{ steps.dryrun.outputs.new_release_published }}
+      next_version: ${{ steps.dryrun.outputs.new_release_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Semantic Release dry run
+        id: dryrun
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: decide
+    if: needs.decide.outputs.will_release == 'true'
+    runs-on: macos-14
+    env:
+      NEXT_VERSION: ${{ needs.decide.outputs.next_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Import Developer ID certificate
         env:
@@ -52,6 +100,21 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --password "$APPLE_APP_SPECIFIC_PASSWORD"
 
+      - name: Bump Info.plist versions
+        run: |
+          set -euo pipefail
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleShortVersionString ${NEXT_VERSION}" \
+            -c "Set :CFBundleVersion ${NEXT_VERSION}" \
+            Resources/Insomnia/Info.plist
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleVersion ${NEXT_VERSION}" \
+            Resources/InsomniaHelper/Info.plist
+          echo "Bumped to ${NEXT_VERSION}:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Insomnia/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/Insomnia/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/InsomniaHelper/Info.plist
+
       - name: Build signed app
         run: |
           set -euo pipefail
@@ -68,7 +131,7 @@ jobs:
           xcrun stapler validate build/Insomnia.app
           spctl --assess --type execute --verbose=4 build/Insomnia.app
           rm -f build/Insomnia.zip
-          ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
+          ditto -c -k --keepParent build/Insomnia.app "build/Insomnia-v${NEXT_VERSION}.zip"
 
       - name: Sign update with EdDSA
         shell: bash
@@ -91,13 +154,16 @@ jobs:
           curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
             | tar -xJf - -C "$RUNNER_TEMP" "./bin/sign_update"
           SIGN_UPDATE="$RUNNER_TEMP/bin/sign_update"
-          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-${GITHUB_REF_NAME}.zip")
+          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
           echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/Insomnia-${{ github.ref_name }}.zip
+          tag_name: v${{ env.NEXT_VERSION }}
+          name: v${{ env.NEXT_VERSION }}
+          files: build/Insomnia-v${{ env.NEXT_VERSION }}.zip
+          draft: true
 
       - name: Publish appcast entry
         shell: bash
@@ -105,15 +171,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
-          BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/Insomnia/Info.plist)
-          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Insomnia-${GITHUB_REF_NAME}.zip"
+          VERSION="${NEXT_VERSION}"
+          BUILD_NUMBER="${NEXT_VERSION}"
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/Insomnia-v${VERSION}.zip"
           PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
-          RELEASE_NOTES=$(gh release view "$GITHUB_REF_NAME" --json body -q .body | head -c 8000)
+          RELEASE_NOTES=$(gh release view "v${VERSION}" --json body -q .body | head -c 8000)
 
           git clone --depth 1 --branch gh-pages \
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
           cd gh-pages
+
+          if grep -q "<title>Insomnia ${VERSION}</title>" appcast.xml; then
+            echo "Appcast already contains v${VERSION}, skipping"
+            exit 0
+          fi
 
           NEW_ITEM=$(cat <<EOF
                   <item>
@@ -136,8 +207,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add appcast.xml
-          git commit -m "appcast: ${GITHUB_REF_NAME}"
+          git commit -m "appcast: v${VERSION}"
           git push origin gh-pages
+
+      - name: Semantic Release (commit, tag, publish)
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cleanup signing materials
         if: always()
