@@ -2,17 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.tonioriol.insomnia.helper</string>
-    <key>CFBundleName</key>
-    <string>InsomniaHelper</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>SMAuthorizedClients</key>
-    <array>
-        <string>anchor apple generic and identifier "com.tonioriol.insomnia" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
-    </array>
+	<key>CFBundleIdentifier</key>
+	<string>com.tonioriol.insomnia.helper</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>InsomniaHelper</string>
+	<key>CFBundleVersion</key>
+	<string>0.1.0</string>
+	<key>SMAuthorizedClients</key>
+	<array>
+		<string>anchor apple generic and identifier "com.tonioriol.insomnia" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
+	</array>
 </dict>
 </plist>
