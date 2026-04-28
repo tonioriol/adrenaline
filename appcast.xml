@@ -70,5 +70,20 @@
                type="application/octet-stream"
                sparkle:edSignature="zZmZDLucT07oLfM0wznN/yrCiSmBr034ik4Ju3G3tX83mfzCvm4Ea6RJSdRYFvO4uPPimUgIC/PTGYIPEDlUBg==" length="1373870" />
 </item>
+            <item>
+    <title>Insomnia 0.2.0</title>
+    <pubDate>Tue, 28 Apr 2026 23:19:00 +0000</pubDate>
+    <sparkle:version>0.2.0</sparkle:version>
+    <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <description><![CDATA[## [v0.2.0](https://github.com/tonioriol/insomnia/compare/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a..v0.2.0) - 2026-04-28
+#### Features
+- add homebrew tap support - ([b98ad37](https://github.com/tonioriol/insomnia/commit/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a)) - Toni Oriol
+#### Miscellaneous Chores
+- (**version**) v0.2.0 - ([e863769](https://github.com/tonioriol/insomnia/commit/e863769cfa99f9c213947f29c2e426bd89678885)) - github-actions[bot]]]></description>
+    <enclosure url="https://github.com/tonioriol/insomnia/releases/download/v0.2.0/Insomnia-v0.2.0.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="zPeFe2BIZdyO9+ErwORrD+7u7Ze3JZlS4nd0VEee0MwYTAqb9mIOS3q0DV+/B65g2eY+K2r7rEbQax6wrwixAg==" length="1373849" />
+</item>
     </channel>
 </rss>
