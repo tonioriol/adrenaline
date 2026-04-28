@@ -32,13 +32,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # cog bump --auto --dry-run prints the next version on stdout, or
-          # exits non-zero if there are no releasable commits since the
-          # latest tag. We capture both cases.
-          if NEXT="$(cog bump --auto --dry-run 2>/dev/null)"; then
+          # cog bump --auto --dry-run prints the next *tag* (with the configured
+          # tag_prefix, e.g. "v0.1.0") on stdout, or exits non-zero if there are
+          # no releasable commits since the latest tag. Strip the leading "v"
+          # so downstream steps work with bare semver "0.1.0".
+          if RAW="$(cog bump --auto --dry-run 2>/dev/null)"; then
+            NEXT="${RAW#v}"
             echo "will_release=true" >> "$GITHUB_OUTPUT"
             echo "next_version=$NEXT" >> "$GITHUB_OUTPUT"
-            echo "Next version: $NEXT"
+            echo "Next version: $NEXT (tag will be v$NEXT)"
           else
             echo "will_release=false" >> "$GITHUB_OUTPUT"
             echo "No releasable commits since last tag"
