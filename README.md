@@ -83,7 +83,7 @@ These steps happen once before the first Sparkle-aware release:
 
 ### Per-release flow
 
-After setup, the only manual step is `git tag vX.Y.Z && git push --tags`. CI handles signing, notarization, EdDSA signing, GitHub Release creation, and appcast publishing.
+See [Release](#release) for the conventional-commits driven flow that fires CI's signing, notarization, EdDSA signing, GitHub Release creation, and appcast publishing.
 
 ### Key rotation
 
