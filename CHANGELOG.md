@@ -3,6 +3,12 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.2.1](https://github.com/tonioriol/insomnia/compare/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd..v0.2.1) - 2026-04-28
+#### Bug Fixes
+- use qualified cask name in brew install commands - ([00b48da](https://github.com/tonioriol/insomnia/commit/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd)) - Toni Oriol
+
+- - -
+
 ## [v0.2.0](https://github.com/tonioriol/insomnia/compare/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a..v0.2.0) - 2026-04-28
 #### Features
 - add homebrew tap support - ([b98ad37](https://github.com/tonioriol/insomnia/commit/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a)) - Toni Oriol
