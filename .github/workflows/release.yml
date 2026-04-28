@@ -2,18 +2,68 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  build-sign-notarize:
-    runs-on: macos-14
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      will_release: ${{ steps.dryrun.outputs.will_release }}
+      next_version: ${{ steps.dryrun.outputs.next_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Cocogitto
+        uses: cocogitto/cocogitto-action@v3
+
+      - name: Compute next version
+        id: dryrun
+        shell: bash
+        run: |
+          set -euo pipefail
+          # cog bump --auto --dry-run prints the next version on stdout, or
+          # exits non-zero if there are no releasable commits since the
+          # latest tag. We capture both cases.
+          if NEXT="$(cog bump --auto --dry-run 2>/dev/null)"; then
+            echo "will_release=true" >> "$GITHUB_OUTPUT"
+            echo "next_version=$NEXT" >> "$GITHUB_OUTPUT"
+            echo "Next version: $NEXT"
+          else
+            echo "will_release=false" >> "$GITHUB_OUTPUT"
+            echo "No releasable commits since last tag"
+          fi
+
+  release:
+    needs: decide
+    if: needs.decide.outputs.will_release == 'true'
+    runs-on: macos-14
+    env:
+      NEXT_VERSION: ${{ needs.decide.outputs.next_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install Cocogitto
+        uses: cocogitto/cocogitto-action@v3
+
+      - name: Configure git for cog bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Import Developer ID certificate
         env:
@@ -52,6 +102,15 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --password "$APPLE_APP_SPECIFIC_PASSWORD"
 
+      - name: Bump version (commits CHANGELOG + plists, creates tag)
+        run: |
+          set -euo pipefail
+          # cog runs the pre_bump_hooks defined in cog.toml — these update both
+          # Info.plists via PlistBuddy. Then cog writes CHANGELOG.md, commits
+          # everything, and creates the v${NEXT_VERSION} tag.
+          cog bump --version "${NEXT_VERSION}"
+          echo "Bumped to ${NEXT_VERSION}; tag v${NEXT_VERSION} created locally"
+
       - name: Build signed app
         run: |
           set -euo pipefail
@@ -68,12 +127,103 @@ jobs:
           xcrun stapler validate build/Insomnia.app
           spctl --assess --type execute --verbose=4 build/Insomnia.app
           rm -f build/Insomnia.zip
-          ditto -c -k --keepParent build/Insomnia.app build/Insomnia-${GITHUB_REF_NAME}.zip
+          ditto -c -k --keepParent build/Insomnia.app "build/Insomnia-v${NEXT_VERSION}.zip"
+
+      - name: Sign update with EdDSA
+        shell: bash
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          SPARKLE_VERSION=$(python3 - <<'PY'
+          import json
+          with open('Package.resolved') as f:
+              data = json.load(f)
+          for pin in data['pins']:
+              if pin['identity'] == 'sparkle':
+                  print(pin['state']['version'])
+                  break
+          else:
+              raise SystemExit('Sparkle pin not found in Package.resolved')
+          PY
+          )
+          curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
+            | tar -xJf - -C "$RUNNER_TEMP" "./bin/sign_update"
+          SIGN_UPDATE="$RUNNER_TEMP/bin/sign_update"
+          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
+          echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
+
+      - name: Push commit and tag
+        run: |
+          set -euo pipefail
+          git push origin HEAD
+          git push origin "v${NEXT_VERSION}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/Insomnia-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Generate per-release notes from cog (covers commits in this version only).
+          cog changelog --at "v${NEXT_VERSION}" > release-notes.md
+          gh release create "v${NEXT_VERSION}" \
+            --title "v${NEXT_VERSION}" \
+            --notes-file release-notes.md \
+            "build/Insomnia-v${NEXT_VERSION}.zip"
+
+      - name: Publish appcast entry
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.NEXT_VERSION }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          DOWNLOAD_URL="https://github.com/${GH_REPO}/releases/download/v${VERSION}/Insomnia-v${VERSION}.zip"
+          PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
+          RELEASE_NOTES=$(gh release view "v${VERSION}" --json body -q .body | head -c 8000)
+
+          git clone --depth 1 --branch gh-pages \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GH_REPO}.git" gh-pages
+          cd gh-pages
+
+          if grep -q "<title>Insomnia ${VERSION}</title>" appcast.xml; then
+            echo "Appcast already contains v${VERSION}, skipping"
+            exit 0
+          fi
+
+          # Inject new <item> before </channel> using python (BSD awk on
+          # macos-14 rejects multi-line -v values).
+          export VERSION DOWNLOAD_URL PUB_DATE RELEASE_NOTES SPARKLE_SIG_AND_LEN
+          python3 - <<'PY'
+          import os, sys
+          version = os.environ['VERSION']
+          item = f"""        <item>
+              <title>Insomnia {version}</title>
+              <pubDate>{os.environ['PUB_DATE']}</pubDate>
+              <sparkle:version>{version}</sparkle:version>
+              <sparkle:shortVersionString>{version}</sparkle:shortVersionString>
+              <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+              <description><![CDATA[{os.environ['RELEASE_NOTES']}]]></description>
+              <enclosure url="{os.environ['DOWNLOAD_URL']}"
+                         type="application/octet-stream"
+                         {os.environ['SPARKLE_SIG_AND_LEN']} />
+          </item>"""
+          with open('appcast.xml', 'r') as f:
+              content = f.read()
+          if '</channel>' not in content:
+              sys.exit('appcast.xml has no </channel> close tag')
+          content = content.replace('</channel>', item + '\n    </channel>', 1)
+          with open('appcast.xml', 'w') as f:
+              f.write(content)
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          git commit -m "appcast: v${VERSION}"
+          git push origin gh-pages
 
       - name: Cleanup signing materials
         if: always()

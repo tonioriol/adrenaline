@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import InsomniaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -7,6 +8,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var coordinator: AppCoordinator?
     private var lidEventSoundController: LidEventSoundController?
     private var lidCloseLockResponder: LidCloseLockResponder?
+    private var updater: SparkleUpdaterController?
+    private var activeStateCancellable: AnyCancellable?
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -39,16 +42,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             policyReader: lockPolicyReader
         )
 
+        let updater = SparkleUpdaterController()
+
         self.preferences = preferences
         self.coordinator = coordinator
         self.lidEventSoundController = lidEventSoundController
         self.lidCloseLockResponder = lidCloseLockResponder
+        self.updater = updater
         self.menuBarController = MenuBarController(
             state: state,
             coordinator: coordinator,
             preferences: preferences,
-            launchAtLoginController: LaunchAtLoginController()
+            launchAtLoginController: LaunchAtLoginController(),
+            updater: updater
         )
+
+        activeStateCancellable = state.$isActive
+            .removeDuplicates()
+            .sink { [weak preferences] isActive in
+                preferences?.wasActive = isActive
+            }
+
+        if preferences.wasActive {
+            Task { @MainActor in
+                await coordinator.turnOn()
+            }
+        }
     }
 
     @MainActor

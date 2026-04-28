@@ -39,20 +39,18 @@ private final class FakeLidSoundPlayer: LidSoundPlaying {
 private final class FakePreferencesStore: PreferencesProviding {
     @Published var preventDisplaySleep: Bool = true
     @Published var preventLidCloseSleep: Bool = false
-    @Published var lockScreenOnLidClose: Bool = true
     @Published var playLidEventSounds: Bool = true
     @Published var lidClosePreventionConfirmed: Bool = false
+    var wasActive: Bool = false
 
     var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { $preventDisplaySleep.eraseToAnyPublisher() }
     var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { $preventLidCloseSleep.eraseToAnyPublisher() }
-    var lockScreenOnLidClosePublisher: AnyPublisher<Bool, Never> { $lockScreenOnLidClose.eraseToAnyPublisher() }
     var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { $playLidEventSounds.eraseToAnyPublisher() }
 
     func snapshot() -> PreferencesSnapshot {
         PreferencesSnapshot(
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
-            lockScreenOnLidClose: lockScreenOnLidClose,
             playLidEventSounds: playLidEventSounds
         )
     }
