@@ -157,28 +157,25 @@ jobs:
           SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
           echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ env.NEXT_VERSION }}
-          name: v${{ env.NEXT_VERSION }}
-          files: build/Insomnia-v${{ env.NEXT_VERSION }}.zip
-          draft: true
+      - name: Semantic Release (commit, tag, publish, upload asset)
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish appcast entry
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.NEXT_VERSION }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          VERSION="${NEXT_VERSION}"
-          BUILD_NUMBER="${NEXT_VERSION}"
-          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/Insomnia-v${VERSION}.zip"
+          DOWNLOAD_URL="https://github.com/${GH_REPO}/releases/download/v${VERSION}/Insomnia-v${VERSION}.zip"
           PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
           RELEASE_NOTES=$(gh release view "v${VERSION}" --json body -q .body | head -c 8000)
 
           git clone --depth 1 --branch gh-pages \
-            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GH_REPO}.git" gh-pages
           cd gh-pages
 
           if grep -q "<title>Insomnia ${VERSION}</title>" appcast.xml; then
@@ -186,34 +183,37 @@ jobs:
             exit 0
           fi
 
-          NEW_ITEM=$(cat <<EOF
-                  <item>
-                      <title>Insomnia ${VERSION}</title>
-                      <pubDate>${PUB_DATE}</pubDate>
-                      <sparkle:version>${BUILD_NUMBER}</sparkle:version>
-                      <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
-                      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-                      <description><![CDATA[${RELEASE_NOTES}]]></description>
-                      <enclosure url="${DOWNLOAD_URL}"
-                                 type="application/octet-stream"
-                                 ${SPARKLE_SIG_AND_LEN} />
-                  </item>
-          EOF
-          )
-
-          awk -v item="$NEW_ITEM" '/<\/channel>/ { print item } { print }' appcast.xml > appcast.xml.new
-          mv appcast.xml.new appcast.xml
+          # Inject new <item> before </channel> using python (BSD awk
+          # rejects multi-line -v values on macOS runners).
+          export VERSION DOWNLOAD_URL PUB_DATE RELEASE_NOTES SPARKLE_SIG_AND_LEN
+          python3 - <<'PY'
+          import os, sys
+          version = os.environ['VERSION']
+          item = f"""        <item>
+              <title>Insomnia {version}</title>
+              <pubDate>{os.environ['PUB_DATE']}</pubDate>
+              <sparkle:version>{version}</sparkle:version>
+              <sparkle:shortVersionString>{version}</sparkle:shortVersionString>
+              <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+              <description><![CDATA[{os.environ['RELEASE_NOTES']}]]></description>
+              <enclosure url="{os.environ['DOWNLOAD_URL']}"
+                         type="application/octet-stream"
+                         {os.environ['SPARKLE_SIG_AND_LEN']} />
+          </item>"""
+          with open('appcast.xml', 'r') as f:
+              content = f.read()
+          if '</channel>' not in content:
+              sys.exit('appcast.xml has no </channel> close tag')
+          content = content.replace('</channel>', item + '\n    </channel>', 1)
+          with open('appcast.xml', 'w') as f:
+              f.write(content)
+          PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add appcast.xml
           git commit -m "appcast: v${VERSION}"
           git push origin gh-pages
-
-      - name: Semantic Release (commit, tag, publish)
-        uses: cycjimmy/semantic-release-action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cleanup signing materials
         if: always()
