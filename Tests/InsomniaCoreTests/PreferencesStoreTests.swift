@@ -42,6 +42,22 @@ final class PreferencesStoreTests: XCTestCase {
         XCTAssertTrue(reloaded.lidClosePreventionConfirmed)
     }
 
+    func testWasActiveDefaultsToFalse() {
+        let defaults = makeIsolatedDefaults()
+        let store = PreferencesStore(defaults: defaults)
+        XCTAssertFalse(store.wasActive)
+    }
+
+    func testWasActiveRoundTripsThroughUserDefaults() {
+        let defaults = makeIsolatedDefaults()
+        let store = PreferencesStore(defaults: defaults)
+
+        store.wasActive = true
+
+        let reloaded = PreferencesStore(defaults: defaults)
+        XCTAssertTrue(reloaded.wasActive)
+    }
+
     func testSnapshotMirrorsCurrentValues() {
         let defaults = makeIsolatedDefaults()
         let store = PreferencesStore(defaults: defaults)

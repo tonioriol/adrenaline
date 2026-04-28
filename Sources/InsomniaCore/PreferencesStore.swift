@@ -23,6 +23,7 @@ public protocol PreferencesProviding: AnyObject {
     var preventLidCloseSleep: Bool { get set }
     var playLidEventSounds: Bool { get set }
     var lidClosePreventionConfirmed: Bool { get set }
+    var wasActive: Bool { get set }
 
     var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { get }
     var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { get }
@@ -38,6 +39,7 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         public static let preventLidCloseSleep = "Insomnia.preventLidCloseSleep"
         public static let playLidEventSounds = "Insomnia.playLidEventSounds"
         public static let lidClosePreventionConfirmed = "Insomnia.lidClosePreventionConfirmed"
+        public static let wasActive = "Insomnia.wasActive"
     }
 
     private let defaults: UserDefaults
@@ -58,12 +60,17 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
 
+    @Published public var wasActive: Bool {
+        didSet { defaults.set(wasActive, forKey: Key.wasActive) }
+    }
+
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.preventDisplaySleep = Self.readBool(from: defaults, key: Key.preventDisplaySleep, default: true)
         self.preventLidCloseSleep = Self.readBool(from: defaults, key: Key.preventLidCloseSleep, default: false)
         self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
+        self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
     }
 
     public var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> {

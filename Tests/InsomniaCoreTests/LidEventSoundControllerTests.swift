@@ -41,6 +41,7 @@ private final class FakePreferencesStore: PreferencesProviding {
     @Published var preventLidCloseSleep: Bool = false
     @Published var playLidEventSounds: Bool = true
     @Published var lidClosePreventionConfirmed: Bool = false
+    var wasActive: Bool = false
 
     var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { $preventDisplaySleep.eraseToAnyPublisher() }
     var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { $preventLidCloseSleep.eraseToAnyPublisher() }
