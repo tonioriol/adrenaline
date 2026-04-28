@@ -85,5 +85,20 @@
                type="application/octet-stream"
                sparkle:edSignature="zPeFe2BIZdyO9+ErwORrD+7u7Ze3JZlS4nd0VEee0MwYTAqb9mIOS3q0DV+/B65g2eY+K2r7rEbQax6wrwixAg==" length="1373849" />
 </item>
+            <item>
+    <title>Insomnia 0.2.1</title>
+    <pubDate>Tue, 28 Apr 2026 23:23:56 +0000</pubDate>
+    <sparkle:version>0.2.1</sparkle:version>
+    <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <description><![CDATA[## [v0.2.1](https://github.com/tonioriol/insomnia/compare/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd..v0.2.1) - 2026-04-28
+#### Bug Fixes
+- use qualified cask name in brew install commands - ([00b48da](https://github.com/tonioriol/insomnia/commit/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd)) - Toni Oriol
+#### Miscellaneous Chores
+- (**version**) v0.2.1 - ([e6e4150](https://github.com/tonioriol/insomnia/commit/e6e415060300847dc5f1c9ac1e7d8a1e60e334b2)) - github-actions[bot]]]></description>
+    <enclosure url="https://github.com/tonioriol/insomnia/releases/download/v0.2.1/Insomnia-v0.2.1.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="0fFNeqosj3trLserwa9l3w71DhlwmiLoUYR+pkQ3cdCOELlffsQ9Is8g9y18y5a+x5gdWmLAqTnf1ciWqzzrAA==" length="1373847" />
+</item>
     </channel>
 </rss>
