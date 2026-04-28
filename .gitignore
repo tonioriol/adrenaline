@@ -2,7 +2,6 @@
 build/
 .DS_Store
 .swiftpm/
-node_modules/
 
 # Local development docs
 docs/

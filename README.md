@@ -30,11 +30,16 @@ Releases are fully automated. Push [Conventional Commits](https://www.convention
 
 ### What CI does on release
 
-1. Bumps `CFBundleShortVersionString` and `CFBundleVersion` in both [`Resources/Insomnia/Info.plist`](Resources/Insomnia/Info.plist) and [`Resources/InsomniaHelper/Info.plist`](Resources/InsomniaHelper/Info.plist) to the new semver.
-2. Builds, codesigns (Developer ID), notarizes, and staples.
-3. EdDSA-signs the zip and uploads it as a GitHub Release asset.
-4. Appends the new version to the [gh-pages appcast](https://tonioriol.github.io/insomnia/appcast.xml) so Sparkle clients pick it up on their next check.
-5. Updates `CHANGELOG.md` and pushes a `chore(release): X.Y.Z [skip ci]` commit plus a `vX.Y.Z` tag back to `main`.
+The flow is driven by [Cocogitto](https://docs.cocogitto.io/), a Rust CLI for conventional commits + semver:
+
+1. `cog bump --auto --dry-run` calculates the next version from commits since the latest tag.
+2. PlistBuddy bumps `CFBundleShortVersionString` and `CFBundleVersion` in both [`Resources/Insomnia/Info.plist`](Resources/Insomnia/Info.plist) and [`Resources/InsomniaHelper/Info.plist`](Resources/InsomniaHelper/Info.plist) to the new semver.
+3. `cog bump --version X.Y.Z` writes the new section to `CHANGELOG.md`, commits the bumped plists + changelog, and creates a local `vX.Y.Z` tag.
+4. The macOS app is built, codesigned (Developer ID), notarized, stapled, and EdDSA-signed.
+5. The bumped commit and tag are pushed to `main`. The signed/notarized zip is uploaded as a GitHub Release asset.
+6. A new entry is appended to the [gh-pages appcast](https://tonioriol.github.io/insomnia/appcast.xml) so Sparkle clients pick it up on their next check.
+
+While the project is pre-1.0, breaking changes bump minor (`0.1.0` → `0.2.0`) per [Cocogitto's 0.x behavior](https://docs.cocogitto.io/guide/bump.html). The first 1.0.0 release will be cut manually with `cog bump --major` when the public API is stable.
 
 ### Manual release
 

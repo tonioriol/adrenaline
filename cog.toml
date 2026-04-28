@@ -1,0 +1,29 @@
+# Cocogitto config — see https://docs.cocogitto.io/reference/config.html
+# This file controls the conventional-commits driven release flow.
+
+tag_prefix = "v"
+branch_whitelist = ["main"]
+ignore_merge_commits = true
+skip_ci = "[skip ci]"
+
+# Bump CFBundleShortVersionString and CFBundleVersion in both Info.plists
+# to the new version BEFORE the version commit lands. The {{version}} alias
+# is interpolated by Cocogitto. Files modified by pre_bump_hooks are
+# automatically included in the version commit.
+pre_bump_hooks = [
+    "/usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString {{version}}' -c 'Set :CFBundleVersion {{version}}' Resources/Insomnia/Info.plist",
+    "/usr/libexec/PlistBuddy -c 'Set :CFBundleVersion {{version}}' Resources/InsomniaHelper/Info.plist",
+]
+
+[commit_types]
+# Recognise one historical "refine" commit (525bef1) as a refactor so cog
+# doesn't fail compliance checks on the existing history. New commits should
+# use standard conventional types.
+refine = { changelog_title = "Refinements" }
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+owner = "tonioriol"
+repository = "insomnia"

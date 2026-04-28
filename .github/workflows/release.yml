@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
 
 concurrency:
   group: release
@@ -18,29 +16,33 @@ jobs:
   decide:
     runs-on: ubuntu-latest
     outputs:
-      will_release: ${{ steps.dryrun.outputs.new_release_published }}
-      next_version: ${{ steps.dryrun.outputs.new_release_version }}
+      will_release: ${{ steps.dryrun.outputs.will_release }}
+      next_version: ${{ steps.dryrun.outputs.next_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
+      - name: Install Cocogitto
+        uses: cocogitto/cocogitto-action@v3
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Semantic Release dry run
+      - name: Compute next version
         id: dryrun
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          dry_run: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # cog bump --auto --dry-run prints the next version on stdout, or
+          # exits non-zero if there are no releasable commits since the
+          # latest tag. We capture both cases.
+          if NEXT="$(cog bump --auto --dry-run 2>/dev/null)"; then
+            echo "will_release=true" >> "$GITHUB_OUTPUT"
+            echo "next_version=$NEXT" >> "$GITHUB_OUTPUT"
+            echo "Next version: $NEXT"
+          else
+            echo "will_release=false" >> "$GITHUB_OUTPUT"
+            echo "No releasable commits since last tag"
+          fi
 
   release:
     needs: decide
@@ -55,13 +57,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
+      - name: Install Cocogitto
+        uses: cocogitto/cocogitto-action@v3
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Configure git for cog bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Import Developer ID certificate
         env:
@@ -100,20 +102,14 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --password "$APPLE_APP_SPECIFIC_PASSWORD"
 
-      - name: Bump Info.plist versions
+      - name: Bump version (commits CHANGELOG + plists, creates tag)
         run: |
           set -euo pipefail
-          /usr/libexec/PlistBuddy \
-            -c "Set :CFBundleShortVersionString ${NEXT_VERSION}" \
-            -c "Set :CFBundleVersion ${NEXT_VERSION}" \
-            Resources/Insomnia/Info.plist
-          /usr/libexec/PlistBuddy \
-            -c "Set :CFBundleVersion ${NEXT_VERSION}" \
-            Resources/InsomniaHelper/Info.plist
-          echo "Bumped to ${NEXT_VERSION}:"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Insomnia/Info.plist
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/Insomnia/Info.plist
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Resources/InsomniaHelper/Info.plist
+          # cog runs the pre_bump_hooks defined in cog.toml — these update both
+          # Info.plists via PlistBuddy. Then cog writes CHANGELOG.md, commits
+          # everything, and creates the v${NEXT_VERSION} tag.
+          cog bump --version "${NEXT_VERSION}"
+          echo "Bumped to ${NEXT_VERSION}; tag v${NEXT_VERSION} created locally"
 
       - name: Build signed app
         run: |
@@ -157,10 +153,24 @@ jobs:
           SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
           echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
 
-      - name: Semantic Release (commit, tag, publish, upload asset)
-        uses: cycjimmy/semantic-release-action@v4
+      - name: Push commit and tag
+        run: |
+          set -euo pipefail
+          git push origin HEAD
+          git push origin "v${NEXT_VERSION}"
+
+      - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Generate per-release notes from cog (covers commits in this version only).
+          cog changelog --at "v${NEXT_VERSION}" > release-notes.md
+          gh release create "v${NEXT_VERSION}" \
+            --title "v${NEXT_VERSION}" \
+            --notes-file release-notes.md \
+            "build/Insomnia-v${NEXT_VERSION}.zip"
 
       - name: Publish appcast entry
         shell: bash
@@ -183,8 +193,8 @@ jobs:
             exit 0
           fi
 
-          # Inject new <item> before </channel> using python (BSD awk
-          # rejects multi-line -v values on macOS runners).
+          # Inject new <item> before </channel> using python (BSD awk on
+          # macos-14 rejects multi-line -v values).
           export VERSION DOWNLOAD_URL PUB_DATE RELEASE_NOTES SPARKLE_SIG_AND_LEN
           python3 - <<'PY'
           import os, sys
