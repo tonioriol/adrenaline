@@ -58,7 +58,7 @@ jobs:
           persist-credentials: true
 
       - name: Install Cocogitto
-        uses: cocogitto/cocogitto-action@v3
+        run: brew install cocogitto
 
       - name: Configure git for cog bump
         run: |
