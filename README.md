@@ -12,10 +12,12 @@ Do not put a closed MacBook into a bag with **Prevent system sleep with lid clos
 
 ```bash
 brew tap tonioriol/insomnia https://github.com/tonioriol/insomnia.git
-brew install --cask insomnia
+brew install --cask tonioriol/insomnia/insomnia
 ```
 
-After install, `brew upgrade --cask insomnia` updates to the latest. Sparkle's in-app updater handles updates automatically too — they're equivalent paths to the same signed binary.
+The fully-qualified `tonioriol/insomnia/insomnia` cask name is required because `homebrew-cask` already publishes a different `insomnia` cask (Kong's HTTP/GraphQL client). Using the qualified name picks this menu bar app instead.
+
+After install, `brew upgrade --cask tonioriol/insomnia/insomnia` updates to the latest. Sparkle's in-app updater handles updates automatically too — they're equivalent paths to the same signed binary.
 
 ### Direct download
 
@@ -24,7 +26,7 @@ Grab the latest signed `.zip` from the [Releases page](https://github.com/tonior
 ### Uninstall
 
 ```bash
-brew uninstall --zap --cask insomnia
+brew uninstall --zap --cask tonioriol/insomnia/insomnia
 ```
 
 The `--zap` flag removes user preferences and caches. To also remove the privileged helper (which runs as root and is omitted from the cask's `zap` because Homebrew can't prompt for sudo):
