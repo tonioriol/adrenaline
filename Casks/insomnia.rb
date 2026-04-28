@@ -1,6 +1,6 @@
 cask "insomnia" do
-  version "0.1.0"
-  sha256 "553081a28b65ee0d2e1046263cc43d5430ad663af7a7ff464e83bd39cd818cc0"
+  version "0.2.0"
+  sha256 "c65eb36400041f2f5f7acbc2d584fdcf439b32a3bdf908f33475208433fb4ae8"
 
   url "https://github.com/tonioriol/insomnia/releases/download/v#{version}/Insomnia-v#{version}.zip"
   name "Insomnia"

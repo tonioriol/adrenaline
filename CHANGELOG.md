@@ -3,6 +3,12 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.2.0](https://github.com/tonioriol/insomnia/compare/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a..v0.2.0) - 2026-04-28
+#### Features
+- add homebrew tap support - ([b98ad37](https://github.com/tonioriol/insomnia/commit/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a)) - Toni Oriol
+
+- - -
+
 ## [v0.1.0](https://github.com/tonioriol/insomnia/compare/bf0b9245081037a1c38e0ec5b3d95dc19d9e7fbb..v0.1.0) - 2026-04-28
 #### Refinements
 - reduce pill icon size - ([525bef1](https://github.com/tonioriol/insomnia/commit/525bef1d6f08ee478b9090ba4ea9c7eca4a2dd82)) - Toni Oriol
