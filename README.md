@@ -17,9 +17,30 @@ The app bundle is created at `build/Insomnia.app`.
 
 ## Release
 
-Signed and notarized release artifacts are produced by GitHub Actions when a version tag such as `v0.2.0` is pushed. The same workflow also publishes an entry to the autoupdate appcast.
+Releases are fully automated. Push [Conventional Commits](https://www.conventionalcommits.org/) to `main` and CI ships a signed, notarized build whenever the commit history warrants a new version. Squash-merged PR titles count, so PR titles must also follow the convention.
 
-Required repository secrets:
+### Commit conventions
+
+| Prefix | Bump | Example |
+|---|---|---|
+| `feat: ...` | minor | `feat: add right-click About item` |
+| `fix: ...` | patch | `fix: release power assertion on reload` |
+| `feat!: ...` or footer `BREAKING CHANGE:` | major | `feat!: rename helper protocol method` |
+| `docs:`, `chore:`, `refactor:`, `style:`, `test:`, `build:`, `ci:`, `perf:` | no release | `chore: bump dependency` |
+
+### What CI does on release
+
+1. Bumps `CFBundleShortVersionString` and `CFBundleVersion` in both [`Resources/Insomnia/Info.plist`](Resources/Insomnia/Info.plist) and [`Resources/InsomniaHelper/Info.plist`](Resources/InsomniaHelper/Info.plist) to the new semver.
+2. Builds, codesigns (Developer ID), notarizes, and staples.
+3. EdDSA-signs the zip and uploads it as a GitHub Release asset.
+4. Appends the new version to the [gh-pages appcast](https://tonioriol.github.io/insomnia/appcast.xml) so Sparkle clients pick it up on their next check.
+5. Updates `CHANGELOG.md` and pushes a `chore(release): X.Y.Z [skip ci]` commit plus a `vX.Y.Z` tag back to `main`.
+
+### Manual release
+
+Visit Actions → Release → "Run workflow". The same pipeline runs. Pushing a `v*` tag manually no longer triggers anything.
+
+### Required repository secrets
 
 - `APPLE_DEVELOPER_ID_CERTIFICATE_BASE64`
 - `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD`
