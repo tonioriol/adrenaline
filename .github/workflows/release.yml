@@ -155,11 +155,26 @@ jobs:
           SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
           echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
 
+      - name: Update cask formula
+        env:
+          VERSION: ${{ env.NEXT_VERSION }}
+        run: |
+          set -euo pipefail
+          SHA=$(shasum -a 256 "build/Insomnia-v${VERSION}.zip" | awk '{print $1}')
+          /usr/bin/sed -i '' \
+            -e 's|^  version ".*"$|  version "'"${VERSION}"'"|' \
+            -e 's|^  sha256 ".*"$|  sha256 "'"${SHA}"'"|' \
+            Casks/insomnia.rb
+          git add Casks/insomnia.rb
+          git commit --amend --no-edit
+          git tag -f "v${VERSION}" HEAD
+          echo "Cask formula updated to ${VERSION} (sha256 ${SHA})"
+
       - name: Push commit and tag
         run: |
           set -euo pipefail
-          git push origin HEAD
-          git push origin "v${NEXT_VERSION}"
+          git push --force-with-lease origin HEAD
+          git push --force origin "v${NEXT_VERSION}"
 
       - name: Create GitHub Release
         env:
