@@ -54,3 +54,5 @@ make run
 ## License
 
 [AGPL-3.0](LICENSE)
+
+Inspired by Caffeine and Fermata; no third-party source is vendored in this repository.
