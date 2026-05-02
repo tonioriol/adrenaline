@@ -1,5 +1,5 @@
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 final class UpdatingTests: XCTestCase {
     func testIdleStatusEquality() {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 @MainActor
 private final class FakeLoginItemService: LoginItemServicing {

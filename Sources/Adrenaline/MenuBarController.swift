@@ -1,6 +1,6 @@
 import AppKit
 import Combine
-import InsomniaCore
+import AdrenalineCore
 
 @MainActor
 final class MenuBarController: NSObject {

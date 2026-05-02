@@ -1,6 +1,6 @@
 import Combine
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 @MainActor
 final class PreferencesStoreTests: XCTestCase {

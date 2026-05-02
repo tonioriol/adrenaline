@@ -1,6 +1,6 @@
 import AppKit
 import Combine
-import InsomniaCore
+import AdrenalineCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var preferences: PreferencesStore?
