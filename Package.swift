@@ -2,19 +2,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "Insomnia",
+    name: "Adrenaline",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "Insomnia", targets: ["Insomnia"]),
-        .executable(name: "InsomniaHelper", targets: ["InsomniaHelper"]),
-        .library(name: "InsomniaCore", targets: ["InsomniaCore"]),
+        .executable(name: "Adrenaline", targets: ["Adrenaline"]),
+        .executable(name: "AdrenalineHelper", targets: ["AdrenalineHelper"]),
+        .library(name: "AdrenalineCore", targets: ["AdrenalineCore"]),
     ],
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.7.0"),
     ],
     targets: [
         .target(
-            name: "InsomniaCore",
+            name: "AdrenalineCore",
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -22,9 +22,9 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "Insomnia",
+            name: "Adrenaline",
             dependencies: [
-                "InsomniaCore",
+                "AdrenalineCore",
                 .product(name: "Sparkle", package: "Sparkle"),
             ],
             linkerSettings: [
@@ -33,8 +33,8 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "InsomniaHelper",
-            dependencies: ["InsomniaCore"],
+            name: "AdrenalineHelper",
+            dependencies: ["AdrenalineCore"],
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
@@ -42,17 +42,17 @@ let package = Package(
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Resources/InsomniaHelper/Info.plist",
+                    "-Xlinker", "Resources/AdrenalineHelper/Info.plist",
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__launchd_plist",
-                    "-Xlinker", "Resources/InsomniaHelper/launchd.plist",
+                    "-Xlinker", "Resources/AdrenalineHelper/launchd.plist",
                 ]),
             ]
         ),
         .testTarget(
-            name: "InsomniaCoreTests",
-            dependencies: ["InsomniaCore"]
+            name: "AdrenalineCoreTests",
+            dependencies: ["AdrenalineCore"]
         ),
     ]
 )
