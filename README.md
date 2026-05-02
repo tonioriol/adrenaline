@@ -1,6 +1,6 @@
-# Insomnia
+# Adrenaline
 
-Keep your Mac awake from the menu bar.
+Keep your Mac awake from the menu bar — even with the lid closed.
 
 **Left-click** the icon to toggle sleep prevention on/off. **Right-click** for options:
 
@@ -16,29 +16,29 @@ Keep your Mac awake from the menu bar.
 ### Homebrew
 
 ```bash
-brew tap tonioriol/insomnia https://github.com/tonioriol/insomnia.git
-brew install --cask tonioriol/insomnia/insomnia
+brew tap tonioriol/adrenaline https://github.com/tonioriol/adrenaline.git
+brew install --cask tonioriol/adrenaline/adrenaline
 ```
 
-The full cask name avoids the existing Kong `insomnia` cask.
+After the official cask is accepted, you can install with `brew install --cask adrenaline`.
 
 ### Direct download
 
-Grab the latest `.zip` from [Releases](https://github.com/tonioriol/insomnia/releases/latest), unzip, drag to Applications.
+Grab the latest `.zip` from [Releases](https://github.com/tonioriol/adrenaline/releases/latest), unzip, drag to Applications.
 
 ### Uninstall
 
 ```bash
-brew uninstall --zap --cask tonioriol/insomnia/insomnia
+brew uninstall --zap --cask tonioriol/adrenaline/adrenaline
 ```
 
 <details>
 <summary>Also remove the privileged helper</summary>
 
 ```bash
-sudo launchctl bootout system/com.tonioriol.insomnia.helper 2>/dev/null
-sudo rm -f /Library/PrivilegedHelperTools/com.tonioriol.insomnia.helper
-sudo rm -f /Library/LaunchDaemons/com.tonioriol.insomnia.helper.plist
+sudo launchctl bootout system/com.tonioriol.adrenaline.helper 2>/dev/null
+sudo rm -f /Library/PrivilegedHelperTools/com.tonioriol.adrenaline.helper
+sudo rm -f /Library/LaunchDaemons/com.tonioriol.adrenaline.helper.plist
 ```
 
 </details>
@@ -46,7 +46,7 @@ sudo rm -f /Library/LaunchDaemons/com.tonioriol.insomnia.helper.plist
 ## Build
 
 ```bash
-make app        # → build/Insomnia.app
+make app        # → build/Adrenaline.app
 make test
 make run
 ```

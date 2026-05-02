@@ -117,19 +117,19 @@ jobs:
         run: |
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
-          codesign --verify --deep --strict --verbose=2 build/Insomnia.app
+          codesign --verify --deep --strict --verbose=2 build/Adrenaline.app
 
       - name: Notarize app zip
         env:
           APPLE_NOTARYTOOL_PROFILE: ${{ secrets.APPLE_NOTARYTOOL_PROFILE }}
         run: |
           set -euo pipefail
-          xcrun notarytool submit build/Insomnia.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
-          xcrun stapler staple build/Insomnia.app
-          xcrun stapler validate build/Insomnia.app
-          spctl --assess --type execute --verbose=4 build/Insomnia.app
-          rm -f build/Insomnia.zip
-          ditto -c -k --keepParent build/Insomnia.app "build/Insomnia-v${NEXT_VERSION}.zip"
+          xcrun notarytool submit build/Adrenaline.zip --keychain-profile "$APPLE_NOTARYTOOL_PROFILE" --wait
+          xcrun stapler staple build/Adrenaline.app
+          xcrun stapler validate build/Adrenaline.app
+          spctl --assess --type execute --verbose=4 build/Adrenaline.app
+          rm -f build/Adrenaline.zip
+          ditto -c -k --keepParent build/Adrenaline.app "build/Adrenaline-v${NEXT_VERSION}.zip"
 
       - name: Sign update with EdDSA
         shell: bash
@@ -152,7 +152,7 @@ jobs:
           curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" \
             | tar -xJf - -C "$RUNNER_TEMP" "./bin/sign_update"
           SIGN_UPDATE="$RUNNER_TEMP/bin/sign_update"
-          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Insomnia-v${NEXT_VERSION}.zip")
+          SIG_AND_LEN=$("$SIGN_UPDATE" --ed-key-file <(printf "%s" "$SPARKLE_ED_PRIVATE_KEY") "build/Adrenaline-v${NEXT_VERSION}.zip")
           echo "SPARKLE_SIG_AND_LEN=$SIG_AND_LEN" >> "$GITHUB_ENV"
 
       - name: Update cask formula
@@ -160,12 +160,12 @@ jobs:
           VERSION: ${{ env.NEXT_VERSION }}
         run: |
           set -euo pipefail
-          SHA=$(shasum -a 256 "build/Insomnia-v${VERSION}.zip" | awk '{print $1}')
+          SHA=$(shasum -a 256 "build/Adrenaline-v${VERSION}.zip" | awk '{print $1}')
           /usr/bin/sed -i '' \
             -e 's|^  version ".*"$|  version "'"${VERSION}"'"|' \
             -e 's|^  sha256 ".*"$|  sha256 "'"${SHA}"'"|' \
-            Casks/insomnia.rb
-          git add Casks/insomnia.rb
+            Casks/adrenaline.rb
+          git add Casks/adrenaline.rb
           git commit --amend --no-edit
           git tag -f "v${VERSION}" HEAD
           echo "Cask formula updated to ${VERSION} (sha256 ${SHA})"
@@ -187,7 +187,7 @@ jobs:
           gh release create "v${NEXT_VERSION}" \
             --title "v${NEXT_VERSION}" \
             --notes-file release-notes.md \
-            "build/Insomnia-v${NEXT_VERSION}.zip"
+            "build/Adrenaline-v${NEXT_VERSION}.zip"
 
       - name: Publish appcast entry
         shell: bash
@@ -197,7 +197,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          DOWNLOAD_URL="https://github.com/${GH_REPO}/releases/download/v${VERSION}/Insomnia-v${VERSION}.zip"
+          DOWNLOAD_URL="https://github.com/${GH_REPO}/releases/download/v${VERSION}/Adrenaline-v${VERSION}.zip"
           PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
           RELEASE_NOTES=$(gh release view "v${VERSION}" --json body -q .body | head -c 8000)
 
@@ -205,7 +205,7 @@ jobs:
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GH_REPO}.git" gh-pages
           cd gh-pages
 
-          if grep -q "<title>Insomnia ${VERSION}</title>" appcast.xml; then
+          if grep -q "<title>Adrenaline ${VERSION}</title>" appcast.xml; then
             echo "Appcast already contains v${VERSION}, skipping"
             exit 0
           fi
@@ -217,7 +217,7 @@ jobs:
           import os, sys
           version = os.environ['VERSION']
           item = f"""        <item>
-              <title>Insomnia {version}</title>
+              <title>Adrenaline {version}</title>
               <pubDate>{os.environ['PUB_DATE']}</pubDate>
               <sparkle:version>{version}</sparkle:version>
               <sparkle:shortVersionString>{version}</sparkle:shortVersionString>

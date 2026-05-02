@@ -2,11 +2,11 @@
 import AppKit
 import Foundation
 
-let outputPath = CommandLine.arguments.dropFirst().first ?? "Resources/Insomnia/Insomnia.icns"
+let outputPath = CommandLine.arguments.dropFirst().first ?? "Resources/Adrenaline/Adrenaline.icns"
 let fileManager = FileManager.default
 let temporaryDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
-    .appendingPathComponent("insomnia-app-icon-\(UUID().uuidString)", isDirectory: true)
-let iconsetDirectory = temporaryDirectory.appendingPathComponent("Insomnia.iconset", isDirectory: true)
+    .appendingPathComponent("adrenaline-app-icon-\(UUID().uuidString)", isDirectory: true)
+let iconsetDirectory = temporaryDirectory.appendingPathComponent("Adrenaline.iconset", isDirectory: true)
 
 try fileManager.createDirectory(at: iconsetDirectory, withIntermediateDirectories: true)
 defer { try? fileManager.removeItem(at: temporaryDirectory) }
@@ -55,13 +55,13 @@ func writePNG(size: CGFloat, filename: String) throws {
         bytesPerRow: 0,
         bitsPerPixel: 0
     ) else {
-        throw NSError(domain: "InsomniaIconGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to render \(filename)"])
+        throw NSError(domain: "AdrenalineIconGenerator", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to render \(filename)"])
     }
 
     bitmap.size = NSSize(width: pixelSize, height: pixelSize)
 
     guard let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmap) else {
-        throw NSError(domain: "InsomniaIconGenerator", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create graphics context for \(filename)"])
+        throw NSError(domain: "AdrenalineIconGenerator", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create graphics context for \(filename)"])
     }
 
     NSGraphicsContext.saveGraphicsState()
@@ -69,13 +69,13 @@ func writePNG(size: CGFloat, filename: String) throws {
     defer { NSGraphicsContext.restoreGraphicsState() }
 
     guard let context = NSGraphicsContext.current?.cgContext else {
-        throw NSError(domain: "InsomniaIconGenerator", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to access CGContext for \(filename)"])
+        throw NSError(domain: "AdrenalineIconGenerator", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to access CGContext for \(filename)"])
     }
 
     drawIcon(size: size, in: context)
 
     guard let pngData = bitmap.representation(using: .png, properties: [:]) else {
-        throw NSError(domain: "InsomniaIconGenerator", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to encode \(filename)"])
+        throw NSError(domain: "AdrenalineIconGenerator", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to encode \(filename)"])
     }
 
     let outputURL = iconsetDirectory.appendingPathComponent(filename)
@@ -84,7 +84,7 @@ func writePNG(size: CGFloat, filename: String) throws {
     guard let verificationBitmap = NSBitmapImageRep(data: pngData),
           verificationBitmap.pixelsWide == pixelSize,
           verificationBitmap.pixelsHigh == pixelSize else {
-        throw NSError(domain: "InsomniaIconGenerator", code: 5, userInfo: [NSLocalizedDescriptionKey: "Generated \(filename) did not match requested \(pixelSize)x\(pixelSize) pixels"])
+        throw NSError(domain: "AdrenalineIconGenerator", code: 5, userInfo: [NSLocalizedDescriptionKey: "Generated \(filename) did not match requested \(pixelSize)x\(pixelSize) pixels"])
     }
 }
 
@@ -114,5 +114,5 @@ try process.run()
 process.waitUntilExit()
 
 guard process.terminationStatus == 0 else {
-    throw NSError(domain: "InsomniaIconGenerator", code: Int(process.terminationStatus), userInfo: [NSLocalizedDescriptionKey: "iconutil failed"])
+    throw NSError(domain: "AdrenalineIconGenerator", code: Int(process.terminationStatus), userInfo: [NSLocalizedDescriptionKey: "iconutil failed"])
 }
