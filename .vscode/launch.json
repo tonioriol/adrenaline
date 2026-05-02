@@ -4,41 +4,41 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:insomnia}",
-            "name": "Debug Insomnia",
-            "target": "Insomnia",
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Debug Adrenaline",
+            "target": "Adrenaline",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug Insomnia"
+            "preLaunchTask": "swift: Build Debug Adrenaline"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:insomnia}",
-            "name": "Release Insomnia",
-            "target": "Insomnia",
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Release Adrenaline",
+            "target": "Adrenaline",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release Insomnia"
+            "preLaunchTask": "swift: Build Release Adrenaline"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:insomnia}",
-            "name": "Debug InsomniaHelper",
-            "target": "InsomniaHelper",
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Debug AdrenalineHelper",
+            "target": "AdrenalineHelper",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug InsomniaHelper"
+            "preLaunchTask": "swift: Build Debug AdrenalineHelper"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:insomnia}",
-            "name": "Release InsomniaHelper",
-            "target": "InsomniaHelper",
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Release AdrenalineHelper",
+            "target": "AdrenalineHelper",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release InsomniaHelper"
+            "preLaunchTask": "swift: Build Release AdrenalineHelper"
         }
     ]
 }
