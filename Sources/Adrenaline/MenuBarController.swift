@@ -95,7 +95,7 @@ final class MenuBarController: NSObject {
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Insomnia")
+        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Adrenaline")
         image?.isTemplate = true
         return image
     }
@@ -169,14 +169,14 @@ final class MenuBarController: NSObject {
     }
 
     private var tooltipText: String {
-        if state.isBusy { return "Insomnia is changing sleep prevention state" }
+        if state.isBusy { return "Adrenaline is changing sleep prevention state" }
         if state.isActive {
             return preferences.preventLidCloseSleep
-                ? "Insomnia is preventing sleep, including lid-close sleep"
-                : "Insomnia is preventing sleep"
+                ? "Adrenaline is preventing sleep, including lid-close sleep"
+                : "Adrenaline is preventing sleep"
         }
-        if let error = state.lastErrorMessage { return "Insomnia is off: \(error)" }
-        return "Insomnia is off"
+        if let error = state.lastErrorMessage { return "Adrenaline is off: \(error)" }
+        return "Adrenaline is off"
     }
 
     @objc
@@ -210,7 +210,7 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
-        let aboutItem = NSMenuItem(title: "About Insomnia", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: "About Adrenaline", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 

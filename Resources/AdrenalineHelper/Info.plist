@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.tonioriol.insomnia.helper</string>
+	<string>com.tonioriol.adrenaline.helper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>InsomniaHelper</string>
+	<string>AdrenalineHelper</string>
 	<key>CFBundleVersion</key>
 	<string>0.2.1</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>anchor apple generic and identifier "com.tonioriol.insomnia" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
+		<string>anchor apple generic and identifier "com.tonioriol.adrenaline" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
 	</array>
 </dict>
 </plist>

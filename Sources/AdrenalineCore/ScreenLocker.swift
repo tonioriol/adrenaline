@@ -22,7 +22,7 @@ public enum ScreenLockerError: Error, LocalizedError {
 
 @MainActor
 public final class LoginFrameworkScreenLocker: ScreenLocking {
-    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "ScreenLocker")
+    private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "ScreenLocker")
     private static let frameworkPath =
         "/System/Library/PrivateFrameworks/login.framework/Versions/A/login"
 

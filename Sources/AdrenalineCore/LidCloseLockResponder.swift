@@ -3,7 +3,7 @@ import os.log
 
 @MainActor
 public final class LidCloseLockResponder {
-    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "LidCloseLockResponder")
+    private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "LidCloseLockResponder")
 
     private let state: AppState
     private let monitor: LidStateMonitoring

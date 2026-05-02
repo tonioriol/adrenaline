@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.tonioriol.insomnia.helper</string>
+    <string>com.tonioriol.adrenaline.helper</string>
     <key>MachServices</key>
     <dict>
-        <key>com.tonioriol.insomnia.helper</key>
+        <key>com.tonioriol.adrenaline.helper</key>
         <true/>
     </dict>
 </dict>

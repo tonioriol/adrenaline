@@ -28,12 +28,12 @@ public enum PrivilegedHelperClientError: Error, LocalizedError, Equatable {
 public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     private let helperIdentifier: String
 
-    public init(helperIdentifier: String = InsomniaHelperConstants.helperBundleIdentifier) {
+    public init(helperIdentifier: String = AdrenalineHelperConstants.helperBundleIdentifier) {
         self.helperIdentifier = helperIdentifier
     }
 
     public func installOrUpdateHelperIfNeeded() async throws {
-        if let version = try? await helperVersion(), version == InsomniaHelperConstants.helperVersion {
+        if let version = try? await helperVersion(), version == AdrenalineHelperConstants.helperVersion {
             return
         }
         try blessHelper()
@@ -66,7 +66,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     }
 
     private func callBooleanCommand(
-        _ command: @escaping (InsomniaHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void,
+        _ command: @escaping (AdrenalineHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void,
         requiresSuccess: Bool = true
     ) async throws -> Bool {
         try await withHelperConnection { helper, complete in
@@ -79,7 +79,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
     }
 
     private func withHelperConnection<T>(
-        _ body: @escaping (InsomniaHelperProtocol, @escaping (Result<T, Error>) -> Void) -> Void
+        _ body: @escaping (AdrenalineHelperProtocol, @escaping (Result<T, Error>) -> Void) -> Void
     ) async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
             let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
@@ -99,7 +99,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
                 continuation.resume(with: result)
             }
 
-            connection.remoteObjectInterface = NSXPCInterface(with: InsomniaHelperProtocol.self)
+            connection.remoteObjectInterface = NSXPCInterface(with: AdrenalineHelperProtocol.self)
             connection.interruptionHandler = {
                 complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection interrupted")))
             }
@@ -110,7 +110,7 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
 
             guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
                 complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed(error.localizedDescription)))
-            }) as? InsomniaHelperProtocol else {
+            }) as? AdrenalineHelperProtocol else {
                 complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")))
                 return
             }

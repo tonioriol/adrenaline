@@ -23,7 +23,7 @@ final class AboutWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "About Insomnia"
+        window.title = "About Adrenaline"
         window.isReleasedWhenClosed = false
         window.center()
 
@@ -49,7 +49,7 @@ final class AboutWindowController: NSWindowController {
         let iconView = NSImageView(image: NSApp.applicationIconImage)
         iconView.imageScaling = .scaleProportionallyUpOrDown
 
-        let nameLabel = NSTextField(labelWithString: "Insomnia")
+        let nameLabel = NSTextField(labelWithString: "Adrenaline")
         nameLabel.font = .systemFont(ofSize: 22, weight: .semibold)
         nameLabel.alignment = .center
 

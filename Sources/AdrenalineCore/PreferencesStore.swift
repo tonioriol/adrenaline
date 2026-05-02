@@ -35,11 +35,11 @@ public protocol PreferencesProviding: AnyObject {
 @MainActor
 public final class PreferencesStore: ObservableObject, PreferencesProviding {
     public enum Key {
-        public static let preventDisplaySleep = "Insomnia.preventDisplaySleep"
-        public static let preventLidCloseSleep = "Insomnia.preventLidCloseSleep"
-        public static let playLidEventSounds = "Insomnia.playLidEventSounds"
-        public static let lidClosePreventionConfirmed = "Insomnia.lidClosePreventionConfirmed"
-        public static let wasActive = "Insomnia.wasActive"
+        public static let preventDisplaySleep = "Adrenaline.preventDisplaySleep"
+        public static let preventLidCloseSleep = "Adrenaline.preventLidCloseSleep"
+        public static let playLidEventSounds = "Adrenaline.playLidEventSounds"
+        public static let lidClosePreventionConfirmed = "Adrenaline.lidClosePreventionConfirmed"
+        public static let wasActive = "Adrenaline.wasActive"
     }
 
     private let defaults: UserDefaults

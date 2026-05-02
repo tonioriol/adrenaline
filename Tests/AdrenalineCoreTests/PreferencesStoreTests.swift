@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class PreferencesStoreTests: XCTestCase {
     private func makeIsolatedDefaults(file: StaticString = #file, line: UInt = #line) -> UserDefaults {
-        let suiteName = "InsomniaTests.\(UUID().uuidString)"
+        let suiteName = "AdrenalineTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             XCTFail("Could not create test UserDefaults suite", file: file, line: line)
             return UserDefaults.standard

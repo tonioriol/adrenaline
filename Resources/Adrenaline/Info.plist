@@ -4,16 +4,18 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Adrenaline</string>
 	<key>CFBundleExecutable</key>
-	<string>Insomnia</string>
+	<string>Adrenaline</string>
 	<key>CFBundleIconFile</key>
-	<string>Insomnia</string>
+	<string>Adrenaline</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.tonioriol.insomnia</string>
+	<string>com.tonioriol.adrenaline</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Insomnia</string>
+	<string>Adrenaline</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -30,13 +32,13 @@
 	<string>NSApplication</string>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>com.tonioriol.insomnia.helper</key>
-		<string>anchor apple generic and identifier "com.tonioriol.insomnia.helper" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
+		<key>com.tonioriol.adrenaline.helper</key>
+		<string>anchor apple generic and identifier "com.tonioriol.adrenaline.helper" and certificate leaf[subject.OU] = "B65K228Z97" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists</string>
 	</dict>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://tonioriol.github.io/insomnia/appcast.xml</string>
+	<string>https://tonioriol.github.io/adrenaline/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>LqUZF4dqbYxjqC25RGacWalEo+7/cBs9+T+J+wmOMQ4=</string>
 	<key>SUScheduledCheckInterval</key>

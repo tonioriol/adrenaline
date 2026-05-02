@@ -1,9 +1,9 @@
 import XCTest
 @testable import AdrenalineCore
 
-final class InsomniaHelperConstantsTests: XCTestCase {
-    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
-    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia.helper\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+final class AdrenalineHelperConstantsTests: XCTestCase {
+    private let expectedAppRequirement = "anchor apple generic and identifier \"com.tonioriol.adrenaline\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    private let expectedHelperRequirement = "anchor apple generic and identifier \"com.tonioriol.adrenaline.helper\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
 
     func testAppBundlePrivilegedHelperRequirementMatchesHelperSigningRequirement() throws {
         let projectRoot = URL(fileURLWithPath: #filePath)
@@ -11,7 +11,7 @@ final class InsomniaHelperConstantsTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
 
-        let infoPlistURL = projectRoot.appendingPathComponent("Resources/Insomnia/Info.plist")
+        let infoPlistURL = projectRoot.appendingPathComponent("Resources/Adrenaline/Info.plist")
         let data = try Data(contentsOf: infoPlistURL)
         let plist = try XCTUnwrap(
             PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
@@ -19,21 +19,21 @@ final class InsomniaHelperConstantsTests: XCTestCase {
         let helperMap = try XCTUnwrap(plist["SMPrivilegedExecutables"] as? [String: String])
 
         XCTAssertEqual(
-            helperMap[InsomniaHelperConstants.helperBundleIdentifier],
-            InsomniaHelperConstants.helperCodeSigningRequirement
+            helperMap[AdrenalineHelperConstants.helperBundleIdentifier],
+            AdrenalineHelperConstants.helperCodeSigningRequirement
         )
     }
 
     func testAppCodeSigningRequirementMatchesLocalDesignatedRequirementShape() {
         XCTAssertEqual(
-            InsomniaHelperConstants.appCodeSigningRequirement,
+            AdrenalineHelperConstants.appCodeSigningRequirement,
             expectedAppRequirement
         )
     }
 
     func testHelperCodeSigningRequirementMatchesLocalDesignatedRequirementShape() {
         XCTAssertEqual(
-            InsomniaHelperConstants.helperCodeSigningRequirement,
+            AdrenalineHelperConstants.helperCodeSigningRequirement,
             expectedHelperRequirement
         )
     }
@@ -44,7 +44,7 @@ final class InsomniaHelperConstantsTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
 
-        let infoPlistURL = projectRoot.appendingPathComponent("Resources/InsomniaHelper/Info.plist")
+        let infoPlistURL = projectRoot.appendingPathComponent("Resources/AdrenalineHelper/Info.plist")
         let data = try Data(contentsOf: infoPlistURL)
         let plist = try XCTUnwrap(
             PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
