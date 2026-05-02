@@ -3,6 +3,22 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.2.2](https://github.com/tonioriol/adrenaline/compare/e7dd1413e184f6fd064c8cc059d521a5665cfb26..v0.2.2) - 2026-05-02
+#### Bug Fixes
+- update swift imports for adrenaline modules - ([447d857](https://github.com/tonioriol/adrenaline/commit/447d8578433a7987cd390b792326f03c9683ba9e)) - Toni Oriol
+#### Documentation
+- acknowledge app inspiration - ([906d2c5](https://github.com/tonioriol/adrenaline/commit/906d2c54007af31ffee07d1fe4146067a8f16f56)) - Toni Oriol
+- clean up README to essentials - ([e7dd141](https://github.com/tonioriol/adrenaline/commit/e7dd1413e184f6fd064c8cc059d521a5665cfb26)) - Toni Oriol
+#### Refactoring
+- rename remaining adrenaline filenames - ([a73e86c](https://github.com/tonioriol/adrenaline/commit/a73e86c85892bf0ac2fd1977af2b9bf95e19a36b)) - Toni Oriol
+- rename distribution to adrenaline - ([6d4718e](https://github.com/tonioriol/adrenaline/commit/6d4718ed889cb36a8beacb82d53ae0ea56002a56)) - Toni Oriol
+- rename app identity to adrenaline - ([1993e9a](https://github.com/tonioriol/adrenaline/commit/1993e9a74cb8420bf34b9989cb78fd18d9533472)) - Toni Oriol
+- rename package targets to adrenaline - ([c0c2020](https://github.com/tonioriol/adrenaline/commit/c0c2020f8d320eec7aa3513917687fdecebf2a6a)) - Toni Oriol
+#### Miscellaneous Chores
+- rename vscode launch targets to adrenaline - ([f004b23](https://github.com/tonioriol/adrenaline/commit/f004b23a833b468b2962611781ee1f6da70fec56)) - Toni Oriol
+
+- - -
+
 ## [v0.2.1](https://github.com/tonioriol/insomnia/compare/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd..v0.2.1) - 2026-04-28
 #### Bug Fixes
 - use qualified cask name in brew install commands - ([00b48da](https://github.com/tonioriol/insomnia/commit/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd)) - Toni Oriol
