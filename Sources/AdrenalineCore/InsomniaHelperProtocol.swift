@@ -1,15 +1,15 @@
 import Foundation
 
-public enum InsomniaHelperConstants {
-    public static let appBundleIdentifier = "com.tonioriol.insomnia"
-    public static let helperBundleIdentifier = "com.tonioriol.insomnia.helper"
-    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
-    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia.helper\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+public enum AdrenalineHelperConstants {
+    public static let appBundleIdentifier = "com.tonioriol.adrenaline"
+    public static let helperBundleIdentifier = "com.tonioriol.adrenaline.helper"
+    public static let appCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.adrenaline\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
+    public static let helperCodeSigningRequirement = "anchor apple generic and identifier \"com.tonioriol.adrenaline.helper\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"
     public static let helperVersion = 1
 }
 
-@objc(InsomniaHelperProtocol)
-public protocol InsomniaHelperProtocol {
+@objc(AdrenalineHelperProtocol)
+public protocol AdrenalineHelperProtocol {
     /// Enables lid-close sleep prevention. Reply values are `(success, errorMessage)`;
     /// `errorMessage == nil` means success, while non-nil contains the helper-reported failure.
     func enableLidClosePrevention(reply: @escaping (NSNumber, NSString?) -> Void)

@@ -40,7 +40,7 @@ final class AwakeControllerTests: XCTestCase {
 
         try controller.enable(preventDisplaySleep: true)
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active", "Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -50,7 +50,7 @@ final class AwakeControllerTests: XCTestCase {
 
         try controller.enable(preventDisplaySleep: false)
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -60,7 +60,7 @@ final class AwakeControllerTests: XCTestCase {
 
         try controller.enable(preventDisplaySleep: true)
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active", "Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -82,7 +82,7 @@ final class AwakeControllerTests: XCTestCase {
         try controller.enable(preventDisplaySleep: false)
         try controller.setPreventDisplaySleep(true)
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active", "Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -104,7 +104,7 @@ final class AwakeControllerTests: XCTestCase {
         client.displayCreateError = TestError(errorDescription: "display failed")
         XCTAssertThrowsError(try controller.setPreventDisplaySleep(true))
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -143,7 +143,7 @@ final class AwakeControllerTests: XCTestCase {
         client.displayCreateError = nil
         try controller.enable()
 
-        XCTAssertEqual(client.createdReasons, ["Insomnia is active", "Insomnia is active", "Insomnia is active"])
+        XCTAssertEqual(client.createdReasons, ["Adrenaline is active", "Adrenaline is active", "Adrenaline is active"])
         XCTAssertTrue(controller.isEnabled)
     }
 }

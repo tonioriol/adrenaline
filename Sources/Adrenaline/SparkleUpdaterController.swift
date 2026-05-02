@@ -6,7 +6,7 @@ import Sparkle
 
 @MainActor
 final class SparkleUpdaterController: NSObject, Updating, SPUUpdaterDelegate {
-    private static let log = OSLog(subsystem: "com.tonioriol.insomnia", category: "updater")
+    private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "updater")
 
     private var controller: SPUStandardUpdaterController!
     private let statusSubject: CurrentValueSubject<UpdaterStatus, Never>

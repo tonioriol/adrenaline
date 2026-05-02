@@ -20,12 +20,12 @@ public final class AwakeController: AwakeControlling {
 
         var rolledBackIDs: [UInt32] = []
         do {
-            let systemID = try client.createNoIdleSleepAssertion(reason: "Insomnia is active")
+            let systemID = try client.createNoIdleSleepAssertion(reason: "Adrenaline is active")
             rolledBackIDs.append(systemID)
             systemAssertionID = systemID
 
             if preventDisplaySleep {
-                let displayID = try client.createDisplaySleepAssertion(reason: "Insomnia is active")
+                let displayID = try client.createDisplaySleepAssertion(reason: "Adrenaline is active")
                 rolledBackIDs.append(displayID)
                 displayAssertionID = displayID
             }
@@ -44,7 +44,7 @@ public final class AwakeController: AwakeControlling {
 
         if enabled {
             guard displayAssertionID == nil else { return }
-            let displayID = try client.createDisplaySleepAssertion(reason: "Insomnia is active")
+            let displayID = try client.createDisplaySleepAssertion(reason: "Adrenaline is active")
             displayAssertionID = displayID
         } else {
             guard let id = displayAssertionID else { return }

@@ -1,11 +1,11 @@
 import Foundation
 import AdrenalineCore
 
-final class HelperDelegate: NSObject, NSXPCListenerDelegate, InsomniaHelperProtocol {
+final class HelperDelegate: NSObject, NSXPCListenerDelegate, AdrenalineHelperProtocol {
     private let powerSettings = ApplePowerSettings()
 
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
-        connection.exportedInterface = NSXPCInterface(with: InsomniaHelperProtocol.self)
+        connection.exportedInterface = NSXPCInterface(with: AdrenalineHelperProtocol.self)
         connection.exportedObject = self
         connection.resume()
         return true
@@ -29,7 +29,7 @@ final class HelperDelegate: NSObject, NSXPCListenerDelegate, InsomniaHelperProto
     }
 
     func helperVersion(reply: @escaping (NSNumber) -> Void) {
-        reply(NSNumber(value: InsomniaHelperConstants.helperVersion))
+        reply(NSNumber(value: AdrenalineHelperConstants.helperVersion))
     }
 
     private func setLidClosePrevention(_ enabled: Bool, reply: @escaping (NSNumber, NSString?) -> Void) {
@@ -44,8 +44,8 @@ final class HelperDelegate: NSObject, NSXPCListenerDelegate, InsomniaHelperProto
 }
 
 let delegate = HelperDelegate()
-let listener = NSXPCListener(machServiceName: InsomniaHelperConstants.helperBundleIdentifier)
+let listener = NSXPCListener(machServiceName: AdrenalineHelperConstants.helperBundleIdentifier)
 listener.delegate = delegate
-listener.setConnectionCodeSigningRequirement(InsomniaHelperConstants.appCodeSigningRequirement)
+listener.setConnectionCodeSigningRequirement(AdrenalineHelperConstants.appCodeSigningRequirement)
 listener.resume()
 RunLoop.current.run()
