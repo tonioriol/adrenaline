@@ -1,5 +1,5 @@
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 private final class FakePowerAssertionClient: PowerAssertionClient {
     var nextID: UInt32 = 41

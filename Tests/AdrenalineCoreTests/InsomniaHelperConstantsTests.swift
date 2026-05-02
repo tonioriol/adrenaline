@@ -1,5 +1,5 @@
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 final class InsomniaHelperConstantsTests: XCTestCase {
     private let expectedAppRequirement = "anchor apple generic and identifier \"com.tonioriol.insomnia\" and certificate leaf[subject.OU] = \"B65K228Z97\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists"

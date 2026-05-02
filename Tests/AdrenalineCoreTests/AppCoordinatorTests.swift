@@ -1,6 +1,6 @@
 import Combine
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 private final class FakeAwakeController: AwakeControlling {
     var isEnabled = false

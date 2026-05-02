@@ -1,5 +1,5 @@
 import AppKit
-import InsomniaCore
+import AdrenalineCore
 
 final class SystemSoundPlayer: LidSoundPlaying {
     func play(named soundName: String) {

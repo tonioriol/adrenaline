@@ -1,5 +1,5 @@
 import Foundation
-import InsomniaCore
+import AdrenalineCore
 
 final class HelperDelegate: NSObject, NSXPCListenerDelegate, InsomniaHelperProtocol {
     private let powerSettings = ApplePowerSettings()

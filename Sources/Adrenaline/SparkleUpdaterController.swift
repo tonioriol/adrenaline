@@ -1,6 +1,6 @@
 import Combine
 import Foundation
-import InsomniaCore
+import AdrenalineCore
 import os.log
 import Sparkle
 

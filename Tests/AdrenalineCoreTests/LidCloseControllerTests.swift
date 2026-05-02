@@ -1,5 +1,5 @@
 import XCTest
-@testable import InsomniaCore
+@testable import AdrenalineCore
 
 private final class FakePrivilegedHelperClient: PrivilegedHelperClientProtocol {
     var installed = false
