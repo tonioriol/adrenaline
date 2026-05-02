@@ -2,7 +2,7 @@ SHELL := /bin/zsh
 CONFIGURATION ?= debug
 SWIFT_BUILD_FLAGS := -c $(CONFIGURATION)
 BUILD_DIR := build
-APP_DIR := $(BUILD_DIR)/Insomnia.app
+APP_DIR := $(BUILD_DIR)/Adrenaline.app
 CONTENTS_DIR := $(APP_DIR)/Contents
 MACOS_DIR := $(CONTENTS_DIR)/MacOS
 FRAMEWORKS_DIR := $(CONTENTS_DIR)/Frameworks
@@ -12,8 +12,8 @@ SWIFT_BIN_DIR := .build/$(CONFIGURATION)
 SPARKLE_FRAMEWORK := $(SWIFT_BIN_DIR)/Sparkle.framework
 TEAM_ID ?= B65K228Z97
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/B65K228Z97/ {print $$2; exit}')
-INSTALL_APP_DIR ?= /Applications/Insomnia.app
-RELEASE_ZIP ?= $(BUILD_DIR)/Insomnia.zip
+INSTALL_APP_DIR ?= /Applications/Adrenaline.app
+RELEASE_ZIP ?= $(BUILD_DIR)/Adrenaline.zip
 
 .PHONY: test build generate-app-icon app sign release-zip reinstall run clean verify-helper-sections
 
@@ -24,16 +24,16 @@ build:
 	swift build $(SWIFT_BUILD_FLAGS)
 
 generate-app-icon:
-	swift Scripts/generate-app-icon.swift Resources/Insomnia/Insomnia.icns
+	swift Scripts/generate-app-icon.swift Resources/Adrenaline/Adrenaline.icns
 
 app: build
 	rm -rf $(APP_DIR)
 	mkdir -p $(MACOS_DIR) $(FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR) $(RESOURCES_DIR)
-	cp Resources/Insomnia/Info.plist $(CONTENTS_DIR)/Info.plist
-	cp Resources/Insomnia/Insomnia.icns $(RESOURCES_DIR)/Insomnia.icns
-	cp $(SWIFT_BIN_DIR)/Insomnia $(MACOS_DIR)/Insomnia
-	install_name_tool -add_rpath @executable_path/../Frameworks $(MACOS_DIR)/Insomnia
-	cp $(SWIFT_BIN_DIR)/InsomniaHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper
+	cp Resources/Adrenaline/Info.plist $(CONTENTS_DIR)/Info.plist
+	cp Resources/Adrenaline/Adrenaline.icns $(RESOURCES_DIR)/Adrenaline.icns
+	cp $(SWIFT_BIN_DIR)/Adrenaline $(MACOS_DIR)/Adrenaline
+	install_name_tool -add_rpath @executable_path/../Frameworks $(MACOS_DIR)/Adrenaline
+	cp $(SWIFT_BIN_DIR)/AdrenalineHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
 	cp -R $(SPARKLE_FRAMEWORK) $(FRAMEWORKS_DIR)/Sparkle.framework
 	$(MAKE) sign
 
@@ -49,7 +49,7 @@ sign:
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Autoupdate"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Updater.app"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework"
-	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.insomnia.helper"
+	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(APP_DIR)"
 
 release-zip: app
@@ -57,8 +57,8 @@ release-zip: app
 	ditto -c -k --keepParent "$(APP_DIR)" "$(RELEASE_ZIP)"
 
 reinstall: app
-	@if pgrep -f "$(INSTALL_APP_DIR)/Contents/MacOS/Insomnia" >/dev/null; then \
-		pkill -f "$(INSTALL_APP_DIR)/Contents/MacOS/Insomnia"; \
+	@if pgrep -f "$(INSTALL_APP_DIR)/Contents/MacOS/Adrenaline" >/dev/null; then \
+		pkill -f "$(INSTALL_APP_DIR)/Contents/MacOS/Adrenaline"; \
 		sleep 1; \
 	fi
 	rm -rf "$(INSTALL_APP_DIR)"
@@ -66,8 +66,8 @@ reinstall: app
 	open "$(INSTALL_APP_DIR)"
 
 verify-helper-sections:
-	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/InsomniaHelper >/dev/null
-	otool -s __TEXT __launchd_plist $(SWIFT_BIN_DIR)/InsomniaHelper >/dev/null
+	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/AdrenalineHelper >/dev/null
+	otool -s __TEXT __launchd_plist $(SWIFT_BIN_DIR)/AdrenalineHelper >/dev/null
 
 run: app
 	open $(APP_DIR)

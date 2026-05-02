@@ -11,8 +11,8 @@ skip_ci = "[skip ci]"
 # is interpolated by Cocogitto. Files modified by pre_bump_hooks are
 # automatically included in the version commit.
 pre_bump_hooks = [
-    "/usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString {{version}}' -c 'Set :CFBundleVersion {{version}}' Resources/Insomnia/Info.plist",
-    "/usr/libexec/PlistBuddy -c 'Set :CFBundleVersion {{version}}' Resources/InsomniaHelper/Info.plist",
+    "/usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString {{version}}' -c 'Set :CFBundleVersion {{version}}' Resources/Adrenaline/Info.plist",
+    "/usr/libexec/PlistBuddy -c 'Set :CFBundleVersion {{version}}' Resources/AdrenalineHelper/Info.plist",
 ]
 
 [commit_types]
@@ -26,4 +26,4 @@ path = "CHANGELOG.md"
 template = "remote"
 remote = "github.com"
 owner = "tonioriol"
-repository = "insomnia"
+repository = "adrenaline"
