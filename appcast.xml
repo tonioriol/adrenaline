@@ -142,5 +142,26 @@
                type="application/octet-stream"
                sparkle:edSignature="UiBM9kbvXa7hkp1x1Y3635UB5XUoMktepCv7awxKCiDP4W1pqsTsQMrvQAIL2pi2e332tF5jeTPsHBdtRxYuBA==" length="1374785" />
 </item>
+            <item>
+    <title>Adrenaline 0.3.1</title>
+    <pubDate>Sun, 03 May 2026 17:28:53 +0000</pubDate>
+    <sparkle:version>0.3.1</sparkle:version>
+    <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <description><![CDATA[## [v0.3.1](https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.1) - 2026-05-03
+#### Bug Fixes
+- auto-launch Adrenaline after migration pkg install - ([3010cce](https://github.com/tonioriol/adrenaline/commit/3010cce44d24fcdf0b24f9e7b675c357e73078cf)) - Toni Oriol
+#### Miscellaneous Chores
+- (**version**) v0.3.1 - ([7da4522](https://github.com/tonioriol/adrenaline/commit/7da4522366fbfbb95e44aa3217696422e4640060)) - github-actions[bot]
+
+- - -
+
+## [v0.3.0-migration](https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.0-migration) - 2026-05-03
+#### Documentation
+- update context with migration completion - ([3a37fcd](https://github.com/tonioriol/adrenaline/commit/3a37fcdfa964c77e588e291ef37cc9c33d707f77)) - Toni Oriol]]></description>
+    <enclosure url="https://github.com/tonioriol/adrenaline/releases/download/v0.3.1/Adrenaline-v0.3.1.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="p0j9he26H+sVb0w0vRSINL4KUbc84y6PtaE6/3NVvgk6Y+tQo2cxlgTZJT3OuK8ra+nkY/o4E8c/k120hAP8AA==" length="1374731" />
+</item>
     </channel>
 </rss>
