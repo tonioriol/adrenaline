@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
-        <title>Insomnia</title>
-        <link>https://github.com/tonioriol/insomnia</link>
-        <description>Insomnia macOS app updates</description>
+        <title>Adrenaline</title>
+        <link>https://github.com/tonioriol/adrenaline</link>
+        <description>Adrenaline macOS app updates</description>
         <language>en</language>
             <item>
-    <title>Insomnia 0.1.0</title>
+    <title>Adrenaline 0.1.0</title>
     <pubDate>Tue, 28 Apr 2026 21:52:51 +0000</pubDate>
     <sparkle:version>0.1.0</sparkle:version>
     <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
@@ -71,7 +71,7 @@
                sparkle:edSignature="zZmZDLucT07oLfM0wznN/yrCiSmBr034ik4Ju3G3tX83mfzCvm4Ea6RJSdRYFvO4uPPimUgIC/PTGYIPEDlUBg==" length="1373870" />
 </item>
             <item>
-    <title>Insomnia 0.2.0</title>
+    <title>Adrenaline 0.2.0</title>
     <pubDate>Tue, 28 Apr 2026 23:19:00 +0000</pubDate>
     <sparkle:version>0.2.0</sparkle:version>
     <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
@@ -86,7 +86,7 @@
                sparkle:edSignature="zPeFe2BIZdyO9+ErwORrD+7u7Ze3JZlS4nd0VEee0MwYTAqb9mIOS3q0DV+/B65g2eY+K2r7rEbQax6wrwixAg==" length="1373849" />
 </item>
             <item>
-    <title>Insomnia 0.2.1</title>
+    <title>Adrenaline 0.2.1</title>
     <pubDate>Tue, 28 Apr 2026 23:23:56 +0000</pubDate>
     <sparkle:version>0.2.1</sparkle:version>
     <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
