@@ -3,6 +3,18 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.3.1](https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.1) - 2026-05-03
+#### Bug Fixes
+- auto-launch Adrenaline after migration pkg install - ([3010cce](https://github.com/tonioriol/adrenaline/commit/3010cce44d24fcdf0b24f9e7b675c357e73078cf)) - Toni Oriol
+
+- - -
+
+## [v0.3.0-migration](https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.0-migration) - 2026-05-03
+#### Documentation
+- update context with migration completion - ([3a37fcd](https://github.com/tonioriol/adrenaline/commit/3a37fcdfa964c77e588e291ef37cc9c33d707f77)) - Toni Oriol
+
+- - -
+
 ## [v0.3.0](https://github.com/tonioriol/adrenaline/compare/6d78905cbdb75f1ecaeb1c660a0385745949f51a..v0.3.0) - 2026-05-03
 #### Features
 - add migration package build scripts and Makefile target - ([693d945](https://github.com/tonioriol/adrenaline/commit/693d945c713c8c00d294ce2e8a49751018120d38)) - Toni Oriol
