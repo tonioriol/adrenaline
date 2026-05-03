@@ -124,5 +124,23 @@
                type="application/octet-stream"
                sparkle:edSignature="D9zad00xHZziEBUsonM4BYX+T67Nwe+rv8kS5LW/xRACFV2QUClZdtoyyIXwHRrdgoQs4jjKD30Ke64kLT+/AQ==" length="1374740" />
 </item>
+            <item>
+    <title>Adrenaline 0.3.0</title>
+    <pubDate>Sun, 03 May 2026 13:40:20 +0000</pubDate>
+    <sparkle:version>0.3.0</sparkle:version>
+    <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <description><![CDATA[## [v0.3.0](https://github.com/tonioriol/adrenaline/compare/6d78905cbdb75f1ecaeb1c660a0385745949f51a..v0.3.0) - 2026-05-03
+#### Features
+- add migration package build scripts and Makefile target - ([693d945](https://github.com/tonioriol/adrenaline/commit/693d945c713c8c00d294ce2e8a49751018120d38)) - Toni Oriol
+#### Documentation
+- add migration implementation plan - ([6106e3e](https://github.com/tonioriol/adrenaline/commit/6106e3e643d5c159cfaf2770262de33d2c04093e)) - Toni Oriol
+- specify rename update migration - ([6d78905](https://github.com/tonioriol/adrenaline/commit/6d78905cbdb75f1ecaeb1c660a0385745949f51a)) - Toni Oriol
+#### Miscellaneous Chores
+- (**version**) v0.3.0 - ([82a5410](https://github.com/tonioriol/adrenaline/commit/82a54101fa2169403d7ee1c0bda7a78bd7fb913b)) - github-actions[bot]]]></description>
+    <enclosure url="https://github.com/tonioriol/adrenaline/releases/download/v0.3.0/Adrenaline-v0.3.0.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="UiBM9kbvXa7hkp1x1Y3635UB5XUoMktepCv7awxKCiDP4W1pqsTsQMrvQAIL2pi2e332tF5jeTPsHBdtRxYuBA==" length="1374785" />
+</item>
     </channel>
 </rss>
