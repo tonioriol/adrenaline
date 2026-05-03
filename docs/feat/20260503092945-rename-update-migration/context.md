@@ -1,6 +1,6 @@
 ---
 title: "Deliver Adrenaline rename via Sparkle update"
-status: active
+status: done
 repos: [adrenaline]
 tags: [migration]
 created: 2026-05-03
@@ -35,9 +35,9 @@ The repo, release workflow, cask, bundle identifiers, and local folder were alre
 
 **Plan:** [plan.md](./plan.md)
 
-**Cursor:** Task 1 — Fix the adrenaline gh-pages appcast metadata
+**Cursor:** All 6 tasks complete
 
-**Status:** in_progress
+**Status:** done
 
 ## LOG
 
@@ -64,3 +64,14 @@ The repo, release workflow, cask, bundle identifiers, and local folder were alre
 - Why: Executed the implementation plan end-to-end.
 - How: (1) Fixed adrenaline gh-pages appcast metadata from "Insomnia" to "Adrenaline". (2) Created migration postinstall script and pkg build script. (3) Created new `tonioriol/insomnia` repo with gh-pages for legacy feed. (4) Built unsigned migration .pkg with EdDSA-signed zip, published as `v0.2.2-migration` release on adrenaline repo, updated legacy appcast with migration item pointing to pkg with `sparkle:installationType="package"`. (5) Verified both feeds live: legacy at `tonioriol.github.io/insomnia/appcast.xml` (HTTP 200) and canonical at `tonioriol.github.io/adrenaline/appcast.xml` (HTTP 200).
 - Decision: Shipped without `productsign` (no Developer ID Installer cert available locally) — EdDSA signature on the zip is what Sparkle validates. Package can be additionally signed in CI later.
+
+### 2026-05-03 17:27 — Auto-launch fix and v0.3.0 rebuild
+
+- Why: First test showed Sparkle couldn't relaunch after pkg install because the old app path (Insomnia.app) was deleted. Also the migration pkg was v0.2.2 while CI had already released v0.3.0.
+- How: Added `open /Applications/Adrenaline.app` as console user to postinstall script. Rebuilt migration pkg from v0.3.0, deleted old v0.2.2-migration release, published v0.3.0-migration release, updated legacy appcast.
+- Decision: Accept the 2-hop pattern (migration lands on pkg version, then normal Sparkle picks up latest) to keep the migration feed simple.
+
+### 2026-05-03 17:42 — End-to-end verification passed, task done
+
+- Why: User manually tested the full path: old Insomnia v0.2.0 → migration pkg → Adrenaline v0.3.0 with auto-launch → immediate normal Sparkle update to latest.
+- How: Installed old Insomnia v0.2.0 from GitHub releases, triggered Check for Updates, Sparkle offered migration, admin prompt, Adrenaline installed and auto-launched, old Insomnia removed.
