@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+
+# Migration postinstall script — runs as root after macOS Installer places
+# Adrenaline.app into /Applications/. Removes old Insomnia app and helper.
+
+OLD_APP="/Applications/Insomnia.app"
+OLD_HELPER_ID="com.tonioriol.insomnia.helper"
+OLD_HELPER_BINARY="/Library/PrivilegedHelperTools/${OLD_HELPER_ID}"
+OLD_HELPER_PLIST="/Library/LaunchDaemons/${OLD_HELPER_ID}.plist"
+
+# Unload and remove old privileged helper
+if launchctl print "system/${OLD_HELPER_ID}" &>/dev/null; then
+    launchctl bootout "system/${OLD_HELPER_ID}" 2>/dev/null || true
+fi
+rm -f "${OLD_HELPER_BINARY}"
+rm -f "${OLD_HELPER_PLIST}"
+
+# Remove old app bundle
+if [ -d "${OLD_APP}" ]; then
+    rm -rf "${OLD_APP}"
+fi
+
+# Clean old Sparkle preferences so the new app doesn't inherit stale state
+defaults delete com.tonioriol.insomnia SULastCheckTime 2>/dev/null || true
+defaults delete com.tonioriol.insomnia SUUpdateRelaunchingMarker 2>/dev/null || true
+
+exit 0

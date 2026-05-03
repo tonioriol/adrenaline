@@ -15,7 +15,7 @@ CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'
 INSTALL_APP_DIR ?= /Applications/Adrenaline.app
 RELEASE_ZIP ?= $(BUILD_DIR)/Adrenaline.zip
 
-.PHONY: test build generate-app-icon app sign release-zip reinstall run clean verify-helper-sections
+.PHONY: test build generate-app-icon app sign migration-pkg release-zip reinstall run clean verify-helper-sections
 
 test:
 	swift test
@@ -51,6 +51,9 @@ sign:
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(APP_DIR)"
+
+migration-pkg: app
+	./Scripts/migration/build-migration-pkg.sh $(shell /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' Resources/Adrenaline/Info.plist) "$(CODE_SIGN_IDENTITY)"
 
 release-zip: app
 	rm -f "$(RELEASE_ZIP)"
