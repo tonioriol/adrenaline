@@ -58,3 +58,9 @@ The repo, release workflow, cask, bundle identifiers, and local folder were alre
 - Why: Spec approved, need concrete executable tasks.
 - How: Wrote [plan.md](./plan.md) with 6 tasks: fix adrenaline appcast metadata, create postinstall script, create pkg build script, create legacy insomnia repo with gh-pages, build/publish migration release, end-to-end verification.
 - Decision: Discovered old `tonioriol.github.io/insomnia/appcast.xml` returns 404 because the repo was renamed — need to create a new `tonioriol/insomnia` repo to restore that URL.
+
+### 2026-05-03 13:40 — Migration fully shipped
+
+- Why: Executed the implementation plan end-to-end.
+- How: (1) Fixed adrenaline gh-pages appcast metadata from "Insomnia" to "Adrenaline". (2) Created migration postinstall script and pkg build script. (3) Created new `tonioriol/insomnia` repo with gh-pages for legacy feed. (4) Built unsigned migration .pkg with EdDSA-signed zip, published as `v0.2.2-migration` release on adrenaline repo, updated legacy appcast with migration item pointing to pkg with `sparkle:installationType="package"`. (5) Verified both feeds live: legacy at `tonioriol.github.io/insomnia/appcast.xml` (HTTP 200) and canonical at `tonioriol.github.io/adrenaline/appcast.xml` (HTTP 200).
+- Decision: Shipped without `productsign` (no Developer ID Installer cert available locally) — EdDSA signature on the zip is what Sparkle validates. Package can be additionally signed in CI later.
