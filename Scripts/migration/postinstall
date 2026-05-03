@@ -25,4 +25,15 @@ fi
 defaults delete com.tonioriol.insomnia SULastCheckTime 2>/dev/null || true
 defaults delete com.tonioriol.insomnia SUUpdateRelaunchingMarker 2>/dev/null || true
 
+# Launch the new app — Sparkle can't relaunch because the old app path is gone
+if [ -d "/Applications/Adrenaline.app" ]; then
+    # Run as the console user, not as root (postinstall runs as root)
+    CONSOLE_USER=$(stat -f '%Su' /dev/console)
+    if [ -n "${CONSOLE_USER}" ] && [ "${CONSOLE_USER}" != "root" ]; then
+        su - "${CONSOLE_USER}" -c 'open /Applications/Adrenaline.app' &
+    else
+        open /Applications/Adrenaline.app &
+    fi
+fi
+
 exit 0
