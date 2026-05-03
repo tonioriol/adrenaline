@@ -18,21 +18,24 @@ The repo, release workflow, cask, bundle identifiers, and local folder were alre
 
 ## SPEC
 
-Pending — design not approved yet.
+[spec.md](./spec.md) — Temporary legacy Insomnia feed, 3-month sunset window, and one package-based migration into Adrenaline.
 
 ## FILES
 
 - Resources/Adrenaline/Info.plist
 - Sources/Adrenaline/SparkleUpdaterController.swift
 - .github/workflows/release.yml
-- README.md
-- Casks/adrenaline.rb
+- Makefile
+- Scripts/migration/postinstall
+- Scripts/migration/build-migration-pkg.sh
+- gh-pages: adrenaline appcast.xml
+- gh-pages: insomnia appcast.xml (new legacy repo)
 
 ## PLAN
 
-**Plan:** No plan written yet.
+**Plan:** [plan.md](./plan.md)
 
-**Cursor:** Brainstorming — define rename-via-update migration design
+**Cursor:** Task 1 — Fix the adrenaline gh-pages appcast metadata
 
 **Status:** in_progress
 
@@ -43,3 +46,15 @@ Pending — design not approved yet.
 - Why: The rename from Insomnia to Adrenaline was shipped as a product/repository rename, but existing installed Insomnia builds still check the old Sparkle feed and therefore cannot discover the new Adrenaline line automatically.
 - How: Created a dedicated task ledger to design the Sparkle/appcast/release migration path before making more updater changes.
 - Decision: Treat this as a migration design problem, not a cosmetic rename follow-up.
+
+### 2026-05-03 12:16 — Spec approved for package-based rename migration
+
+- Why: The rename must reach existing Sparkle-enabled Insomnia users through the updater, including users who do not update immediately.
+- How: Approved the design in [spec.md](./spec.md) to keep the legacy Insomnia appcast alive for 3 months, freeze it on a single migration item, and deliver the rename via a Sparkle package update into Adrenaline.
+- Decision: Prefer a temporary compatibility bridge over permanent dual-feed publishing or a brittle direct bundle rename update.
+
+### 2026-05-03 13:36 — Implementation plan written
+
+- Why: Spec approved, need concrete executable tasks.
+- How: Wrote [plan.md](./plan.md) with 6 tasks: fix adrenaline appcast metadata, create postinstall script, create pkg build script, create legacy insomnia repo with gh-pages, build/publish migration release, end-to-end verification.
+- Decision: Discovered old `tonioriol.github.io/insomnia/appcast.xml` returns 404 because the repo was renamed — need to create a new `tonioriol/insomnia` repo to restore that URL.
