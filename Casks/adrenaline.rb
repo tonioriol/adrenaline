@@ -1,6 +1,6 @@
 cask "adrenaline" do
-  version "0.2.2"
-  sha256 "90da9f8deba56e531a22dc23198d73445c64e098ee513d2a778560b2f0b23bf7"
+  version "0.3.0"
+  sha256 "fefc1ab8b556022d051036c198ffbc45d5b4f0632a8a3a40d908ccc91b2ae451"
 
   url "https://github.com/tonioriol/adrenaline/releases/download/v#{version}/Adrenaline-v#{version}.zip"
   name "Adrenaline"

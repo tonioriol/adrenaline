@@ -3,6 +3,15 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.3.0](https://github.com/tonioriol/adrenaline/compare/6d78905cbdb75f1ecaeb1c660a0385745949f51a..v0.3.0) - 2026-05-03
+#### Features
+- add migration package build scripts and Makefile target - ([693d945](https://github.com/tonioriol/adrenaline/commit/693d945c713c8c00d294ce2e8a49751018120d38)) - Toni Oriol
+#### Documentation
+- add migration implementation plan - ([6106e3e](https://github.com/tonioriol/adrenaline/commit/6106e3e643d5c159cfaf2770262de33d2c04093e)) - Toni Oriol
+- specify rename update migration - ([6d78905](https://github.com/tonioriol/adrenaline/commit/6d78905cbdb75f1ecaeb1c660a0385745949f51a)) - Toni Oriol
+
+- - -
+
 ## [v0.2.2](https://github.com/tonioriol/adrenaline/compare/e7dd1413e184f6fd064c8cc059d521a5665cfb26..v0.2.2) - 2026-05-02
 #### Bug Fixes
 - update swift imports for adrenaline modules - ([447d857](https://github.com/tonioriol/adrenaline/commit/447d8578433a7987cd390b792326f03c9683ba9e)) - Toni Oriol
