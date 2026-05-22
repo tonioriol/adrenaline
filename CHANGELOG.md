@@ -3,6 +3,15 @@
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
 - - -
+## [v0.4.0](https://github.com/tonioriol/adrenaline/compare/6ce2abdacbd2de31ef7d69bb21be7da66b346cdd..v0.4.0) - 2026-05-22
+#### Features
+- force max volume for lid event sounds via CoreAudio - ([53fcbe5](https://github.com/tonioriol/adrenaline/commit/53fcbe5cb1b5ffabb5c84f73ee8086e82f26e683)) - Toni Oriol
+#### Documentation
+- log resource profiling results and launch strategy - ([e14711e](https://github.com/tonioriol/adrenaline/commit/e14711e23ef190c1df9f3ecb2ef70d124e969833)) - Toni Oriol
+- mark rename migration task done - ([6ce2abd](https://github.com/tonioriol/adrenaline/commit/6ce2abdacbd2de31ef7d69bb21be7da66b346cdd)) - Toni Oriol
+
+- - -
+
 ## [v0.3.1](https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.1) - 2026-05-03
 #### Bug Fixes
 - auto-launch Adrenaline after migration pkg install - ([3010cce](https://github.com/tonioriol/adrenaline/commit/3010cce44d24fcdf0b24f9e7b675c357e73078cf)) - Toni Oriol
