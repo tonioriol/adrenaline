@@ -1,7 +1,6 @@
 import AppKit
 import AdrenalineCore
 
-@MainActor
 final class AboutWindowController: NSWindowController {
     private let updater: Updating
     private let statusLabel = NSTextField(labelWithString: "")

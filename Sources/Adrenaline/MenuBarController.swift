@@ -1,7 +1,6 @@
 import AppKit
 import AdrenalineCore
 
-@MainActor
 final class MenuBarController: NSObject {
     private enum PreferenceRowID: Hashable {
         case preventDisplaySleep
@@ -62,28 +61,28 @@ final class MenuBarController: NSObject {
         let center = NotificationCenter.default
 
         observers.append(
-            center.addObserver(forName: .appStateActiveDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+            center.addObserver(forName: .appStateActiveDidChange, object: state, queue: .main) { [weak self] _ in
                 self?.render()
             }
         )
         observers.append(
-            center.addObserver(forName: .appStateBusyDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+            center.addObserver(forName: .appStateBusyDidChange, object: state, queue: .main) { [weak self] _ in
                 self?.render()
             }
         )
         observers.append(
-            center.addObserver(forName: .appStateErrorDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+            center.addObserver(forName: .appStateErrorDidChange, object: state, queue: .main) { [weak self] _ in
                 self?.render()
             }
         )
         observers.append(
-            center.addObserver(forName: .preferencesPreventLidCloseSleepDidChange, object: preferences, queue: .main) { @MainActor [weak self] _ in
+            center.addObserver(forName: .preferencesPreventLidCloseSleepDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.render()
                 self?.refreshVisibleRows()
             }
         )
         observers.append(
-            center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { @MainActor [weak self] _ in
+            center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.refreshVisibleRows()
             }
         )

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MacOSLockPolicy: Equatable, Sendable {
+public struct MacOSLockPolicy: Equatable {
     public var requiresPassword: Bool
 
     public init(requiresPassword: Bool) {

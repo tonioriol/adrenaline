@@ -1,6 +1,5 @@
 import AppKit
 
-@MainActor
 final class CheckboxMenuItemView: NSView {
     private enum Metrics {
         static let width: CGFloat = 280

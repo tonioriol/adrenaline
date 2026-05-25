@@ -10,7 +10,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var updater: SparkleUpdaterController?
     private var activeStateObserver: NSObjectProtocol?
 
-    @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
         let preferences = PreferencesStore()
         let state = AppState()
@@ -71,7 +70,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @MainActor
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let coordinator else { return .terminateNow }
         coordinator.shutdownCleanup {
