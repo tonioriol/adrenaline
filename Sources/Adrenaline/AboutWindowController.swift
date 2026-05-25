@@ -1,18 +1,11 @@
 import AppKit
-import Combine
 import AdrenalineCore
 
 @MainActor
 final class AboutWindowController: NSWindowController {
     private let updater: Updating
-    private var cancellables: Set<AnyCancellable> = []
     private let statusLabel = NSTextField(labelWithString: "")
     private let autoInstallCheckbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
-    private let dateFormatter: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter()
-        f.unitsStyle = .full
-        return f
-    }()
 
     init(updater: Updating) {
         self.updater = updater
@@ -101,12 +94,10 @@ final class AboutWindowController: NSWindowController {
     }
 
     private func bindUpdater() {
-        updater.statusPublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] status in
-                self?.statusLabel.stringValue = self?.statusText(for: status) ?? ""
-            }
-            .store(in: &cancellables)
+        statusLabel.stringValue = statusText(for: .idle(lastChecked: updater.lastUpdateCheckDate))
+        updater.onStatusChange = { [weak self] status in
+            self?.statusLabel.stringValue = self?.statusText(for: status) ?? ""
+        }
     }
 
     // MARK: - Actions
@@ -125,8 +116,7 @@ final class AboutWindowController: NSWindowController {
         switch status {
         case .idle(let lastChecked):
             guard let lastChecked else { return "Last checked: never" }
-            let relative = dateFormatter.localizedString(for: lastChecked, relativeTo: Date())
-            return "Last checked: \(relative)"
+            return "Last checked: \(relativeString(for: lastChecked))"
         case .checking:
             return "Checking for updates…"
         case .updateAvailable(let version):
@@ -136,6 +126,20 @@ final class AboutWindowController: NSWindowController {
         case .error(let message):
             return "Update check failed: \(message)"
         }
+    }
+
+    private func relativeString(for date: Date) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.day, .hour, .minute]
+        formatter.maximumUnitCount = 1
+        formatter.unitsStyle = .full
+
+        let now = Date()
+        if let value = formatter.string(from: date, to: now), !value.isEmpty {
+            return "\(value) ago"
+        }
+
+        return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
 
     private static func versionString() -> String {

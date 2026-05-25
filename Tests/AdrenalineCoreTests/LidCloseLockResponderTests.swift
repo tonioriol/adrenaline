@@ -1,10 +1,8 @@
-import Combine
 import XCTest
 @testable import AdrenalineCore
 
-@MainActor
 private final class FakeLidStateMonitor: LidStateMonitoring {
-    var onLidStateChange: (@MainActor (LidState) -> Void)?
+    var onLidStateChange: ((LidState) -> Void)?
     private(set) var isMonitoring = false
     var currentLidState: LidState?
 
@@ -16,7 +14,6 @@ private final class FakeLidStateMonitor: LidStateMonitoring {
     }
 }
 
-@MainActor
 private final class FakeScreenLocker: ScreenLocking {
     private(set) var lockCallCount = 0
     var lockError: Error?
@@ -27,17 +24,12 @@ private final class FakeScreenLocker: ScreenLocking {
     }
 }
 
-@MainActor
 private final class FakePreferencesStore: PreferencesProviding {
-    @Published var preventDisplaySleep: Bool = true
-    @Published var preventLidCloseSleep: Bool = false
-    @Published var playLidEventSounds: Bool = true
-    @Published var lidClosePreventionConfirmed: Bool = false
+    var preventDisplaySleep: Bool = true
+    var preventLidCloseSleep: Bool = false
+    var playLidEventSounds: Bool = true
+    var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
-
-    var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { $preventDisplaySleep.eraseToAnyPublisher() }
-    var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { $preventLidCloseSleep.eraseToAnyPublisher() }
-    var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { $playLidEventSounds.eraseToAnyPublisher() }
 
     func snapshot() -> PreferencesSnapshot {
         PreferencesSnapshot(
@@ -48,7 +40,6 @@ private final class FakePreferencesStore: PreferencesProviding {
     }
 }
 
-@MainActor
 private final class FakeLockPolicyReader: MacOSLockPolicyReading {
     private(set) var readCallCount = 0
     var policy = MacOSLockPolicy(requiresPassword: true)
@@ -63,7 +54,6 @@ private final class FakeLockPolicyReader: MacOSLockPolicyReading {
 
 private struct TestError: Error {}
 
-@MainActor
 final class LidCloseLockResponderTests: XCTestCase {
     private func makeResponder(
         isActive: Bool,

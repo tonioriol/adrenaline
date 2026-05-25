@@ -1,5 +1,4 @@
 import AppKit
-import Combine
 import AdrenalineCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -9,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lidEventSoundController: LidEventSoundController?
     private var lidCloseLockResponder: LidCloseLockResponder?
     private var updater: SparkleUpdaterController?
-    private var activeStateCancellable: AnyCancellable?
+    private var activeStateObserver: NSObjectProtocol?
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -57,24 +56,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             updater: updater
         )
 
-        activeStateCancellable = state.$isActive
-            .removeDuplicates()
-            .sink { [weak preferences] isActive in
+        activeStateObserver = NotificationCenter.default.addObserver(
+            forName: .appStateActiveDidChange,
+            object: state,
+            queue: .main
+        ) { [weak preferences, weak state] _ in
+            if let isActive = state?.isActive {
                 preferences?.wasActive = isActive
             }
+        }
 
         if preferences.wasActive {
-            Task { @MainActor in
-                await coordinator.turnOn()
-            }
+            coordinator.turnOn()
         }
     }
 
     @MainActor
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let coordinator else { return .terminateNow }
-        Task { @MainActor in
-            await coordinator.shutdownCleanup()
+        coordinator.shutdownCleanup {
             NSApp.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

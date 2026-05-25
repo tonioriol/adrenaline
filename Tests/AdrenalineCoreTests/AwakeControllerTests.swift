@@ -32,7 +32,6 @@ private struct TestError: LocalizedError {
     var errorDescription: String?
 }
 
-@MainActor
 final class AwakeControllerTests: XCTestCase {
     func testEnableCreatesSystemAndDisplayAssertions() throws {
         let client = FakePowerAssertionClient()

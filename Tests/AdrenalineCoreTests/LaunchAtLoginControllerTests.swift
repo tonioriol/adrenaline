@@ -1,7 +1,6 @@
 import XCTest
 @testable import AdrenalineCore
 
-@MainActor
 private final class FakeLoginItemService: LoginItemServicing {
     var status: LaunchAtLoginStatus = .disabled
     var registerError: Error?
@@ -26,7 +25,6 @@ private struct LaunchAtLoginTestError: Error, LocalizedError {
     let errorDescription: String?
 }
 
-@MainActor
 final class LaunchAtLoginControllerTests: XCTestCase {
     func testIsEnabledReflectsServiceStatus() {
         let service = FakeLoginItemService()

@@ -1,7 +1,6 @@
 import XCTest
 @testable import AdrenalineCore
 
-@MainActor
 final class AppStateTests: XCTestCase {
     private func observeNotifications(
         named names: [Notification.Name],

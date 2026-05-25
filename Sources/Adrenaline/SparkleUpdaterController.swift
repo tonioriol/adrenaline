@@ -1,24 +1,22 @@
-import Combine
 import Foundation
 import AdrenalineCore
 import os.log
 import Sparkle
 
-@MainActor
-final class SparkleUpdaterController: NSObject, Updating, SPUUpdaterDelegate {
+final class SparkleUpdaterController: NSObject, Updating, SPUUpdaterDelegate, SPUStandardUserDriverDelegate {
     private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "updater")
 
     private var controller: SPUStandardUpdaterController!
-    private let statusSubject: CurrentValueSubject<UpdaterStatus, Never>
+    private var currentStatus: UpdaterStatus = .idle(lastChecked: nil)
 
-    /// Guards `_resultHandled` across nonisolated delegate callbacks.
-    private nonisolated(unsafe) let resultLock = NSLock()
+    /// Guards `resultHandled` across delegate callbacks.
+    private let resultLock = NSLock()
     /// Set synchronously by specific callbacks (didFindValidUpdate,
-    /// updaterDidNotFindUpdate) *before* dispatching to MainActor.
+    /// updaterDidNotFindUpdate) before dispatching to the main queue.
     /// `didFinishUpdateCycleFor` checks and resets this flag to decide
-    /// whether to act — avoiding a Task-ordering race where it could
+    /// whether to act — avoiding an ordering race where it could
     /// overwrite a status already set by a specific callback.
-    private nonisolated(unsafe) var _resultHandled = false
+    private var resultHandled = false
 
     var automaticallyDownloadsUpdates: Bool {
         get { controller.updater.automaticallyDownloadsUpdates }
@@ -35,73 +33,76 @@ final class SparkleUpdaterController: NSObject, Updating, SPUUpdaterDelegate {
         controller.updater.lastUpdateCheckDate
     }
 
-    var statusPublisher: AnyPublisher<UpdaterStatus, Never> {
-        statusSubject.eraseToAnyPublisher()
+    var onStatusChange: ((UpdaterStatus) -> Void)? {
+        didSet {
+            if let onStatusChange {
+                onStatusChange(currentStatus)
+            }
+        }
     }
 
     override init() {
-        self.statusSubject = CurrentValueSubject(.idle(lastChecked: nil))
         super.init()
         self.controller = SPUStandardUpdaterController(
             startingUpdater: true,
             updaterDelegate: self,
-            userDriverDelegate: nil
+            userDriverDelegate: self
         )
-        statusSubject.value = .idle(lastChecked: controller.updater.lastUpdateCheckDate)
+        currentStatus = .idle(lastChecked: controller.updater.lastUpdateCheckDate)
     }
 
     func checkForUpdates() {
         controller.checkForUpdates(nil)
     }
 
+    private func publishStatus(_ status: UpdaterStatus) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.currentStatus = status
+            self.onStatusChange?(status)
+        }
+    }
+
     // MARK: - SPUUpdaterDelegate
 
-    nonisolated func updater(_ updater: SPUUpdater, mayPerform updateCheck: SPUUpdateCheck) throws {
+    func updater(_ updater: SPUUpdater, mayPerform updateCheck: SPUUpdateCheck) throws {
         // No-op; Sparkle uses thrown errors to veto a check. We allow all checks.
     }
 
-    nonisolated func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: Error?) {
+    func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: Error?) {
         // Check flag synchronously — no Task ordering issues.
         let alreadyHandled = resultLock.withLock {
-            let v = _resultHandled
-            _resultHandled = false // reset for next cycle
+            let v = resultHandled
+            resultHandled = false // reset for next cycle
             return v
         }
         guard !alreadyHandled else { return }
 
         // No specific callback fired — handle the result here.
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            if let error {
-                os_log("update check failed: %{public}@", log: Self.log, type: .error, String(describing: error))
-                self.statusSubject.value = .error(error.localizedDescription)
-            } else {
-                self.statusSubject.value = .idle(lastChecked: self.controller.updater.lastUpdateCheckDate)
-            }
+        if let error {
+            os_log("update check failed: %{public}@", log: Self.log, type: .error, String(describing: error))
+            publishStatus(.error(error.localizedDescription))
+        } else {
+            publishStatus(.idle(lastChecked: controller.updater.lastUpdateCheckDate))
         }
     }
 
-    nonisolated func updaterMayCheck(forUpdates updater: SPUUpdater) -> Bool {
-        Task { @MainActor [weak self] in
-            self?.statusSubject.value = .checking
-        }
+    func updaterMayCheck(forUpdates updater: SPUUpdater) -> Bool {
+        publishStatus(.checking)
         return true
     }
 
-    nonisolated func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
-        resultLock.withLock { _resultHandled = true }
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        resultLock.withLock { resultHandled = true }
         let displayVersion = item.displayVersionString
-        Task { @MainActor [weak self] in
-            os_log("update available: %{public}@", log: Self.log, type: .info, displayVersion)
-            self?.statusSubject.value = .updateAvailable(version: displayVersion)
-        }
+        os_log("update available: %{public}@", log: Self.log, type: .info, displayVersion)
+        publishStatus(.updateAvailable(version: displayVersion))
     }
 
-    nonisolated func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
-        resultLock.withLock { _resultHandled = true }
-        Task { @MainActor [weak self] in
-            os_log("up to date", log: Self.log, type: .info)
-            self?.statusSubject.value = .upToDate
-        }
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        resultLock.withLock { resultHandled = true }
+        os_log("up to date", log: Self.log, type: .info)
+        publishStatus(.upToDate)
     }
+
 }

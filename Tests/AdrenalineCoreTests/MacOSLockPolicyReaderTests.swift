@@ -1,7 +1,6 @@
 import XCTest
 @testable import AdrenalineCore
 
-@MainActor
 final class MacOSLockPolicyReaderTests: XCTestCase {
     func testAskForPasswordIntegerOneRequiresPassword() throws {
         let reader = makeReader(screenSaverValues: ["askForPassword": 1])

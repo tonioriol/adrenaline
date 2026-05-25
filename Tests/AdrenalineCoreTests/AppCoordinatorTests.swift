@@ -1,4 +1,3 @@
-import Combine
 import XCTest
 @testable import AdrenalineCore
 
@@ -37,74 +36,41 @@ private final class FakeLidCloseController: LidCloseControlling {
     var isEnabled = false
     var enableError: Error?
     var disableError: Error?
-    var statusValue = true
+    var statusValue: Bool?
     var enableCallCount = 0
     var disableCallCount = 0
 
-    func enable() async throws {
+    func enable(completion: @escaping (Error?) -> Void) {
         enableCallCount += 1
-        if let enableError { throw enableError }
-        isEnabled = true
-    }
-
-    func disable() async throws {
-        disableCallCount += 1
-        if let disableError { throw disableError }
-        isEnabled = false
-    }
-
-    func status() async throws -> Bool {
-        statusValue
-    }
-}
-
-private final class SuspendedEnableLidCloseController: LidCloseControlling {
-    var isEnabled = false
-    var statusValue = true
-    var disableCallCount = 0
-    var events: [String] = []
-
-    let enableStarted = XCTestExpectation(description: "lid-close enable started")
-    private var enableContinuation: CheckedContinuation<Void, Never>?
-
-    func enable() async throws {
-        events.append("enable-start")
-        enableStarted.fulfill()
-        await withCheckedContinuation { continuation in
-            enableContinuation = continuation
+        if let enableError {
+            completion(enableError)
+            return
         }
-        events.append("enable-resume")
         isEnabled = true
+        completion(nil)
     }
 
-    func resumeEnable() {
-        enableContinuation?.resume()
-        enableContinuation = nil
-    }
-
-    func disable() async throws {
-        events.append("disable")
+    func disable(completion: @escaping (Error?) -> Void) {
         disableCallCount += 1
+        if let disableError {
+            completion(disableError)
+            return
+        }
         isEnabled = false
+        completion(nil)
     }
 
-    func status() async throws -> Bool {
-        events.append("status")
-        return statusValue
+    func status(completion: @escaping (Result<Bool, Error>) -> Void) {
+        completion(.success(statusValue ?? isEnabled))
     }
 }
 
-@MainActor
 private final class FakePreferencesStore: PreferencesProviding {
-    @Published var preventDisplaySleep: Bool = true
-    @Published var preventLidCloseSleep: Bool = false
-    @Published var playLidEventSounds: Bool = true
-    @Published var lidClosePreventionConfirmed: Bool = false
+    var preventDisplaySleep: Bool = true
+    var preventLidCloseSleep: Bool = false
+    var playLidEventSounds: Bool = true
+    var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
-
-    var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { $preventDisplaySleep.eraseToAnyPublisher() }
-    var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { $preventLidCloseSleep.eraseToAnyPublisher() }
-    var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { $playLidEventSounds.eraseToAnyPublisher() }
 
     func snapshot() -> PreferencesSnapshot {
         PreferencesSnapshot(
@@ -119,9 +85,8 @@ private struct TestError: Error, LocalizedError {
     let errorDescription: String?
 }
 
-@MainActor
 final class AppCoordinatorTests: XCTestCase {
-    func testTurnOnSkipsLidCloseWhenPreferenceOff() async {
+    func testTurnOnSkipsLidCloseWhenPreferenceOff() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -129,7 +94,7 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = false
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
 
         XCTAssertTrue(state.isActive)
         XCTAssertEqual(awake.enableCallCount, 1)
@@ -137,7 +102,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.enableCallCount, 0)
     }
 
-    func testTurnOnRespectsDisplaySleepPreference() async {
+    func testTurnOnRespectsDisplaySleepPreference() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -145,13 +110,13 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventDisplaySleep = false
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
 
         XCTAssertEqual(awake.lastPreventDisplaySleep, false)
         XCTAssertEqual(lid.enableCallCount, 0)
     }
 
-    func testTurnOffSkipsLidCloseWhenNotEngagedThisSession() async {
+    func testTurnOffSkipsLidCloseWhenNotEngagedThisSession() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -159,58 +124,58 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = false
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
-        await coordinator.turnOff()
+        coordinator.turnOn()
+        coordinator.turnOff()
 
         XCTAssertEqual(lid.disableCallCount, 0)
         XCTAssertFalse(state.isActive)
     }
 
-    func testSetPreventDisplaySleepWhileOnReconcilesAwakeController() async {
+    func testSetPreventDisplaySleepWhileOnReconcilesAwakeController() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
         let prefs = FakePreferencesStore()
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
-        await coordinator.setPreventDisplaySleep(false)
+        coordinator.turnOn()
+        coordinator.setPreventDisplaySleep(false)
 
         XCTAssertEqual(awake.preventDisplaySleepHistory, [false])
         XCTAssertFalse(prefs.preventDisplaySleep)
     }
 
-    func testSetPreventDisplaySleepWhileOffJustPersists() async {
+    func testSetPreventDisplaySleepWhileOffJustPersists() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
         let prefs = FakePreferencesStore()
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.setPreventDisplaySleep(false)
+        coordinator.setPreventDisplaySleep(false)
 
         XCTAssertEqual(awake.preventDisplaySleepHistory, [])
         XCTAssertFalse(prefs.preventDisplaySleep)
     }
 
-    func testSetPreventLidCloseSleepWhileOnEngagesHelper() async {
+    func testSetPreventLidCloseSleepWhileOnEngagesHelper() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
         let prefs = FakePreferencesStore()
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         XCTAssertEqual(lid.enableCallCount, 0)
 
-        await coordinator.setPreventLidCloseSleep(true)
+        coordinator.setPreventLidCloseSleep(true)
 
         XCTAssertEqual(lid.enableCallCount, 1)
         XCTAssertTrue(prefs.preventLidCloseSleep)
         XCTAssertTrue(lid.isEnabled)
     }
 
-    func testSetPreventLidCloseSleepRevertsPreferenceOnEnableFailure() async {
+    func testSetPreventLidCloseSleepRevertsPreferenceOnEnableFailure() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -218,8 +183,8 @@ final class AppCoordinatorTests: XCTestCase {
         let prefs = FakePreferencesStore()
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
-        await coordinator.setPreventLidCloseSleep(true)
+        coordinator.turnOn()
+        coordinator.setPreventLidCloseSleep(true)
 
         XCTAssertFalse(prefs.preventLidCloseSleep)
         XCTAssertEqual(state.lastErrorMessage, "helper refused")
@@ -227,7 +192,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertTrue(awake.isEnabled)
     }
 
-    func testSetPreventLidCloseSleepWhileOnDisablesHelperWhenTurnedOff() async {
+    func testSetPreventLidCloseSleepWhileOnDisablesHelperWhenTurnedOff() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -235,16 +200,16 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         XCTAssertEqual(lid.enableCallCount, 1)
 
-        await coordinator.setPreventLidCloseSleep(false)
+        coordinator.setPreventLidCloseSleep(false)
 
         XCTAssertEqual(lid.disableCallCount, 1)
         XCTAssertFalse(prefs.preventLidCloseSleep)
     }
 
-    func testSetPreventLidCloseSleepDisableFailureKeepsActiveAndLeavesPreferenceOff() async {
+    func testSetPreventLidCloseSleepDisableFailureKeepsActiveAndLeavesPreferenceOff() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -253,12 +218,12 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         XCTAssertTrue(state.isActive)
         XCTAssertTrue(awake.isEnabled)
         XCTAssertEqual(lid.enableCallCount, 1)
 
-        await coordinator.setPreventLidCloseSleep(false)
+        coordinator.setPreventLidCloseSleep(false)
 
         XCTAssertFalse(prefs.preventLidCloseSleep)
         XCTAssertTrue(state.isActive, "ordinary awake assertions remain active, so UI must stay active-with-error")
@@ -267,7 +232,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
-    func testSetPreventLidCloseSleepStatusStillActiveAfterDisableKeepsActiveAndRecordsError() async {
+    func testSetPreventLidCloseSleepStatusStillActiveAfterDisableKeepsActiveAndRecordsError() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -275,10 +240,10 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         lid.statusValue = true
 
-        await coordinator.setPreventLidCloseSleep(false)
+        coordinator.setPreventLidCloseSleep(false)
 
         XCTAssertFalse(prefs.preventLidCloseSleep)
         XCTAssertTrue(state.isActive, "ordinary awake assertions remain active, so UI must stay active-with-error")
@@ -287,7 +252,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
-    func testToggleOnEnablesAwakeAndLidCloseAndMarksActive() async {
+    func testToggleOnEnablesAwakeAndLidCloseAndMarksActive() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -295,7 +260,7 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.toggle()
+        coordinator.toggle()
 
         XCTAssertTrue(state.isActive)
         XCTAssertFalse(state.isBusy)
@@ -306,13 +271,13 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertNil(state.lastErrorMessage)
     }
 
-    func testToggleDoesNothingWhenStateIsBusy() async {
+    func testToggleDoesNothingWhenStateIsBusy() {
         let state = AppState(isBusy: true)
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: FakePreferencesStore())
 
-        await coordinator.toggle()
+        coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
         XCTAssertTrue(state.isBusy)
@@ -322,7 +287,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 0)
     }
 
-    func testToggleOffDisablesAwakeAndLidClose() async {
+    func testToggleOffDisablesAwakeAndLidClose() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -330,8 +295,8 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
-        await coordinator.toggle()
+        coordinator.turnOn()
+        coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(awake.isEnabled)
@@ -340,7 +305,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
-    func testToggleOffRecordsErrorWhenLidCloseRemainsActiveAfterDisable() async {
+    func testToggleOffRecordsErrorWhenLidCloseRemainsActiveAfterDisable() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -348,9 +313,9 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         lid.statusValue = true
-        await coordinator.toggle()
+        coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)
@@ -359,7 +324,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
-    func testShutdownCleanupDisablesControllersEvenWhenBusy() async {
+    func testShutdownCleanupDisablesControllersEvenWhenBusy() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -367,10 +332,9 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         state.setBusy(true)
-        lid.statusValue = false
-        await coordinator.shutdownCleanup()
+        coordinator.shutdownCleanup { }
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)
@@ -381,7 +345,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertNil(state.lastErrorMessage)
     }
 
-    func testShutdownCleanupRecordsErrorAndEndsInactiveIdleWhenLidCloseRemainsActive() async {
+    func testShutdownCleanupRecordsErrorAndEndsInactiveIdleWhenLidCloseRemainsActive() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -389,10 +353,10 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         state.setBusy(true)
         lid.statusValue = true
-        await coordinator.shutdownCleanup()
+        coordinator.shutdownCleanup { }
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)
@@ -402,7 +366,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(state.helperState, .failed(message: "Lid-close prevention remained active after disable"))
     }
 
-    func testShutdownCleanupAttemptsBestEffortDisableWhenInactiveButBusy() async {
+    func testShutdownCleanupAttemptsBestEffortDisableWhenInactiveButBusy() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -410,11 +374,10 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.turnOn()
+        coordinator.turnOn()
         state.setActive(false)
         state.setBusy(true)
-        lid.statusValue = false
-        await coordinator.shutdownCleanup()
+        coordinator.shutdownCleanup { }
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)
@@ -424,37 +387,7 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(lid.disableCallCount, 1)
     }
 
-    func testShutdownCleanupPreventsSuspendedTurnOnFromReactivating() async {
-        let state = AppState()
-        let awake = FakeAwakeController()
-        let lid = SuspendedEnableLidCloseController()
-        let prefs = FakePreferencesStore()
-        prefs.preventLidCloseSleep = true
-        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
-
-        let turnOnTask = Task { await coordinator.turnOn() }
-        await fulfillment(of: [lid.enableStarted], timeout: 1)
-
-        let shutdownTask = Task { await coordinator.shutdownCleanup() }
-        await Task.yield()
-
-        lid.resumeEnable()
-        await turnOnTask.value
-        await shutdownTask.value
-
-        XCTAssertFalse(state.isActive)
-        XCTAssertFalse(state.isBusy)
-        XCTAssertFalse(awake.isEnabled)
-        XCTAssertFalse(lid.isEnabled)
-        XCTAssertGreaterThanOrEqual(lid.disableCallCount, 1)
-        XCTAssertGreaterThan(
-            lid.events.lastIndex(of: "disable") ?? -1,
-            lid.events.lastIndex(of: "enable-resume") ?? -1,
-            "shutdown cleanup must perform final disable after suspended enable resumes"
-        )
-    }
-
-    func testLidCloseFailureRollsBackAwakeAndLeavesStateOff() async {
+    func testLidCloseFailureRollsBackAwakeAndLeavesStateOff() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -463,18 +396,18 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.toggle()
+        coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)
         XCTAssertFalse(awake.isEnabled)
         XCTAssertEqual(awake.disableCallCount, 1)
-        XCTAssertEqual(lid.disableCallCount, 1)
+        XCTAssertEqual(lid.disableCallCount, 0)
         XCTAssertEqual(state.lastErrorMessage, "helper refused")
         XCTAssertEqual(state.helperState, .failed(message: "helper refused"))
     }
 
-    func testFalseStatusAfterEnableRollsBack() async {
+    func testFalseStatusAfterEnableRollsBack() {
         let state = AppState()
         let awake = FakeAwakeController()
         let lid = FakeLidCloseController()
@@ -483,7 +416,7 @@ final class AppCoordinatorTests: XCTestCase {
         prefs.preventLidCloseSleep = true
         let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
 
-        await coordinator.toggle()
+        coordinator.toggle()
 
         XCTAssertFalse(state.isActive)
         XCTAssertFalse(state.isBusy)

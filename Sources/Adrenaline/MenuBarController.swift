@@ -1,5 +1,4 @@
 import AppKit
-import Combine
 import AdrenalineCore
 
 @MainActor
@@ -29,7 +28,7 @@ final class MenuBarController: NSObject {
     private let updater: Updating
     private var aboutWindowController: AboutWindowController?
     private let statusItem: NSStatusItem
-    private var cancellables: Set<AnyCancellable> = []
+    private var observers: [NSObjectProtocol] = []
     private var visibleRows: [PreferenceRowID: CheckboxMenuItemView] = [:]
     private var launchAtLoginErrorMessage: String?
 
@@ -60,20 +59,40 @@ final class MenuBarController: NSObject {
     }
 
     private func bindState() {
-        state.$isActive.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
-        state.$isBusy.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
-        state.$lastErrorMessage.receive(on: RunLoop.main).sink { [weak self] _ in self?.render() }.store(in: &cancellables)
-        preferences.preventLidCloseSleepPublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
+        let center = NotificationCenter.default
+
+        observers.append(
+            center.addObserver(forName: .appStateActiveDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+                self?.render()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .appStateBusyDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+                self?.render()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .appStateErrorDidChange, object: state, queue: .main) { @MainActor [weak self] _ in
+                self?.render()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .preferencesPreventLidCloseSleepDidChange, object: preferences, queue: .main) { @MainActor [weak self] _ in
                 self?.render()
                 self?.refreshVisibleRows()
             }
-            .store(in: &cancellables)
-        preferences.playLidEventSoundsPublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.refreshVisibleRows() }
-            .store(in: &cancellables)
+        )
+        observers.append(
+            center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { @MainActor [weak self] _ in
+                self?.refreshVisibleRows()
+            }
+        )
+    }
+
+    deinit {
+        for observer in observers {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     private func render() {
@@ -95,8 +114,42 @@ final class MenuBarController: NSObject {
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Adrenaline")
-        image?.isTemplate = true
+        if #available(macOS 11.0, *) {
+            let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Adrenaline")
+            image?.isTemplate = true
+            return image
+        }
+
+        switch symbolName {
+        case "hourglass":
+            return legacySymbolImage(text: "⌛")
+        case "exclamationmark.triangle":
+            return legacySymbolImage(text: "⚠")
+        default:
+            return nil
+        }
+    }
+
+    private func legacySymbolImage(text: String) -> NSImage {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size)
+        image.lockFocus()
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 13),
+            .foregroundColor: NSColor.black,
+        ]
+        let attributedText = NSAttributedString(string: text, attributes: attributes)
+        let textSize = attributedText.size()
+        let rect = NSRect(
+            x: (size.width - textSize.width) / 2,
+            y: (size.height - textSize.height) / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+        attributedText.draw(in: rect)
+
+        image.unlockFocus()
         return image
     }
 
@@ -187,9 +240,7 @@ final class MenuBarController: NSObject {
             return
         }
 
-        Task { @MainActor in
-            await coordinator.toggle()
-        }
+        coordinator.toggle()
     }
 
     private func showMenu() {
@@ -304,10 +355,8 @@ final class MenuBarController: NSObject {
 
     private func togglePreventDisplaySleep() {
         let newValue = !preferences.preventDisplaySleep
-        Task { @MainActor in
-            await coordinator.setPreventDisplaySleep(newValue)
-            refreshVisibleRows()
-        }
+        coordinator.setPreventDisplaySleep(newValue)
+        refreshVisibleRows()
     }
 
     private func togglePreventLidCloseSleep() {
@@ -322,13 +371,11 @@ final class MenuBarController: NSObject {
         if !newValue {
             preferences.lidClosePreventionConfirmed = false
         }
-        Task { @MainActor in
-            await coordinator.setPreventLidCloseSleep(newValue)
-            if newValue && !preferences.preventLidCloseSleep {
-                preferences.lidClosePreventionConfirmed = false
-            }
-            refreshVisibleRows()
+        coordinator.setPreventLidCloseSleep(newValue)
+        if newValue && !preferences.preventLidCloseSleep {
+            preferences.lidClosePreventionConfirmed = false
         }
+        refreshVisibleRows()
     }
 
     private func confirmLidClosePreventionEnable() -> Bool {

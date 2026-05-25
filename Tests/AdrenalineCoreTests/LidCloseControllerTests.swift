@@ -12,27 +12,39 @@ private final class FakePrivilegedHelperClient: PrivilegedHelperClientProtocol {
     var enableError: Error?
     var disableError: Error?
 
-    func installOrUpdateHelperIfNeeded() async throws {
+    func installOrUpdateHelperIfNeeded(completion: @escaping (Error?) -> Void) {
         installCallCount += 1
-        if let installError { throw installError }
+        if let installError {
+            completion(installError)
+            return
+        }
         installed = true
+        completion(nil)
     }
 
-    func enableLidClosePrevention() async throws {
+    func enableLidClosePrevention(completion: @escaping (Error?) -> Void) {
         enableCallCount += 1
-        if let enableError { throw enableError }
+        if let enableError {
+            completion(enableError)
+            return
+        }
         enabled = true
+        completion(nil)
     }
 
-    func disableLidClosePrevention() async throws {
+    func disableLidClosePrevention(completion: @escaping (Error?) -> Void) {
         disableCallCount += 1
-        if let disableError { throw disableError }
+        if let disableError {
+            completion(disableError)
+            return
+        }
         enabled = false
+        completion(nil)
     }
 
-    func readLidClosePreventionStatus() async throws -> Bool {
+    func readLidClosePreventionStatus(completion: @escaping (Result<Bool, Error>) -> Void) {
         statusCallCount += 1
-        return enabled
+        completion(.success(enabled))
     }
 }
 
@@ -40,73 +52,75 @@ private struct TestError: Error, LocalizedError {
     let errorDescription: String?
 }
 
-@MainActor
 final class LidCloseControllerTests: XCTestCase {
-    func testEnableInstallsHelperThenEnablesLidClosePrevention() async throws {
+    func testEnableInstallsHelperThenEnablesLidClosePrevention() {
         let helper = FakePrivilegedHelperClient()
         let controller = LidCloseController(helperClient: helper)
+        var receivedError: Error?
 
-        try await controller.enable()
+        controller.enable { receivedError = $0 }
 
+        XCTAssertNil(receivedError)
         XCTAssertTrue(helper.installed)
         XCTAssertTrue(helper.enabled)
         XCTAssertEqual(helper.installCallCount, 1)
         XCTAssertEqual(helper.enableCallCount, 1)
     }
 
-    func testEnableDoesNotEnableWhenInstallFails() async {
+    func testEnableDoesNotEnableWhenInstallFails() {
         let helper = FakePrivilegedHelperClient()
         helper.installError = TestError(errorDescription: "install failed")
         let controller = LidCloseController(helperClient: helper)
+        var receivedError: Error?
 
-        do {
-            try await controller.enable()
-            XCTFail("Expected enable to throw when helper installation fails")
-        } catch {
-            XCTAssertEqual(error.localizedDescription, "install failed")
-        }
+        controller.enable { receivedError = $0 }
 
+        XCTAssertEqual(receivedError?.localizedDescription, "install failed")
         XCTAssertFalse(helper.installed)
         XCTAssertFalse(helper.enabled)
         XCTAssertEqual(helper.installCallCount, 1)
         XCTAssertEqual(helper.enableCallCount, 0)
     }
 
-    func testEnablePropagatesEnableFailureAfterInstall() async {
+    func testEnablePropagatesEnableFailureAfterInstall() {
         let helper = FakePrivilegedHelperClient()
         helper.enableError = TestError(errorDescription: "enable failed")
         let controller = LidCloseController(helperClient: helper)
+        var receivedError: Error?
 
-        do {
-            try await controller.enable()
-            XCTFail("Expected enable to throw when helper enable fails")
-        } catch {
-            XCTAssertEqual(error.localizedDescription, "enable failed")
-        }
+        controller.enable { receivedError = $0 }
 
+        XCTAssertEqual(receivedError?.localizedDescription, "enable failed")
         XCTAssertTrue(helper.installed)
         XCTAssertFalse(helper.enabled)
         XCTAssertEqual(helper.installCallCount, 1)
         XCTAssertEqual(helper.enableCallCount, 1)
     }
 
-    func testDisableForwardsToHelper() async throws {
+    func testDisableForwardsToHelper() {
         let helper = FakePrivilegedHelperClient()
         helper.enabled = true
         let controller = LidCloseController(helperClient: helper)
+        var receivedError: Error?
 
-        try await controller.disable()
+        controller.disable { receivedError = $0 }
 
+        XCTAssertNil(receivedError)
         XCTAssertFalse(helper.enabled)
         XCTAssertEqual(helper.disableCallCount, 1)
     }
 
-    func testStatusForwardsToHelper() async throws {
+    func testStatusForwardsToHelper() {
         let helper = FakePrivilegedHelperClient()
         helper.enabled = true
         let controller = LidCloseController(helperClient: helper)
+        var receivedResult: Result<Bool, Error>?
 
-        let enabled = try await controller.status()
+        controller.status { receivedResult = $0 }
+
+        guard case .success(let enabled)? = receivedResult else {
+            return XCTFail("Expected successful status result")
+        }
 
         XCTAssertTrue(enabled)
         XCTAssertEqual(helper.statusCallCount, 1)
