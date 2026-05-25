@@ -1,7 +1,6 @@
 import Foundation
 import os.log
 
-@MainActor
 public final class LidCloseLockResponder {
     private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "LidCloseLockResponder")
 
