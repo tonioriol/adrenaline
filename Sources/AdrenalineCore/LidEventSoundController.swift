@@ -1,7 +1,6 @@
-import Combine
 import Foundation
 
-public enum LidState: Equatable, Sendable {
+public enum LidState: Equatable {
     case open
     case closed
 }
@@ -18,7 +17,6 @@ public protocol LidSoundPlaying: AnyObject {
     func play(named soundName: String)
 }
 
-@MainActor
 public final class LidEventSoundController {
     public static let closeSoundName = "Hero"
     public static let openSoundName = "Basso"
@@ -27,9 +25,9 @@ public final class LidEventSoundController {
     private let monitor: LidStateMonitoring
     private let soundPlayer: LidSoundPlaying
     private let preferences: PreferencesProviding
-    private var cancellable: AnyCancellable?
     private var lastHandledState: LidState?
     private var monitoringStarted = false
+    private var activeObserver: NSObjectProtocol?
 
     public init(
         state: AppState,
@@ -46,11 +44,20 @@ public final class LidEventSoundController {
             self?.handle(lidState)
         }
 
-        cancellable = state.$isActive
-            .removeDuplicates()
-            .sink { [weak self] isActive in
-                self?.setMonitoringEnabled(isActive)
-            }
+        activeObserver = NotificationCenter.default.addObserver(
+            forName: .appStateActiveDidChange,
+            object: state,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.setMonitoringEnabled(self.state.isActive)
+        }
+    }
+
+    deinit {
+        if let observer = activeObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     private func setMonitoringEnabled(_ enabled: Bool) {
