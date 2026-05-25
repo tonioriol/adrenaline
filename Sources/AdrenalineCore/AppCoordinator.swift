@@ -27,14 +27,14 @@ public enum AppCoordinatorError: Error, LocalizedError, Equatable {
     }
 }
 
-@MainActor
 public final class AppCoordinator {
     private let state: AppState
     private let awakeController: AwakeControlling
     private let lidCloseController: LidCloseControlling
     private let preferences: PreferencesProviding
     private var shutdownRequested = false
-    private var currentTransitionTask: Task<Void, Never>?
+    private var isTransitioning = false
+    private var pendingShutdownDone: (() -> Void)?
     private var lidCloseEngagedThisSession = false
 
     public init(
@@ -49,103 +49,144 @@ public final class AppCoordinator {
         self.preferences = preferences
     }
 
-    public func toggle() async {
+    public func toggle() {
         if state.isActive {
-            await turnOff()
+            turnOff()
         } else {
-            await turnOn()
+            turnOn()
         }
     }
 
-    public func turnOn() async {
-        await runTransition {
-            await self.performTurnOn()
+    public func turnOn() {
+        runTransition { [weak self] done in
+            self?.performTurnOn(done: done) ?? done()
         }
     }
 
-    public func turnOff() async {
-        await runTransition {
-            await self.performTurnOff(force: false)
+    public func turnOff() {
+        runTransition { [weak self] done in
+            self?.performTurnOff(force: false, done: done) ?? done()
         }
     }
 
-    public func shutdownCleanup() async {
+    public func shutdownCleanup(done: @escaping () -> Void) {
         shutdownRequested = true
-        let inFlightTransition = currentTransitionTask
-        await inFlightTransition?.value
-        await performTurnOff(force: true)
-    }
-
-    public func setPreventDisplaySleep(_ enabled: Bool) async {
-        await runTransition {
-            await self.performSetPreventDisplaySleep(enabled)
+        if isTransitioning {
+            pendingShutdownDone = done
+        } else {
+            performTurnOff(force: true, done: done)
         }
     }
 
-    public func setPreventLidCloseSleep(_ enabled: Bool) async {
-        await runTransition {
-            await self.performSetPreventLidCloseSleep(enabled)
+    public func setPreventDisplaySleep(_ enabled: Bool) {
+        runTransition { [weak self] done in
+            self?.performSetPreventDisplaySleep(enabled, done: done) ?? done()
         }
     }
 
-    private func runTransition(_ operation: @escaping @MainActor () async -> Void) async {
-        guard !shutdownRequested, !state.isBusy, currentTransitionTask == nil else { return }
-
-        let task = Task { @MainActor in
-            await operation()
+    public func setPreventLidCloseSleep(_ enabled: Bool) {
+        runTransition { [weak self] done in
+            self?.performSetPreventLidCloseSleep(enabled, done: done) ?? done()
         }
-        currentTransitionTask = task
-        await task.value
-        currentTransitionTask = nil
     }
 
-    private func performTurnOn() async {
+    private func runTransition(_ operation: @escaping (@escaping () -> Void) -> Void) {
+        guard !shutdownRequested, !state.isBusy, !isTransitioning else { return }
+        isTransitioning = true
+        operation { [weak self] in
+            guard let self else { return }
+            self.isTransitioning = false
+            if let shutdownDone = self.pendingShutdownDone {
+                self.pendingShutdownDone = nil
+                self.performTurnOff(force: true, done: shutdownDone)
+            }
+        }
+    }
+
+    // MARK: - Turn On
+
+    private func performTurnOn(done: @escaping () -> Void) {
         let snapshot = preferences.snapshot()
         state.setBusy(true)
         state.clearError()
 
         do {
             try awakeController.enable(preventDisplaySleep: snapshot.preventDisplaySleep)
+        } catch {
+            state.recordError(error.localizedDescription)
+            done()
+            return
+        }
 
-            if snapshot.preventLidCloseSleep {
-                try await lidCloseController.enable()
-                lidCloseEngagedThisSession = true
+        guard snapshot.preventLidCloseSleep else {
+            finalizeTurnOn(done: done)
+            return
+        }
 
-                if shutdownRequested {
-                    await rollbackForShutdown()
-                    return
-                }
-
-                guard try await lidCloseController.status() else {
-                    throw AppCoordinatorError.lidCloseStatusDidNotBecomeActive
-                }
-            }
-
-            if shutdownRequested {
-                await rollbackForShutdown()
+        lidCloseController.enable { [weak self] error in
+            guard let self else { done(); return }
+            if let error {
+                self.awakeController.disable()
+                self.lidCloseEngagedThisSession = false
+                self.state.recordError(error.localizedDescription)
+                done()
                 return
             }
 
-            state.setActive(true)
-            state.setBusy(false)
-        } catch {
-            awakeController.disable()
-            try? await lidCloseController.disable()
-            lidCloseEngagedThisSession = false
-            state.recordError(error.localizedDescription)
+            self.lidCloseEngagedThisSession = true
+
+            if self.shutdownRequested {
+                self.rollbackForShutdown(done: done)
+                return
+            }
+
+            self.lidCloseController.status { [weak self] result in
+                guard let self else { done(); return }
+                switch result {
+                case .success(let active) where active:
+                    self.finalizeTurnOn(done: done)
+                case .success:
+                    self.awakeController.disable()
+                    self.lidCloseController.disable { _ in }
+                    self.lidCloseEngagedThisSession = false
+                    self.state.recordError(AppCoordinatorError.lidCloseStatusDidNotBecomeActive.localizedDescription)
+                    done()
+                case .failure(let error):
+                    self.awakeController.disable()
+                    self.lidCloseController.disable { _ in }
+                    self.lidCloseEngagedThisSession = false
+                    self.state.recordError(error.localizedDescription)
+                    done()
+                }
+            }
         }
     }
 
-    private func rollbackForShutdown() async {
-        awakeController.disable()
-        try? await lidCloseController.disable()
-        lidCloseEngagedThisSession = false
-        state.setActive(false)
+    private func finalizeTurnOn(done: @escaping () -> Void) {
+        if shutdownRequested {
+            rollbackForShutdown(done: done)
+            return
+        }
+        state.setActive(true)
         state.setBusy(false)
+        done()
     }
 
-    private func performTurnOff(force: Bool) async {
-        guard force || !state.isBusy else { return }
+    private func rollbackForShutdown(done: @escaping () -> Void) {
+        awakeController.disable()
+        lidCloseController.disable { [weak self] _ in
+            guard let self else { done(); return }
+            self.lidCloseEngagedThisSession = false
+            self.state.setActive(false)
+            self.state.setBusy(false)
+            done()
+        }
+    }
+
+    // MARK: - Turn Off
+
+    private func performTurnOff(force: Bool, done: @escaping () -> Void) {
+        guard force || !state.isBusy else { done(); return }
         state.setBusy(true)
         awakeController.disable()
 
@@ -155,28 +196,39 @@ public final class AppCoordinator {
         guard needsLidCloseDisable else {
             state.setActive(false)
             state.setBusy(false)
+            done()
             return
         }
 
-        do {
-            try await lidCloseController.disable()
-            state.setActive(false)
-            state.setBusy(false)
-
-            if try await lidCloseController.status() {
-                throw AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable
+        lidCloseController.disable { [weak self] error in
+            guard let self else { done(); return }
+            if let error {
+                self.state.setActive(false)
+                self.state.setBusy(false)
+                self.state.recordError(error.localizedDescription)
+                done()
+                return
             }
-        } catch {
-            state.setActive(false)
-            state.setBusy(false)
-            state.recordError(error.localizedDescription)
+
+            self.state.setActive(false)
+            self.state.setBusy(false)
+
+            self.lidCloseController.status { [weak self] result in
+                guard let self else { done(); return }
+                if case .success(true) = result {
+                    self.state.recordError(AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable.localizedDescription)
+                }
+                done()
+            }
         }
     }
 
-    private func performSetPreventDisplaySleep(_ enabled: Bool) async {
+    // MARK: - Preference Changes
+
+    private func performSetPreventDisplaySleep(_ enabled: Bool, done: @escaping () -> Void) {
         let previous = preferences.preventDisplaySleep
         preferences.preventDisplaySleep = enabled
-        guard state.isActive, previous != enabled else { return }
+        guard state.isActive, previous != enabled else { done(); return }
 
         do {
             try awakeController.setPreventDisplaySleep(enabled)
@@ -184,37 +236,66 @@ public final class AppCoordinator {
             preferences.preventDisplaySleep = previous
             state.recordErrorWhileActive(error.localizedDescription)
         }
+        done()
     }
 
-    private func performSetPreventLidCloseSleep(_ enabled: Bool) async {
+    private func performSetPreventLidCloseSleep(_ enabled: Bool, done: @escaping () -> Void) {
         let previous = preferences.preventLidCloseSleep
         preferences.preventLidCloseSleep = enabled
-        guard state.isActive, previous != enabled else { return }
+        guard state.isActive, previous != enabled else { done(); return }
 
         if enabled {
-            do {
-                try await lidCloseController.enable()
-                lidCloseEngagedThisSession = true
-                guard try await lidCloseController.status() else {
-                    throw AppCoordinatorError.lidCloseStatusDidNotBecomeActive
+            lidCloseController.enable { [weak self] error in
+                guard let self else { done(); return }
+                if let error {
+                    self.preferences.preventLidCloseSleep = previous
+                    self.state.recordErrorWhileActive(error.localizedDescription)
+                    done()
+                    return
                 }
-            } catch {
-                try? await lidCloseController.disable()
-                lidCloseEngagedThisSession = false
-                preferences.preventLidCloseSleep = previous
-                state.recordErrorWhileActive(error.localizedDescription)
+
+                self.lidCloseEngagedThisSession = true
+
+                self.lidCloseController.status { [weak self] result in
+                    guard let self else { done(); return }
+                    switch result {
+                    case .success(let active) where active:
+                        break // success
+                    case .success:
+                        self.lidCloseController.disable { _ in }
+                        self.lidCloseEngagedThisSession = false
+                        self.preferences.preventLidCloseSleep = previous
+                        self.state.recordErrorWhileActive(
+                            AppCoordinatorError.lidCloseStatusDidNotBecomeActive.localizedDescription
+                        )
+                    case .failure(let error):
+                        self.lidCloseController.disable { _ in }
+                        self.lidCloseEngagedThisSession = false
+                        self.preferences.preventLidCloseSleep = previous
+                        self.state.recordErrorWhileActive(error.localizedDescription)
+                    }
+                    done()
+                }
             }
         } else {
-            do {
-                try await lidCloseController.disable()
-
-                if try await lidCloseController.status() {
-                    throw AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable
+            lidCloseController.disable { [weak self] error in
+                guard let self else { done(); return }
+                if let error {
+                    self.state.recordErrorWhileActive(error.localizedDescription)
+                    done()
+                    return
                 }
 
-                lidCloseEngagedThisSession = false
-            } catch {
-                state.recordErrorWhileActive(error.localizedDescription)
+                self.lidCloseController.status { [weak self] result in
+                    guard let self else { done(); return }
+                    if case .success(true) = result {
+                        self.state.recordErrorWhileActive(
+                            AppCoordinatorError.lidCloseStatusRemainedActiveAfterDisable.localizedDescription
+                        )
+                    }
+                    self.lidCloseEngagedThisSession = false
+                    done()
+                }
             }
         }
     }
