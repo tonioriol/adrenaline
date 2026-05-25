@@ -1,65 +1,85 @@
 import Foundation
-import ServiceManagement
 
-public enum LaunchAtLoginStatus: Equatable, Sendable {
+public enum LaunchAtLoginStatus: Equatable {
     case enabled
     case disabled
     case requiresApproval
     case unavailable
-
-    init(serviceManagementStatus: SMAppService.Status) {
-        switch serviceManagementStatus {
-        case .enabled:
-            self = .enabled
-        case .notRegistered:
-            self = .disabled
-        case .requiresApproval:
-            self = .requiresApproval
-        case .notFound:
-            self = .unavailable
-        @unknown default:
-            self = .unavailable
-        }
-    }
 }
 
-@MainActor
 public protocol LoginItemServicing: AnyObject {
     var status: LaunchAtLoginStatus { get }
     func register() throws
     func unregister() throws
 }
 
-@MainActor
-public final class MainAppLoginItemService: LoginItemServicing {
-    public init() {}
+public final class LaunchAgentLoginItemService: LoginItemServicing {
+    private let agentLabel: String
+    private let appExecutablePath: String?
+
+    public init(
+        agentLabel: String = AdrenalineHelperConstants.appBundleIdentifier,
+        appExecutablePath: String? = nil
+    ) {
+        self.agentLabel = agentLabel
+        self.appExecutablePath = appExecutablePath
+    }
+
+    private var resolvedExecutablePath: String? {
+        if let appExecutablePath = appExecutablePath { return appExecutablePath }
+        guard let execPath = Bundle.main.executablePath else { return nil }
+        let url = URL(fileURLWithPath: execPath)
+        let contentsDir = url.deletingLastPathComponent().deletingLastPathComponent()
+        let appDir = contentsDir.deletingLastPathComponent()
+        guard appDir.pathExtension == "app" else { return nil }
+        return appDir.path
+    }
+
+    private var launchAgentURL: URL {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        return home
+            .appendingPathComponent("Library/LaunchAgents")
+            .appendingPathComponent("\(agentLabel).plist")
+    }
 
     public var status: LaunchAtLoginStatus {
-        LaunchAtLoginStatus(serviceManagementStatus: SMAppService.mainApp.status)
+        FileManager.default.fileExists(atPath: launchAgentURL.path) ? .enabled : .disabled
     }
 
     public func register() throws {
-        try SMAppService.mainApp.register()
+        guard let appPath = resolvedExecutablePath else {
+            return
+        }
+
+        let plist: NSDictionary = [
+            "Label": agentLabel,
+            "ProgramArguments": ["/usr/bin/open", appPath],
+            "RunAtLoad": true,
+        ]
+
+        let dir = launchAgentURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        plist.write(to: launchAgentURL, atomically: true)
     }
 
     public func unregister() throws {
-        try SMAppService.mainApp.unregister()
+        let path = launchAgentURL.path
+        guard FileManager.default.fileExists(atPath: path) else { return }
+        try FileManager.default.removeItem(atPath: path)
     }
 }
 
-@MainActor
 public protocol LaunchAtLoginControlling: AnyObject {
     var isEnabled: Bool { get }
     var status: LaunchAtLoginStatus { get }
     func setEnabled(_ enabled: Bool) throws
 }
 
-@MainActor
 public final class LaunchAtLoginController: LaunchAtLoginControlling {
     private let service: LoginItemServicing
 
     public init(service: LoginItemServicing? = nil) {
-        self.service = service ?? MainAppLoginItemService()
+        self.service = service ?? LaunchAgentLoginItemService()
     }
 
     public var isEnabled: Bool {
