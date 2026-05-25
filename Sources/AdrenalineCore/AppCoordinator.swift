@@ -8,9 +8,9 @@ public protocol AwakeControlling: AnyObject {
 }
 
 public protocol LidCloseControlling: AnyObject {
-    func enable() async throws
-    func disable() async throws
-    func status() async throws -> Bool
+    func enable(completion: @escaping (Error?) -> Void)
+    func disable(completion: @escaping (Error?) -> Void)
+    func status(completion: @escaping (Result<Bool, Error>) -> Void)
 }
 
 public enum AppCoordinatorError: Error, LocalizedError, Equatable {

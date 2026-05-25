@@ -1,7 +1,6 @@
 import Foundation
 import os.log
 
-@MainActor
 public protocol ScreenLocking: AnyObject {
     func lock() throws
 }
@@ -20,7 +19,6 @@ public enum ScreenLockerError: Error, LocalizedError {
     }
 }
 
-@MainActor
 public final class LoginFrameworkScreenLocker: ScreenLocking {
     private static let log = OSLog(subsystem: "com.tonioriol.adrenaline", category: "ScreenLocker")
     private static let frameworkPath =

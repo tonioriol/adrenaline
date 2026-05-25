@@ -8,12 +8,10 @@ public struct MacOSLockPolicy: Equatable, Sendable {
     }
 }
 
-@MainActor
 public protocol MacOSLockPolicyReading: AnyObject {
     func currentPolicy() throws -> MacOSLockPolicy
 }
 
-@MainActor
 public final class MacOSLockPolicyReader: MacOSLockPolicyReading {
     private static let screenSaverSuiteName = "com.apple.screensaver"
     private static let askForPasswordKey = "askForPassword"

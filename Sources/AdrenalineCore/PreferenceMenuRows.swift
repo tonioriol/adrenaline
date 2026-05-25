@@ -1,10 +1,10 @@
-public enum PreferenceMenuRowID: Hashable, Sendable {
+public enum PreferenceMenuRowID: Hashable {
     case preventDisplaySleep
     case preventLidCloseSleep
     case playLidEventSounds
 }
 
-public struct PreferenceMenuRow: Equatable, Sendable {
+public struct PreferenceMenuRow: Equatable {
     public let id: PreferenceMenuRowID
     public let title: String
     public let isOn: Bool

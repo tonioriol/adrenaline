@@ -28,8 +28,8 @@ public protocol AdrenalineHelperProtocol {
 }
 
 public protocol PrivilegedHelperClientProtocol: AnyObject {
-    func installOrUpdateHelperIfNeeded() async throws
-    func enableLidClosePrevention() async throws
-    func disableLidClosePrevention() async throws
-    func readLidClosePreventionStatus() async throws -> Bool
+    func installOrUpdateHelperIfNeeded(completion: @escaping (Error?) -> Void)
+    func enableLidClosePrevention(completion: @escaping (Error?) -> Void)
+    func disableLidClosePrevention(completion: @escaping (Error?) -> Void)
+    func readLidClosePreventionStatus(completion: @escaping (Result<Bool, Error>) -> Void)
 }

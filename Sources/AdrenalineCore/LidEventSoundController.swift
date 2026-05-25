@@ -6,16 +6,14 @@ public enum LidState: Equatable, Sendable {
     case closed
 }
 
-@MainActor
 public protocol LidStateMonitoring: AnyObject {
-    var onLidStateChange: (@MainActor (LidState) -> Void)? { get set }
+    var onLidStateChange: ((LidState) -> Void)? { get set }
     var isMonitoring: Bool { get }
     var currentLidState: LidState? { get }
     func start() throws
     func stop()
 }
 
-@MainActor
 public protocol LidSoundPlaying: AnyObject {
     func play(named soundName: String)
 }

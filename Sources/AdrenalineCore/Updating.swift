@@ -1,7 +1,6 @@
-import Combine
 import Foundation
 
-public enum UpdaterStatus: Equatable, Sendable {
+public enum UpdaterStatus: Equatable {
     case idle(lastChecked: Date?)
     case checking
     case updateAvailable(version: String)
@@ -9,10 +8,9 @@ public enum UpdaterStatus: Equatable, Sendable {
     case error(String)
 }
 
-@MainActor
 public protocol Updating: AnyObject {
     var automaticallyDownloadsUpdates: Bool { get set }
     var lastUpdateCheckDate: Date? { get }
-    var statusPublisher: AnyPublisher<UpdaterStatus, Never> { get }
+    var onStatusChange: ((UpdaterStatus) -> Void)? { get set }
     func checkForUpdates()
 }
