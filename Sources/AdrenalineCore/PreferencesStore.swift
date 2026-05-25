@@ -1,7 +1,6 @@
-import Combine
 import Foundation
 
-public struct PreferencesSnapshot: Equatable, Sendable {
+public struct PreferencesSnapshot: Equatable {
     public var preventDisplaySleep: Bool
     public var preventLidCloseSleep: Bool
     public var playLidEventSounds: Bool
@@ -17,7 +16,12 @@ public struct PreferencesSnapshot: Equatable, Sendable {
     }
 }
 
-@MainActor
+public extension Notification.Name {
+    static let preferencesPreventDisplaySleepDidChange = Notification.Name("Adrenaline.preferencesPreventDisplaySleepDidChange")
+    static let preferencesPreventLidCloseSleepDidChange = Notification.Name("Adrenaline.preferencesPreventLidCloseSleepDidChange")
+    static let preferencesPlayLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesPlayLidEventSoundsDidChange")
+}
+
 public protocol PreferencesProviding: AnyObject {
     var preventDisplaySleep: Bool { get set }
     var preventLidCloseSleep: Bool { get set }
@@ -25,15 +29,10 @@ public protocol PreferencesProviding: AnyObject {
     var lidClosePreventionConfirmed: Bool { get set }
     var wasActive: Bool { get set }
 
-    var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> { get }
-    var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> { get }
-    var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> { get }
-
     func snapshot() -> PreferencesSnapshot
 }
 
-@MainActor
-public final class PreferencesStore: ObservableObject, PreferencesProviding {
+public final class PreferencesStore: PreferencesProviding {
     public enum Key {
         public static let preventDisplaySleep = "Adrenaline.preventDisplaySleep"
         public static let preventLidCloseSleep = "Adrenaline.preventLidCloseSleep"
@@ -44,23 +43,38 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
 
     private let defaults: UserDefaults
 
-    @Published public var preventDisplaySleep: Bool {
-        didSet { defaults.set(preventDisplaySleep, forKey: Key.preventDisplaySleep) }
+    public var preventDisplaySleep: Bool {
+        didSet {
+            defaults.set(preventDisplaySleep, forKey: Key.preventDisplaySleep)
+            if preventDisplaySleep != oldValue {
+                NotificationCenter.default.post(name: .preferencesPreventDisplaySleepDidChange, object: self)
+            }
+        }
     }
 
-    @Published public var preventLidCloseSleep: Bool {
-        didSet { defaults.set(preventLidCloseSleep, forKey: Key.preventLidCloseSleep) }
+    public var preventLidCloseSleep: Bool {
+        didSet {
+            defaults.set(preventLidCloseSleep, forKey: Key.preventLidCloseSleep)
+            if preventLidCloseSleep != oldValue {
+                NotificationCenter.default.post(name: .preferencesPreventLidCloseSleepDidChange, object: self)
+            }
+        }
     }
 
-    @Published public var playLidEventSounds: Bool {
-        didSet { defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds) }
+    public var playLidEventSounds: Bool {
+        didSet {
+            defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds)
+            if playLidEventSounds != oldValue {
+                NotificationCenter.default.post(name: .preferencesPlayLidEventSoundsDidChange, object: self)
+            }
+        }
     }
 
-    @Published public var lidClosePreventionConfirmed: Bool {
+    public var lidClosePreventionConfirmed: Bool {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
 
-    @Published public var wasActive: Bool {
+    public var wasActive: Bool {
         didSet { defaults.set(wasActive, forKey: Key.wasActive) }
     }
 
@@ -71,18 +85,6 @@ public final class PreferencesStore: ObservableObject, PreferencesProviding {
         self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
         self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
-    }
-
-    public var preventDisplaySleepPublisher: AnyPublisher<Bool, Never> {
-        $preventDisplaySleep.eraseToAnyPublisher()
-    }
-
-    public var preventLidCloseSleepPublisher: AnyPublisher<Bool, Never> {
-        $preventLidCloseSleep.eraseToAnyPublisher()
-    }
-
-    public var playLidEventSoundsPublisher: AnyPublisher<Bool, Never> {
-        $playLidEventSounds.eraseToAnyPublisher()
     }
 
     public func snapshot() -> PreferencesSnapshot {
