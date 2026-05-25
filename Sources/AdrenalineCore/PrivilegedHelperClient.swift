@@ -32,91 +32,127 @@ public final class PrivilegedHelperClient: PrivilegedHelperClientProtocol {
         self.helperIdentifier = helperIdentifier
     }
 
-    public func installOrUpdateHelperIfNeeded() async throws {
-        if let version = try? await helperVersion(), version == AdrenalineHelperConstants.helperVersion {
-            return
+    public func installOrUpdateHelperIfNeeded(completion: @escaping (Error?) -> Void) {
+        helperVersion { [weak self] result in
+            switch result {
+            case .success(let version) where version == AdrenalineHelperConstants.helperVersion:
+                DispatchQueue.main.async { completion(nil) }
+            default:
+                guard let self else {
+                    DispatchQueue.main.async { completion(nil) }
+                    return
+                }
+                do {
+                    try self.blessHelper()
+                    DispatchQueue.main.async { completion(nil) }
+                } catch {
+                    DispatchQueue.main.async { completion(error) }
+                }
+            }
         }
-        try blessHelper()
     }
 
-    public func enableLidClosePrevention() async throws {
-        _ = try await callBooleanCommand { helper, reply in
-            helper.enableLidClosePrevention(reply: reply)
+    public func enableLidClosePrevention(completion: @escaping (Error?) -> Void) {
+        callBooleanCommand(
+            { helper, reply in helper.enableLidClosePrevention(reply: reply) },
+            requiresSuccess: true
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success: completion(nil)
+                case .failure(let error): completion(error)
+                }
+            }
         }
     }
 
-    public func disableLidClosePrevention() async throws {
-        _ = try await callBooleanCommand { helper, reply in
-            helper.disableLidClosePrevention(reply: reply)
+    public func disableLidClosePrevention(completion: @escaping (Error?) -> Void) {
+        callBooleanCommand(
+            { helper, reply in helper.disableLidClosePrevention(reply: reply) },
+            requiresSuccess: true
+        ) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success: completion(nil)
+                case .failure(let error): completion(error)
+                }
+            }
         }
     }
 
-    public func readLidClosePreventionStatus() async throws -> Bool {
-        try await callBooleanCommand({ helper, reply in
-            helper.readLidClosePreventionStatus(reply: reply)
-        }, requiresSuccess: false)
+    public func readLidClosePreventionStatus(completion: @escaping (Result<Bool, Error>) -> Void) {
+        callBooleanCommand(
+            { helper, reply in helper.readLidClosePreventionStatus(reply: reply) },
+            requiresSuccess: false
+        ) { result in
+            DispatchQueue.main.async { completion(result) }
+        }
     }
 
-    private func helperVersion() async throws -> Int {
-        try await withHelperConnection { helper, complete in
+    private func helperVersion(completion: @escaping (Result<Int, Error>) -> Void) {
+        withHelperConnection { helper, complete in
             helper.helperVersion { version in
                 complete(.success(version.intValue))
             }
+        } completion: { result in
+            completion(result)
         }
     }
 
     private func callBooleanCommand(
         _ command: @escaping (AdrenalineHelperProtocol, @escaping (NSNumber, NSString?) -> Void) -> Void,
-        requiresSuccess: Bool = true
-    ) async throws -> Bool {
-        try await withHelperConnection { helper, complete in
+        requiresSuccess: Bool,
+        completion: @escaping (Result<Bool, Error>) -> Void
+    ) {
+        withHelperConnection { helper, complete in
             command(helper) { value, errorMessage in
                 complete(Result {
                     try Self.decodeBooleanReply(value, errorMessage: errorMessage, requiresSuccess: requiresSuccess)
                 })
             }
+        } completion: { result in
+            completion(result)
         }
     }
 
     private func withHelperConnection<T>(
-        _ body: @escaping (AdrenalineHelperProtocol, @escaping (Result<T, Error>) -> Void) -> Void
-    ) async throws -> T {
-        try await withCheckedThrowingContinuation { continuation in
-            let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
-            let lock = NSLock()
-            var didComplete = false
+        _ body: @escaping (AdrenalineHelperProtocol, @escaping (Result<T, Error>) -> Void) -> Void,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        let connection = NSXPCConnection(machServiceName: helperIdentifier, options: .privileged)
+        let lock = NSLock()
+        var didComplete = false
 
-            let complete: (Result<T, Error>) -> Void = { result in
-                lock.lock()
-                guard !didComplete else {
-                    lock.unlock()
-                    return
-                }
-                didComplete = true
+        let complete: (Result<T, Error>) -> Void = { result in
+            lock.lock()
+            guard !didComplete else {
                 lock.unlock()
-
-                connection.invalidate()
-                continuation.resume(with: result)
-            }
-
-            connection.remoteObjectInterface = NSXPCInterface(with: AdrenalineHelperProtocol.self)
-            connection.interruptionHandler = {
-                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection interrupted")))
-            }
-            connection.invalidationHandler = {
-                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection invalidated")))
-            }
-            connection.resume()
-
-            guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
-                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed(error.localizedDescription)))
-            }) as? AdrenalineHelperProtocol else {
-                complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")))
                 return
             }
+            didComplete = true
+            lock.unlock()
 
-            body(proxy, complete)
+            connection.invalidate()
+            completion(result)
         }
+
+        connection.remoteObjectInterface = NSXPCInterface(with: AdrenalineHelperProtocol.self)
+        connection.interruptionHandler = {
+            complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection interrupted")))
+        }
+        connection.invalidationHandler = {
+            complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Helper connection invalidated")))
+        }
+        connection.resume()
+
+        guard let proxy = connection.remoteObjectProxyWithErrorHandler({ error in
+            complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed(error.localizedDescription)))
+        }) as? AdrenalineHelperProtocol else {
+            complete(.failure(PrivilegedHelperClientError.xpcConnectionFailed("Could not create remote proxy")))
+            return
+        }
+
+        body(proxy, complete)
     }
 
     internal static func decodeBooleanReply(
