@@ -7,16 +7,21 @@ public final class LidCloseController: LidCloseControlling {
         self.helperClient = helperClient
     }
 
-    public func enable() async throws {
-        try await helperClient.installOrUpdateHelperIfNeeded()
-        try await helperClient.enableLidClosePrevention()
+    public func enable(completion: @escaping (Error?) -> Void) {
+        helperClient.installOrUpdateHelperIfNeeded { [weak self] error in
+            if let error {
+                completion(error)
+                return
+            }
+            self?.helperClient.enableLidClosePrevention(completion: completion)
+        }
     }
 
-    public func disable() async throws {
-        try await helperClient.disableLidClosePrevention()
+    public func disable(completion: @escaping (Error?) -> Void) {
+        helperClient.disableLidClosePrevention(completion: completion)
     }
 
-    public func status() async throws -> Bool {
-        try await helperClient.readLidClosePreventionStatus()
+    public func status(completion: @escaping (Result<Bool, Error>) -> Void) {
+        helperClient.readLidClosePreventionStatus(completion: completion)
     }
 }
