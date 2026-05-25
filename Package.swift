@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Adrenaline",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v10_13)],
     products: [
         .executable(name: "Adrenaline", targets: ["Adrenaline"]),
         .executable(name: "AdrenalineHelper", targets: ["AdrenalineHelper"]),
