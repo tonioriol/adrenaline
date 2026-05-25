@@ -21,18 +21,17 @@ public enum LidStateMonitorError: Error, LocalizedError, Equatable {
     }
 }
 
-@MainActor
 public final class LidStateMonitor: LidStateMonitoring {
-    nonisolated static let clamshellStateChangeMessage: UInt32 = (0x38 << 26) | (13 << 14) | 0x100
-    nonisolated static let clamshellStateBit: UInt = 1 << 0
+    static let clamshellStateChangeMessage: UInt32 = (0x38 << 26) | (13 << 14) | 0x100
+    static let clamshellStateBit: UInt = 1 << 0
     private static let appleClamshellStateKey = "AppleClamshellState"
 
-    public var onLidStateChange: (@MainActor (LidState) -> Void)?
+    public var onLidStateChange: ((LidState) -> Void)?
     public private(set) var isMonitoring = false
 
     public var currentLidState: LidState? {
         let service = rootDomain != 0 ? rootDomain : IOServiceGetMatchingService(
-            kIOMainPortDefault,
+            kIOMasterPortDefault,
             IOServiceMatching("IOPMrootDomain")
         )
         guard service != 0 else { return nil }
@@ -73,7 +72,7 @@ public final class LidStateMonitor: LidStateMonitoring {
             IOObjectRelease(rootDomain)
         }
 
-        if let notificationPort {
+        if let notificationPort = notificationPort {
             IONotificationPortDestroy(notificationPort)
         }
     }
@@ -82,14 +81,14 @@ public final class LidStateMonitor: LidStateMonitoring {
         guard !isMonitoring else { return }
 
         let root = IOServiceGetMatchingService(
-            kIOMainPortDefault,
+            kIOMasterPortDefault,
             IOServiceMatching("IOPMrootDomain")
         )
         guard root != 0 else {
             throw LidStateMonitorError.rootDomainUnavailable
         }
 
-        guard let port = IONotificationPortCreate(kIOMainPortDefault) else {
+        guard let port = IONotificationPortCreate(kIOMasterPortDefault) else {
             IOObjectRelease(root)
             throw LidStateMonitorError.notificationPortUnavailable
         }
@@ -150,19 +149,19 @@ public final class LidStateMonitor: LidStateMonitoring {
         isMonitoring = false
     }
 
-    nonisolated static func lidState(fromClamshellMessageArgument messageArgument: UInt) -> LidState {
+    static func lidState(fromClamshellMessageArgument messageArgument: UInt) -> LidState {
         (messageArgument & clamshellStateBit) == 0 ? .open : .closed
     }
 
-    private nonisolated static let handleInterestNotification: IOServiceInterestCallback = { refcon, _, messageType, messageArgument in
+    private static let handleInterestNotification: IOServiceInterestCallback = { refcon, _, messageType, messageArgument in
         guard messageType == LidStateMonitor.clamshellStateChangeMessage,
-              let refcon else { return }
+              let refcon = refcon else { return }
 
         let monitor = Unmanaged<LidStateMonitor>.fromOpaque(refcon).takeUnretainedValue()
         let argument = UInt(bitPattern: messageArgument)
         let lidState = LidStateMonitor.lidState(fromClamshellMessageArgument: argument)
 
-        Task { @MainActor in
+        DispatchQueue.main.async {
             monitor.onLidStateChange?(lidState)
         }
     }
