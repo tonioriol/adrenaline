@@ -1,7 +1,6 @@
-import Combine
 import Foundation
 
-public enum HelperState: Equatable, Sendable {
+public enum HelperState: Equatable {
     case unknown
     case notInstalled
     case installing
@@ -9,12 +8,41 @@ public enum HelperState: Equatable, Sendable {
     case failed(message: String)
 }
 
-@MainActor
-public final class AppState: ObservableObject {
-    @Published public private(set) var isActive: Bool
-    @Published public private(set) var isBusy: Bool
-    @Published public private(set) var helperState: HelperState
-    @Published public private(set) var lastErrorMessage: String?
+public extension Notification.Name {
+    static let appStateActiveDidChange = Notification.Name("Adrenaline.appStateActiveDidChange")
+    static let appStateBusyDidChange = Notification.Name("Adrenaline.appStateBusyDidChange")
+    static let appStateErrorDidChange = Notification.Name("Adrenaline.appStateErrorDidChange")
+    static let appStateHelperDidChange = Notification.Name("Adrenaline.appStateHelperDidChange")
+}
+
+public final class AppState {
+    public private(set) var isActive: Bool {
+        didSet {
+            guard isActive != oldValue else { return }
+            NotificationCenter.default.post(name: .appStateActiveDidChange, object: self)
+        }
+    }
+
+    public private(set) var isBusy: Bool {
+        didSet {
+            guard isBusy != oldValue else { return }
+            NotificationCenter.default.post(name: .appStateBusyDidChange, object: self)
+        }
+    }
+
+    public private(set) var helperState: HelperState {
+        didSet {
+            guard helperState != oldValue else { return }
+            NotificationCenter.default.post(name: .appStateHelperDidChange, object: self)
+        }
+    }
+
+    public private(set) var lastErrorMessage: String? {
+        didSet {
+            guard lastErrorMessage != oldValue else { return }
+            NotificationCenter.default.post(name: .appStateErrorDidChange, object: self)
+        }
+    }
 
     public init(
         isActive: Bool = false,

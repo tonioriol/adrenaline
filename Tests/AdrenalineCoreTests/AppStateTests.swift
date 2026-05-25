@@ -3,6 +3,27 @@ import XCTest
 
 @MainActor
 final class AppStateTests: XCTestCase {
+    private func observeNotifications(
+        named names: [Notification.Name],
+        from object: AnyObject,
+        during operation: () -> Void
+    ) -> [Notification.Name: Int] {
+        var counts = Dictionary(uniqueKeysWithValues: names.map { ($0, 0) })
+        let tokens = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: object, queue: nil) { _ in
+                counts[name, default: 0] += 1
+            }
+        }
+
+        operation()
+
+        for token in tokens {
+            NotificationCenter.default.removeObserver(token)
+        }
+
+        return counts
+    }
+
     func testInitialStateIsInactiveAndIdle() {
         let state = AppState()
 
@@ -21,6 +42,19 @@ final class AppStateTests: XCTestCase {
         XCTAssertTrue(state.isActive)
         XCTAssertNil(state.lastErrorMessage)
         XCTAssertEqual(state.helperState, .unknown)
+    }
+
+    func testSetActivePostsActiveDidChangeNotification() {
+        let state = AppState()
+
+        let counts = observeNotifications(
+            named: [Notification.Name("Adrenaline.appStateActiveDidChange")],
+            from: state
+        ) {
+            state.setActive(true)
+        }
+
+        XCTAssertEqual(counts[Notification.Name("Adrenaline.appStateActiveDidChange")], 1)
     }
 
     func testRecordingErrorKeepsFeatureInactive() {
@@ -42,6 +76,26 @@ final class AppStateTests: XCTestCase {
         XCTAssertFalse(state.isBusy)
         XCTAssertEqual(state.lastErrorMessage, "helper failed")
         XCTAssertEqual(state.helperState, .failed(message: "helper failed"))
+    }
+
+    func testRecordingErrorPostsNotificationsForChangedProperties() {
+        let state = AppState(isActive: true, isBusy: true)
+        let activeDidChange = Notification.Name("Adrenaline.appStateActiveDidChange")
+        let busyDidChange = Notification.Name("Adrenaline.appStateBusyDidChange")
+        let errorDidChange = Notification.Name("Adrenaline.appStateErrorDidChange")
+        let helperDidChange = Notification.Name("Adrenaline.appStateHelperDidChange")
+
+        let counts = observeNotifications(
+            named: [activeDidChange, busyDidChange, errorDidChange, helperDidChange],
+            from: state
+        ) {
+            state.recordError("helper failed")
+        }
+
+        XCTAssertEqual(counts[activeDidChange], 1)
+        XCTAssertEqual(counts[busyDidChange], 1)
+        XCTAssertEqual(counts[errorDidChange], 1)
+        XCTAssertEqual(counts[helperDidChange], 1)
     }
 
     func testRecordErrorWhileActiveKeepsActiveButSetsErrorAndHelperFailed() {
