@@ -36,6 +36,7 @@ private final class FakeLidSoundPlayer: LidSoundPlaying {
 private final class FakePreferencesStore: PreferencesProviding {
     var preventDisplaySleep: Bool = true
     var preventLidCloseSleep: Bool = false
+    var preventDiskSleep: Bool = true
     var playLidEventSounds: Bool = true
     var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
@@ -44,6 +45,7 @@ private final class FakePreferencesStore: PreferencesProviding {
         PreferencesSnapshot(
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
+            preventDiskSleep: preventDiskSleep,
             playLidEventSounds: playLidEventSounds
         )
     }

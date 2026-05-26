@@ -100,6 +100,12 @@ public final class AppCoordinator {
         }
     }
 
+    public func setPreventDiskSleep(_ enabled: Bool) {
+        runTransition { [weak self] done in
+            self?.performSetPreventDiskSleep(enabled, done: done) ?? done()
+        }
+    }
+
     private func runTransition(_ operation: @escaping (@escaping () -> Void) -> Void) {
         guard !shutdownRequested, !state.isBusy, !isTransitioning else { return }
         isTransitioning = true
@@ -121,7 +127,7 @@ public final class AppCoordinator {
         state.clearError()
 
         do {
-            try awakeController.enable(preventDisplaySleep: snapshot.preventDisplaySleep)
+            try awakeController.enable(preventDisplaySleep: snapshot.preventDisplaySleep, preventDiskSleep: snapshot.preventDiskSleep)
         } catch {
             state.recordError(error.localizedDescription)
             done()
@@ -244,6 +250,20 @@ public final class AppCoordinator {
             try awakeController.setPreventDisplaySleep(enabled)
         } catch {
             preferences.preventDisplaySleep = previous
+            state.recordErrorWhileActive(error.localizedDescription)
+        }
+        done()
+    }
+
+    private func performSetPreventDiskSleep(_ enabled: Bool, done: @escaping () -> Void) {
+        let previous = preferences.preventDiskSleep
+        preferences.preventDiskSleep = enabled
+        guard state.isActive, previous != enabled else { done(); return }
+
+        do {
+            try awakeController.setPreventDiskSleep(enabled)
+        } catch {
+            preferences.preventDiskSleep = previous
             state.recordErrorWhileActive(error.localizedDescription)
         }
         done()

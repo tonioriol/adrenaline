@@ -38,4 +38,45 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(row?.isEnabled, false)
         XCTAssertEqual(row?.isChild, true)
     }
+
+    func testDiskSleepRowAppearsWhenShowDiskSleepIsTrue() {
+        let snapshot = PreferencesSnapshot(
+            preventDisplaySleep: true,
+            preventLidCloseSleep: false,
+            preventDiskSleep: true,
+            playLidEventSounds: true
+        )
+
+        let rows = PreferenceMenuRows.rows(for: snapshot, showDiskSleep: true)
+
+        XCTAssertEqual(rows.map(\.id), [
+            .preventDisplaySleep,
+            .preventDiskSleep,
+            .preventLidCloseSleep,
+            .playLidEventSounds,
+        ])
+
+        let row = rows.first { $0.id == .preventDiskSleep }
+        XCTAssertEqual(row?.title, "Prevent disk sleep")
+        XCTAssertEqual(row?.isOn, true)
+        XCTAssertEqual(row?.isEnabled, true)
+        XCTAssertEqual(row?.isChild, false)
+    }
+
+    func testDiskSleepRowHiddenByDefault() {
+        let snapshot = PreferencesSnapshot(
+            preventDisplaySleep: true,
+            preventLidCloseSleep: false,
+            preventDiskSleep: true,
+            playLidEventSounds: true
+        )
+
+        let rows = PreferenceMenuRows.rows(for: snapshot)
+
+        XCTAssertEqual(rows.map(\.id), [
+            .preventDisplaySleep,
+            .preventLidCloseSleep,
+            .playLidEventSounds,
+        ])
+    }
 }

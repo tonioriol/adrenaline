@@ -4,6 +4,7 @@ import AdrenalineCore
 final class MenuBarController: NSObject {
     private enum PreferenceRowID: Hashable {
         case preventDisplaySleep
+        case preventDiskSleep
         case preventLidCloseSleep
         case playLidEventSounds
         case launchAtLogin
@@ -12,6 +13,8 @@ final class MenuBarController: NSObject {
             switch rowID {
             case .preventDisplaySleep:
                 self = .preventDisplaySleep
+            case .preventDiskSleep:
+                self = .preventDiskSleep
             case .preventLidCloseSleep:
                 self = .preventLidCloseSleep
             case .playLidEventSounds:
@@ -312,11 +315,17 @@ final class MenuBarController: NSObject {
         switch id {
         case .preventDisplaySleep:
             togglePreventDisplaySleep()
+        case .preventDiskSleep:
+            togglePreventDiskSleep()
         case .preventLidCloseSleep:
             togglePreventLidCloseSleep()
         case .playLidEventSounds:
             togglePlayLidEventSounds()
         }
+    }
+
+    private func togglePreventDiskSleep() {
+        coordinator.setPreventDiskSleep(!preferences.preventDiskSleep)
     }
 
     private func addCheckboxRow(

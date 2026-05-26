@@ -7,16 +7,24 @@ private final class FakeAwakeController: AwakeControlling {
     var enableCallCount = 0
     var disableCallCount = 0
     var lastPreventDisplaySleep: Bool?
+    var lastPreventDiskSleep: Bool?
     var preventDisplaySleepHistory: [Bool] = []
+    var preventDiskSleepHistory: [Bool] = []
     var setPreventDisplaySleepError: Error?
+    var setPreventDiskSleepError: Error?
 
     func enable() throws {
-        try enable(preventDisplaySleep: true)
+        try enable(preventDisplaySleep: true, preventDiskSleep: false)
     }
 
     func enable(preventDisplaySleep: Bool) throws {
+        try enable(preventDisplaySleep: preventDisplaySleep, preventDiskSleep: false)
+    }
+
+    func enable(preventDisplaySleep: Bool, preventDiskSleep: Bool) throws {
         enableCallCount += 1
         lastPreventDisplaySleep = preventDisplaySleep
+        lastPreventDiskSleep = preventDiskSleep
         if let enableError { throw enableError }
         isEnabled = true
     }
@@ -24,6 +32,11 @@ private final class FakeAwakeController: AwakeControlling {
     func setPreventDisplaySleep(_ enabled: Bool) throws {
         if let setPreventDisplaySleepError { throw setPreventDisplaySleepError }
         preventDisplaySleepHistory.append(enabled)
+    }
+
+    func setPreventDiskSleep(_ enabled: Bool) throws {
+        if let setPreventDiskSleepError { throw setPreventDiskSleepError }
+        preventDiskSleepHistory.append(enabled)
     }
 
     func disable() {
@@ -68,6 +81,7 @@ private final class FakeLidCloseController: LidCloseControlling {
 private final class FakePreferencesStore: PreferencesProviding {
     var preventDisplaySleep: Bool = true
     var preventLidCloseSleep: Bool = false
+    var preventDiskSleep: Bool = true
     var playLidEventSounds: Bool = true
     var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
@@ -76,6 +90,7 @@ private final class FakePreferencesStore: PreferencesProviding {
         PreferencesSnapshot(
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
+            preventDiskSleep: preventDiskSleep,
             playLidEventSounds: playLidEventSounds
         )
     }

@@ -3,15 +3,18 @@ import Foundation
 public struct PreferencesSnapshot: Equatable {
     public var preventDisplaySleep: Bool
     public var preventLidCloseSleep: Bool
+    public var preventDiskSleep: Bool
     public var playLidEventSounds: Bool
 
     public init(
         preventDisplaySleep: Bool,
         preventLidCloseSleep: Bool,
+        preventDiskSleep: Bool = true,
         playLidEventSounds: Bool
     ) {
         self.preventDisplaySleep = preventDisplaySleep
         self.preventLidCloseSleep = preventLidCloseSleep
+        self.preventDiskSleep = preventDiskSleep
         self.playLidEventSounds = playLidEventSounds
     }
 }
@@ -19,12 +22,14 @@ public struct PreferencesSnapshot: Equatable {
 public extension Notification.Name {
     static let preferencesPreventDisplaySleepDidChange = Notification.Name("Adrenaline.preferencesPreventDisplaySleepDidChange")
     static let preferencesPreventLidCloseSleepDidChange = Notification.Name("Adrenaline.preferencesPreventLidCloseSleepDidChange")
+    static let preferencesPreventDiskSleepDidChange = Notification.Name("Adrenaline.preferencesPreventDiskSleepDidChange")
     static let preferencesPlayLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesPlayLidEventSoundsDidChange")
 }
 
 public protocol PreferencesProviding: AnyObject {
     var preventDisplaySleep: Bool { get set }
     var preventLidCloseSleep: Bool { get set }
+    var preventDiskSleep: Bool { get set }
     var playLidEventSounds: Bool { get set }
     var lidClosePreventionConfirmed: Bool { get set }
     var wasActive: Bool { get set }
@@ -36,6 +41,7 @@ public final class PreferencesStore: PreferencesProviding {
     public enum Key {
         public static let preventDisplaySleep = "Adrenaline.preventDisplaySleep"
         public static let preventLidCloseSleep = "Adrenaline.preventLidCloseSleep"
+        public static let preventDiskSleep = "Adrenaline.preventDiskSleep"
         public static let playLidEventSounds = "Adrenaline.playLidEventSounds"
         public static let lidClosePreventionConfirmed = "Adrenaline.lidClosePreventionConfirmed"
         public static let wasActive = "Adrenaline.wasActive"
@@ -61,6 +67,15 @@ public final class PreferencesStore: PreferencesProviding {
         }
     }
 
+    public var preventDiskSleep: Bool {
+        didSet {
+            defaults.set(preventDiskSleep, forKey: Key.preventDiskSleep)
+            if preventDiskSleep != oldValue {
+                NotificationCenter.default.post(name: .preferencesPreventDiskSleepDidChange, object: self)
+            }
+        }
+    }
+
     public var playLidEventSounds: Bool {
         didSet {
             defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds)
@@ -82,6 +97,7 @@ public final class PreferencesStore: PreferencesProviding {
         self.defaults = defaults
         self.preventDisplaySleep = Self.readBool(from: defaults, key: Key.preventDisplaySleep, default: true)
         self.preventLidCloseSleep = Self.readBool(from: defaults, key: Key.preventLidCloseSleep, default: false)
+        self.preventDiskSleep = Self.readBool(from: defaults, key: Key.preventDiskSleep, default: true)
         self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
         self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
@@ -91,6 +107,7 @@ public final class PreferencesStore: PreferencesProviding {
         PreferencesSnapshot(
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
+            preventDiskSleep: preventDiskSleep,
             playLidEventSounds: playLidEventSounds
         )
     }

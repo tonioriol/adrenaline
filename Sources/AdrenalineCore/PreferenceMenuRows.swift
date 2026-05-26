@@ -1,5 +1,6 @@
 public enum PreferenceMenuRowID: Hashable {
     case preventDisplaySleep
+    case preventDiskSleep
     case preventLidCloseSleep
     case playLidEventSounds
 }
@@ -21,26 +22,37 @@ public struct PreferenceMenuRow: Equatable {
 }
 
 public enum PreferenceMenuRows {
-    public static func rows(for snapshot: PreferencesSnapshot) -> [PreferenceMenuRow] {
-        [
+    public static func rows(for snapshot: PreferencesSnapshot, showDiskSleep: Bool = false) -> [PreferenceMenuRow] {
+        var result: [PreferenceMenuRow] = [
             PreferenceMenuRow(
                 id: .preventDisplaySleep,
                 title: "Prevent display sleep",
                 isOn: snapshot.preventDisplaySleep,
                 isEnabled: true),
-            PreferenceMenuRow(
-                id: .preventLidCloseSleep,
-                title: snapshot.preventLidCloseSleep
-                    ? "⚠ Prevent system sleep with lid closed"
-                    : "Prevent system sleep with lid closed",
-                isOn: snapshot.preventLidCloseSleep,
-                isEnabled: true),
-            PreferenceMenuRow(
-                id: .playLidEventSounds,
-                title: "Play lid event sounds",
-                isOn: snapshot.playLidEventSounds,
-                isEnabled: snapshot.preventLidCloseSleep,
-                isChild: true),
         ]
+
+        if showDiskSleep {
+            result.append(PreferenceMenuRow(
+                id: .preventDiskSleep,
+                title: "Prevent disk sleep",
+                isOn: snapshot.preventDiskSleep,
+                isEnabled: true))
+        }
+
+        result.append(PreferenceMenuRow(
+            id: .preventLidCloseSleep,
+            title: snapshot.preventLidCloseSleep
+                ? "⚠ Prevent system sleep with lid closed"
+                : "Prevent system sleep with lid closed",
+            isOn: snapshot.preventLidCloseSleep,
+            isEnabled: true))
+        result.append(PreferenceMenuRow(
+            id: .playLidEventSounds,
+            title: "Play lid event sounds",
+            isOn: snapshot.playLidEventSounds,
+            isEnabled: snapshot.preventLidCloseSleep,
+            isChild: true))
+
+        return result
     }
 }
