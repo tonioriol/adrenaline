@@ -28,20 +28,25 @@ public final class DiskTypeDetector: DiskTypeDetecting {
         while service != 0 {
             defer { IOObjectRelease(service); service = IOIteratorNext(iterator) }
 
+            // Skip devices without characteristics (e.g. card readers without media)
             guard let cfProperties = IORegistryEntryCreateCFProperty(
                 service,
                 "Device Characteristics" as CFString,
                 kCFAllocatorDefault,
                 0
             )?.takeRetainedValue() as? NSDictionary else {
-                return true
+                continue
             }
 
-            if let mediumType = cfProperties["Medium Type"] as? String {
-                if mediumType != "Solid State" {
-                    return true
-                }
-            } else {
+            // Only consider devices that explicitly report a medium type.
+            // Card readers and controllers often omit this key — skip them.
+            guard let mediumType = cfProperties["Medium Type"] as? String else {
+                continue
+            }
+
+            // "Solid State" is the known SSD value. Anything else
+            // (e.g. "Rotational") is a mechanical drive worth protecting.
+            if mediumType != "Solid State" {
                 return true
             }
         }
