@@ -49,5 +49,16 @@
                type="application/octet-stream"
                sparkle:edSignature="vvdcsHLjzQLs2wSmQcuiSaX2t/Dux0ZFKCr6eksXLFhHdxNuSYwq37KviYmdA9zQeIl64UEvY69pFSRZ46+5Ag==" length="1385954" />
 </item>
+            <item>
+    <title>Adrenaline 0.7.3</title>
+    <pubDate>Tue, 26 May 2026 16:18:30 +0000</pubDate>
+    <sparkle:version>0.7.3</sparkle:version>
+    <sparkle:shortVersionString>0.7.3</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+    <sparkle:releaseNotesLink>https://tonioriol.github.io/adrenaline/releases/latest.html</sparkle:releaseNotesLink>
+    <enclosure url="https://github.com/tonioriol/adrenaline/releases/download/v0.7.3/Adrenaline-v0.7.3.zip"
+               type="application/octet-stream"
+               sparkle:edSignature="E1vy4obfgPfs6CxjKjjLYI2VPy4YwP7cJbiL6pmNfTKckVZ57AOd4q9IdBYM8OvTtPDXjBbAS/FKTEEnC430Cw==" length="1385939" />
+</item>
     </channel>
 </rss>
