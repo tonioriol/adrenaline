@@ -4,13 +4,16 @@ import XCTest
 private final class FakePowerAssertionClient: PowerAssertionClient {
     var nextID: UInt32 = 41
     var createdReasons: [String] = []
+    var createdAssertionTypes: [String] = []
     var releasedIDs: [UInt32] = []
     var createError: Error?
     var displayCreateError: Error?
+    var diskCreateError: Error?
 
     func createNoIdleSleepAssertion(reason: String) throws -> UInt32 {
         if let createError { throw createError }
         createdReasons.append(reason)
+        createdAssertionTypes.append("system")
         nextID += 1
         return nextID
     }
@@ -19,6 +22,16 @@ private final class FakePowerAssertionClient: PowerAssertionClient {
         if let createError { throw createError }
         if let displayCreateError { throw displayCreateError }
         createdReasons.append(reason)
+        createdAssertionTypes.append("display")
+        nextID += 1
+        return nextID
+    }
+
+    func createDiskSleepAssertion(reason: String) throws -> UInt32 {
+        if let createError { throw createError }
+        if let diskCreateError { throw diskCreateError }
+        createdReasons.append(reason)
+        createdAssertionTypes.append("disk")
         nextID += 1
         return nextID
     }
@@ -60,6 +73,16 @@ final class AwakeControllerTests: XCTestCase {
         try controller.enable(preventDisplaySleep: true)
 
         XCTAssertEqual(client.createdReasons, ["Adrenaline is active", "Adrenaline is active"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testEnableWithDisplayAndDiskFlagsCreatesAllAssertions() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: true, preventDiskSleep: true)
+
+        XCTAssertEqual(client.createdAssertionTypes, ["system", "display", "disk"])
         XCTAssertTrue(controller.isEnabled)
     }
 
@@ -107,6 +130,38 @@ final class AwakeControllerTests: XCTestCase {
         XCTAssertTrue(controller.isEnabled)
     }
 
+    func testSetPreventDiskSleepReleasesDiskAssertionWhenTurnedOff() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: true, preventDiskSleep: true)
+        try controller.setPreventDiskSleep(false)
+
+        XCTAssertEqual(client.releasedIDs, [44])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testSetPreventDiskSleepCreatesDiskAssertionWhenTurnedOn() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: false, preventDiskSleep: false)
+        try controller.setPreventDiskSleep(true)
+
+        XCTAssertEqual(client.createdAssertionTypes, ["system", "disk"])
+        XCTAssertTrue(controller.isEnabled)
+    }
+
+    func testSetPreventDiskSleepIsNoopWhenDisabled() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.setPreventDiskSleep(true)
+
+        XCTAssertTrue(client.createdReasons.isEmpty)
+        XCTAssertFalse(controller.isEnabled)
+    }
+
     func testDisableReleasesCreatedAssertions() throws {
         let client = FakePowerAssertionClient()
         let controller = AwakeController(client: client)
@@ -115,6 +170,17 @@ final class AwakeControllerTests: XCTestCase {
         controller.disable()
 
         XCTAssertEqual(client.releasedIDs, [43, 42])
+        XCTAssertFalse(controller.isEnabled)
+    }
+
+    func testDisableReleasesDiskAssertionBeforeOtherAssertions() throws {
+        let client = FakePowerAssertionClient()
+        let controller = AwakeController(client: client)
+
+        try controller.enable(preventDisplaySleep: true, preventDiskSleep: true)
+        controller.disable()
+
+        XCTAssertEqual(client.releasedIDs, [44, 43, 42])
         XCTAssertFalse(controller.isEnabled)
     }
 

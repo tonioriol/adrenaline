@@ -4,6 +4,7 @@ import IOKit.pwr_mgt
 public protocol PowerAssertionClient: AnyObject {
     func createNoIdleSleepAssertion(reason: String) throws -> UInt32
     func createDisplaySleepAssertion(reason: String) throws -> UInt32
+    func createDiskSleepAssertion(reason: String) throws -> UInt32
     func releaseAssertion(id: UInt32)
 }
 
@@ -27,6 +28,10 @@ public final class IOKitPowerAssertionClient: PowerAssertionClient {
 
     public func createDisplaySleepAssertion(reason: String) throws -> UInt32 {
         try createAssertion(type: kIOPMAssertPreventUserIdleDisplaySleep as CFString, typeName: "display-sleep", reason: reason)
+    }
+
+    public func createDiskSleepAssertion(reason: String) throws -> UInt32 {
+        try createAssertion(type: kIOPMAssertPreventDiskIdle as CFString, typeName: "disk-sleep", reason: reason)
     }
 
     public func releaseAssertion(id: UInt32) {

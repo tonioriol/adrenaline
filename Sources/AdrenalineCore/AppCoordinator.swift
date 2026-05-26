@@ -3,8 +3,18 @@ import Foundation
 public protocol AwakeControlling: AnyObject {
     func enable() throws
     func enable(preventDisplaySleep: Bool) throws
+    func enable(preventDisplaySleep: Bool, preventDiskSleep: Bool) throws
     func setPreventDisplaySleep(_ enabled: Bool) throws
+    func setPreventDiskSleep(_ enabled: Bool) throws
     func disable()
+}
+
+public extension AwakeControlling {
+    func enable(preventDisplaySleep: Bool, preventDiskSleep: Bool) throws {
+        try enable(preventDisplaySleep: preventDisplaySleep)
+    }
+
+    func setPreventDiskSleep(_ enabled: Bool) throws {}
 }
 
 public protocol LidCloseControlling: AnyObject {
