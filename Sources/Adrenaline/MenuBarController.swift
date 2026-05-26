@@ -28,6 +28,7 @@ final class MenuBarController: NSObject {
     private let preferences: PreferencesStore
     private let launchAtLoginController: LaunchAtLoginControlling
     private let updater: Updating
+    private let diskTypeDetector: DiskTypeDetecting
     private var aboutWindowController: AboutWindowController?
     private let statusItem: NSStatusItem
     private var observers: [NSObjectProtocol] = []
@@ -39,13 +40,15 @@ final class MenuBarController: NSObject {
         coordinator: AppCoordinator,
         preferences: PreferencesStore,
         launchAtLoginController: LaunchAtLoginControlling,
-        updater: Updating
+        updater: Updating,
+        diskTypeDetector: DiskTypeDetecting
     ) {
         self.state = state
         self.coordinator = coordinator
         self.preferences = preferences
         self.launchAtLoginController = launchAtLoginController
         self.updater = updater
+        self.diskTypeDetector = diskTypeDetector
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         super.init()
         configureStatusItem()
@@ -81,6 +84,11 @@ final class MenuBarController: NSObject {
         observers.append(
             center.addObserver(forName: .preferencesPreventLidCloseSleepDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.render()
+                self?.refreshVisibleRows()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .preferencesPreventDiskSleepDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.refreshVisibleRows()
             }
         )
@@ -269,7 +277,7 @@ final class MenuBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        for row in PreferenceMenuRows.rows(for: preferences.snapshot()) {
+        for row in PreferenceMenuRows.rows(for: preferences.snapshot(), showDiskSleep: diskTypeDetector.hasNonSSDDrive) {
             guard let id = PreferenceRowID(row.id) else { continue }
             addCheckboxRow(
                 to: menu,
@@ -346,7 +354,7 @@ final class MenuBarController: NSObject {
     }
 
     private func refreshVisibleRows() {
-        for row in PreferenceMenuRows.rows(for: preferences.snapshot()) {
+        for row in PreferenceMenuRows.rows(for: preferences.snapshot(), showDiskSleep: diskTypeDetector.hasNonSSDDrive) {
             guard let id = PreferenceRowID(row.id) else { continue }
             visibleRows[id]?.update(
                 title: row.title,

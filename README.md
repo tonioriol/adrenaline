@@ -7,6 +7,7 @@ Keep your Mac awake from the menu bar — even with the lid closed.
 | Option | Default | |
 |---|---|---|
 | Prevent display sleep | ON | Also keeps the display awake |
+| Prevent disk sleep | ON | Keeps mechanical drives spinning (only shown when HDD detected) |
 | Prevent sleep with lid closed | OFF | Requires one-time admin authorization |
 | Play lid event sounds | ON | Sound on lid open/close |
 | Launch at login | OFF | Start with macOS |

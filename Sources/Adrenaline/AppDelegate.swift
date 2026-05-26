@@ -41,6 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         let updater = SparkleUpdaterController()
+        let diskTypeDetector = DiskTypeDetector()
 
         self.preferences = preferences
         self.coordinator = coordinator
@@ -52,7 +53,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             coordinator: coordinator,
             preferences: preferences,
             launchAtLoginController: LaunchAtLoginController(),
-            updater: updater
+            updater: updater,
+            diskTypeDetector: diskTypeDetector
         )
 
         activeStateObserver = NotificationCenter.default.addObserver(
