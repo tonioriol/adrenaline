@@ -16,14 +16,21 @@ a { color: #0066cc; }
   a { color: #5ac8fa; }
 }
 h2 { font-size: 1.3em; margin-top: 1.2em; }
-h2:first-child { margin-top: 0; }
 h4 { font-size: 1em; margin-bottom: 0.3em; }
 ul { padding-left: 1.5em; }
 li { margin-bottom: 0.3em; }
-hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0; }
+/* Sparkle injects 'sparkle-installed-version' class on the <section>
+   whose data-sparkle-version matches the installed app version.
+   Hide that section and all subsequent (older) sibling sections. */
+.sparkle-installed-version,
+.sparkle-installed-version ~ section { display: none; }
+section + section { border-top: 1px solid rgba(128,128,128,0.3);
+                    padding-top: 1.5em; margin-top: 1.5em; }
+section:first-child h2:first-child { margin-top: 0; }
 </style>
 </head>
 <body>
+<section data-sparkle-version="0.7.4">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/a5ca125c012b93aadcf181c3eaa8362499975f64..v0.7.4">v0.7.4</a> - 2026-05-27</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -33,7 +40,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.7.4 - (<a href="https://github.com/tonioriol/adrenaline/commit/b8c7698d22f0fc59787cec552f46d7129163bb8c">b8c7698</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.7.3">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/cc6eb0a90fa237d5e99a6d8af768623b09341ec7..v0.7.3">v0.7.3</a> - 2026-05-26</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -43,7 +51,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.7.3 - (<a href="https://github.com/tonioriol/adrenaline/commit/04199729f43b289023358361e4619e240c7b295d">0419972</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.7.2">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/9c957021f739527d600bce0d0cf268951facd762..v0.7.2">v0.7.2</a> - 2026-05-26</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -53,7 +62,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.7.2 - (<a href="https://github.com/tonioriol/adrenaline/commit/e69483a94e0bbd953364450c24661701953e484a">e69483a</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.7.1">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/7a1f286b44418c71b3483fde11be177bc76193c7..v0.7.1">v0.7.1</a> - 2026-05-26</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -63,7 +73,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.7.1 - (<a href="https://github.com/tonioriol/adrenaline/commit/73ee9e24d83874f0a565ab87be154e47c1bbc808">73ee9e2</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.7.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/13f61e41e6466d466c45316610de62ca3a65dfab..v0.7.0">v0.7.0</a> - 2026-05-26</h2>
 <h4>Features</h4>
 <ul>
@@ -99,13 +110,15 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <li>remove remaining <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mainactor/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mainactor">@mainactor</a> and Sendable from UI layer - (<a href="https://github.com/tonioriol/adrenaline/commit/cd4f159b14393827603149af7fbcee9841e55ad4">cd4f159</a>) - Toni Oriol</li>
 <li>lower deployment target to macOS 10.13 - (<a href="https://github.com/tonioriol/adrenaline/commit/13f61e41e6466d466c45316610de62ca3a65dfab">13f61e4</a>) - Toni Oriol</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.6.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/v0.6.0..v0.6.0">v0.6.0</a> - 2026-05-23</h2>
 <h4>Miscellaneous Chores</h4>
 <ul>
 <li>(<strong>version</strong>) v0.6.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/40ab5036490b83944e0a911dfe1f9b34a8f659fd">40ab503</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.5.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/0628e735fc0801862dfb54335bf9297b01bef512..v0.5.0">v0.5.0</a> - 2026-05-22</h2>
 <h4>Features</h4>
 <ul>
@@ -115,7 +128,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.5.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/8608cb7046ace8da22581ff4e11b7adf526bb737">8608cb7</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.4.2">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/330fa1e4dfb52e70d4381edb25ada6ac623d16ae..v0.4.2">v0.4.2</a> - 2026-05-22</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -130,7 +144,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.4.2 - (<a href="https://github.com/tonioriol/adrenaline/commit/ec6107aad216533196db10fa2548ac9666d69497">ec6107a</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.4.1">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/6df7217fe56d72dd34bab678695b8b18bb26f862..v0.4.1">v0.4.1</a> - 2026-05-22</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -140,7 +155,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.4.1 - (<a href="https://github.com/tonioriol/adrenaline/commit/0b75fabbbddca3e3fbc11a4c1a7e6d9d33cfd5d1">0b75fab</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.4.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/6ce2abdacbd2de31ef7d69bb21be7da66b346cdd..v0.4.0">v0.4.0</a> - 2026-05-22</h2>
 <h4>Features</h4>
 <ul>
@@ -155,7 +171,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.4.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/8fcb5b5707f29b7dbdea45bdc2b471c0b0fac856">8fcb5b5</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.3.1">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/v0.3.0-migration..v0.3.1">v0.3.1</a> - 2026-05-03</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -171,9 +188,11 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>update context with migration completion - (<a href="https://github.com/tonioriol/adrenaline/commit/3a37fcdfa964c77e588e291ef37cc9c33d707f77">3a37fcd</a>) - Toni Oriol</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.3.0-migration">
 <p>One-time migration package for existing Insomnia users. Installs Adrenaline, removes old Insomnia, and auto-launches. Future updates come from the Adrenaline feed automatically.</p>
-<hr>
+</section>
+<section data-sparkle-version="0.3.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/6d78905cbdb75f1ecaeb1c660a0385745949f51a..v0.3.0">v0.3.0</a> - 2026-05-03</h2>
 <h4>Features</h4>
 <ul>
@@ -188,7 +207,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.3.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/82a54101fa2169403d7ee1c0bda7a78bd7fb913b">82a5410</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.2.2">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/e7dd1413e184f6fd064c8cc059d521a5665cfb26..v0.2.2">v0.2.2</a> - 2026-05-02</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -211,7 +231,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <li>(<strong>version</strong>) v0.2.2 - (<a href="https://github.com/tonioriol/adrenaline/commit/fb8fdcacaccf2dbe6d90e5d5e6709f8e543a300b">fb8fdca</a>) - github-actions[bot]</li>
 <li>rename vscode launch targets to adrenaline - (<a href="https://github.com/tonioriol/adrenaline/commit/f004b23a833b468b2962611781ee1f6da70fec56">f004b23</a>) - Toni Oriol</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.2.1">
 <h2><a href="https://github.com/tonioriol/insomnia/compare/00b48da9ad9b79be1ca4f38d42fc72d6fad314dd..v0.2.1">v0.2.1</a> - 2026-04-28</h2>
 <h4>Bug Fixes</h4>
 <ul>
@@ -221,7 +242,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.2.1 - (<a href="https://github.com/tonioriol/insomnia/commit/e6e415060300847dc5f1c9ac1e7d8a1e60e334b2">e6e4150</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.2.0">
 <h2><a href="https://github.com/tonioriol/insomnia/compare/b98ad37ae6699fbae4c3713b1fbaaf8232eebd2a..v0.2.0">v0.2.0</a> - 2026-04-28</h2>
 <h4>Features</h4>
 <ul>
@@ -231,7 +253,8 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <ul>
 <li>(<strong>version</strong>) v0.2.0 - (<a href="https://github.com/tonioriol/insomnia/commit/e863769cfa99f9c213947f29c2e426bd89678885">e863769</a>) - github-actions[bot]</li>
 </ul>
-<hr>
+</section>
+<section data-sparkle-version="0.1.0">
 <h2><a href="https://github.com/tonioriol/insomnia/compare/bf0b9245081037a1c38e0ec5b3d95dc19d9e7fbb..v0.1.0">v0.1.0</a> - 2026-04-28</h2>
 <h4>Refinements</h4>
 <ul>
@@ -421,5 +444,6 @@ hr { border: none; border-top: 1px solid rgba(128,128,128,0.3); margin: 1.5em 0;
 <li>ignore local signing secrets - (<a href="https://github.com/tonioriol/insomnia/commit/49b942425bfe1cb37c4317c6592c9c98e21ed4f5">49b9424</a>) - Toni Oriol</li>
 <li>wire macos lock policy reader - (<a href="https://github.com/tonioriol/insomnia/commit/8ab1dfcd26a472faeb1d204e56a737f7c1802cbc">8ab1dfc</a>) - Toni Oriol</li>
 </ul>
+</section>
 </body>
 </html>
