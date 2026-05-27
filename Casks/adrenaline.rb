@@ -1,6 +1,6 @@
 cask "adrenaline" do
-  version "0.4.0"
-  sha256 "fa2942610aef454585ad8cbbb228350518c7e4e5a0cd9baf2f5d3788f2ffd244"
+  version "0.5.0"
+  sha256 "f27fddedf37a393bb89056131f9e5b59f30116ed29418fc992324cbb74e5f1f3"
 
   url "https://github.com/tonioriol/adrenaline/releases/download/v#{version}/Adrenaline-v#{version}.zip"
   name "Adrenaline"
@@ -13,7 +13,7 @@ cask "adrenaline" do
   end
 
   auto_updates true
-  depends_on macos: ">= :ventura"
+  depends_on macos: ">= :high_sierra"
 
   app "Adrenaline.app"
 

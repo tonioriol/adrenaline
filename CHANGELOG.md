@@ -2,7 +2,34 @@
 
 All notable changes to Insomnia are documented here. The format follows [Conventional Changelog](https://www.conventionalcommits.org/) and Insomnia adheres to [Semantic Versioning](https://semver.org/).
 
+## [v0.5.0](https://github.com/tonioriol/adrenaline/compare/078a5bfcd2842151500b369fa44112833a779e7b..v0.5.0) - 2026-05-27
+#### Features
+- integrate prevent disk sleep into UI and documentation - ([7987adc](https://github.com/tonioriol/adrenaline/commit/7987adc5a8f109bd827c0b66c7804d2ab93e033a)) - Toni Oriol
+- add prevent disk sleep preference and coordinator wiring - ([ca12bc3](https://github.com/tonioriol/adrenaline/commit/ca12bc39204589ad7bef7f11b17186d394b94823)) - Toni Oriol
+- add disk sleep prevention assertion and detector - ([e669b05](https://github.com/tonioriol/adrenaline/commit/e669b0523167ed0d964ce8ee5cd95bfa6976c02c)) - Toni Oriol
+#### Bug Fixes
+- skip card readers in disk type detection (false positive on SDXC reader) - ([b14288f](https://github.com/tonioriol/adrenaline/commit/b14288f51cbea8fd7c025d5419b68d6ce674f1c3)) - Toni Oriol
+#### Tests
+- update all AdrenalineCore tests for callback-based APIs - ([0eddafc](https://github.com/tonioriol/adrenaline/commit/0eddafc566892d11d1da5fb8389b14f0e11690e4)) - Toni Oriol
+#### Refactoring
+- replace setConnectionCodeSigningRequirement with SecCode validation - ([101fcdd](https://github.com/tonioriol/adrenaline/commit/101fcddf6b5199a78ed630f938582b4f6c9abbf6)) - Toni Oriol
+- replace SMAppService with LaunchAgent for login item - ([c6ef337](https://github.com/tonioriol/adrenaline/commit/c6ef33767518f0562ab1dda24741b94280525ad6)) - Toni Oriol
+- remove @MainActor from LidCloseLockResponder - ([4607183](https://github.com/tonioriol/adrenaline/commit/4607183f1ef41b808132b082016ad3a6860b7bbc)) - Toni Oriol
+- replace Combine with NotificationCenter in LidEventSoundController - ([d7b3aab](https://github.com/tonioriol/adrenaline/commit/d7b3aab4502fccac38316bf273d158272b179954)) - Toni Oriol
+- replace kIOMainPortDefault and Task with GCD in LidStateMonitor - ([90abdd5](https://github.com/tonioriol/adrenaline/commit/90abdd5484258477efe68827b24ac845d8b084c6)) - Toni Oriol
+- convert AppCoordinator from async to callbacks - ([6a2e004](https://github.com/tonioriol/adrenaline/commit/6a2e00457f86defbf24b346146ba85d755f90e4d)) - Toni Oriol
+- convert LidCloseController from async to callbacks - ([72abd96](https://github.com/tonioriol/adrenaline/commit/72abd960fbdb7c5168222a7fb26d51ecf2ef85a6)) - Toni Oriol
+- convert PrivilegedHelperClient from async to callbacks - ([5746971](https://github.com/tonioriol/adrenaline/commit/5746971e44c20106f208bfe3953750b80bb0fe38)) - Toni Oriol
+- remove async/Combine/Sendable from core protocols - ([0a41241](https://github.com/tonioriol/adrenaline/commit/0a412413d7f26ab61da9d68fbc164fbec1307330)) - Toni Oriol
+- replace Combine in PreferencesStore with NotificationCenter - ([cec2d5f](https://github.com/tonioriol/adrenaline/commit/cec2d5f1ea5ce575403cd09d7b22b17a36550923)) - Toni Oriol
+- replace Combine in AppState with NotificationCenter - ([476561a](https://github.com/tonioriol/adrenaline/commit/476561a46a444a64256ad89bc48d1a933edab1f7)) - Toni Oriol
+#### Miscellaneous Chores
+- (**version**) v0.5.0 - ([0c03d97](https://github.com/tonioriol/adrenaline/commit/0c03d9726e972ba9b6480ccaa733f20f4a8586fe)) - Toni Oriol
+- remove remaining @MainActor and Sendable from UI layer - ([98a0753](https://github.com/tonioriol/adrenaline/commit/98a075320cc4612b19952d0d28d7f68ee07599b5)) - Toni Oriol
+- lower deployment target to macOS 10.13 - ([078a5bf](https://github.com/tonioriol/adrenaline/commit/078a5bfcd2842151500b369fa44112833a779e7b)) - Toni Oriol
+
 - - -
+
 ## [v0.4.0](https://github.com/tonioriol/adrenaline/compare/6ce2abdacbd2de31ef7d69bb21be7da66b346cdd..v0.4.0) - 2026-05-22
 #### Features
 - force max volume for lid event sounds via CoreAudio - ([53fcbe5](https://github.com/tonioriol/adrenaline/commit/53fcbe5cb1b5ffabb5c84f73ee8086e82f26e683)) - Toni Oriol
