@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adrenaline 0.5.0</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  padding: 1em;
+  color-scheme: light dark;
+  color: -apple-system-label;
+  background: transparent;
+}
+a { color: #0066cc; }
+@media (prefers-color-scheme: dark) {
+  a { color: #5ac8fa; }
+}
+h2 { font-size: 1.3em; margin-top: 1.2em; }
+h4 { font-size: 1em; margin-bottom: 0.3em; }
+ul { padding-left: 1.5em; }
+li { margin-bottom: 0.3em; }
+/* Sparkle injects 'sparkle-installed-version' class on the <section>
+   whose data-sparkle-version matches the installed app version.
+   Hide that section and all subsequent (older) sibling sections. */
+.sparkle-installed-version,
+.sparkle-installed-version ~ section { display: none; }
+section + section { border-top: 1px solid rgba(128,128,128,0.3);
+                    padding-top: 1.5em; margin-top: 1.5em; }
+section:first-child h2:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+<h2><a href="https://github.com/tonioriol/adrenaline/compare/078a5bfcd2842151500b369fa44112833a779e7b..v0.5.0">v0.5.0</a> - 2026-05-27</h2>
+<h4>Features</h4>
+<ul>
+<li>integrate prevent disk sleep into UI and documentation - (<a href="https://github.com/tonioriol/adrenaline/commit/7987adc5a8f109bd827c0b66c7804d2ab93e033a">7987adc</a>) - Toni Oriol</li>
+<li>add prevent disk sleep preference and coordinator wiring - (<a href="https://github.com/tonioriol/adrenaline/commit/ca12bc39204589ad7bef7f11b17186d394b94823">ca12bc3</a>) - Toni Oriol</li>
+<li>add disk sleep prevention assertion and detector - (<a href="https://github.com/tonioriol/adrenaline/commit/e669b0523167ed0d964ce8ee5cd95bfa6976c02c">e669b05</a>) - Toni Oriol</li>
+</ul>
+<h4>Bug Fixes</h4>
+<ul>
+<li>skip card readers in disk type detection (false positive on SDXC reader) - (<a href="https://github.com/tonioriol/adrenaline/commit/b14288f51cbea8fd7c025d5419b68d6ce674f1c3">b14288f</a>) - Toni Oriol</li>
+</ul>
+<h4>Tests</h4>
+<ul>
+<li>update all AdrenalineCore tests for callback-based APIs - (<a href="https://github.com/tonioriol/adrenaline/commit/0eddafc566892d11d1da5fb8389b14f0e11690e4">0eddafc</a>) - Toni Oriol</li>
+</ul>
+<h4>Refactoring</h4>
+<ul>
+<li>replace setConnectionCodeSigningRequirement with SecCode validation - (<a href="https://github.com/tonioriol/adrenaline/commit/101fcddf6b5199a78ed630f938582b4f6c9abbf6">101fcdd</a>) - Toni Oriol</li>
+<li>replace SMAppService with LaunchAgent for login item - (<a href="https://github.com/tonioriol/adrenaline/commit/c6ef33767518f0562ab1dda24741b94280525ad6">c6ef337</a>) - Toni Oriol</li>
+<li>remove <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mainactor/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mainactor">@mainactor</a> from LidCloseLockResponder - (<a href="https://github.com/tonioriol/adrenaline/commit/4607183f1ef41b808132b082016ad3a6860b7bbc">4607183</a>) - Toni Oriol</li>
+<li>replace Combine with NotificationCenter in LidEventSoundController - (<a href="https://github.com/tonioriol/adrenaline/commit/d7b3aab4502fccac38316bf273d158272b179954">d7b3aab</a>) - Toni Oriol</li>
+<li>replace kIOMainPortDefault and Task with GCD in LidStateMonitor - (<a href="https://github.com/tonioriol/adrenaline/commit/90abdd5484258477efe68827b24ac845d8b084c6">90abdd5</a>) - Toni Oriol</li>
+<li>convert AppCoordinator from async to callbacks - (<a href="https://github.com/tonioriol/adrenaline/commit/6a2e00457f86defbf24b346146ba85d755f90e4d">6a2e004</a>) - Toni Oriol</li>
+<li>convert LidCloseController from async to callbacks - (<a href="https://github.com/tonioriol/adrenaline/commit/72abd960fbdb7c5168222a7fb26d51ecf2ef85a6">72abd96</a>) - Toni Oriol</li>
+<li>convert PrivilegedHelperClient from async to callbacks - (<a href="https://github.com/tonioriol/adrenaline/commit/5746971e44c20106f208bfe3953750b80bb0fe38">5746971</a>) - Toni Oriol</li>
+<li>remove async/Combine/Sendable from core protocols - (<a href="https://github.com/tonioriol/adrenaline/commit/0a412413d7f26ab61da9d68fbc164fbec1307330">0a41241</a>) - Toni Oriol</li>
+<li>replace Combine in PreferencesStore with NotificationCenter - (<a href="https://github.com/tonioriol/adrenaline/commit/cec2d5f1ea5ce575403cd09d7b22b17a36550923">cec2d5f</a>) - Toni Oriol</li>
+<li>replace Combine in AppState with NotificationCenter - (<a href="https://github.com/tonioriol/adrenaline/commit/476561a46a444a64256ad89bc48d1a933edab1f7">476561a</a>) - Toni Oriol</li>
+</ul>
+<h4>Miscellaneous Chores</h4>
+<ul>
+<li>(<strong>version</strong>) v0.5.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/f769aac6d7013af62d95ebe30fa66c300a42d26f">f769aac</a>) - github-actions[bot]</li>
+<li>(<strong>version</strong>) v0.5.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/fc24117b05395a620f1bbcacb2c8b7807edd4393">fc24117</a>) - Toni Oriol</li>
+<li>remove remaining <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mainactor/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mainactor">@mainactor</a> and Sendable from UI layer - (<a href="https://github.com/tonioriol/adrenaline/commit/98a075320cc4612b19952d0d28d7f68ee07599b5">98a0753</a>) - Toni Oriol</li>
+<li>lower deployment target to macOS 10.13 - (<a href="https://github.com/tonioriol/adrenaline/commit/078a5bfcd2842151500b369fa44112833a779e7b">078a5bf</a>) - Toni Oriol</li>
+</ul>
+</body>
+</html>
