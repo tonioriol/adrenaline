@@ -29,6 +29,12 @@ All notable changes to Insomnia are documented here. The format follows [Convent
 - lower deployment target to macOS 10.13 - ([078a5bf](https://github.com/tonioriol/adrenaline/commit/078a5bfcd2842151500b369fa44112833a779e7b)) - Toni Oriol
 
 - - -
+## [v0.6.0](https://github.com/tonioriol/adrenaline/compare/db659a8b8f71aa2289f30e27c2a42e6a92694d59..v0.6.0) - 2026-08-14
+#### Features
+- make lid sound volume override configurable - ([db659a8](https://github.com/tonioriol/adrenaline/commit/db659a8b8f71aa2289f30e27c2a42e6a92694d59)) - Toni Oriol
+
+- - -
+
 
 ## [v0.4.0](https://github.com/tonioriol/adrenaline/compare/6ce2abdacbd2de31ef7d69bb21be7da66b346cdd..v0.4.0) - 2026-05-22
 #### Features
