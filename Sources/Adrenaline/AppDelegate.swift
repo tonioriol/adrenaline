@@ -22,7 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             preferences: preferences
         )
         let lidStateMonitor = LidStateMonitor()
-        let soundPlayer = SystemSoundPlayer()
+        let soundPlayer = SystemSoundPlayer(preferences: preferences)
         let screenLocker = LoginFrameworkScreenLocker()
         let lockPolicyReader = MacOSLockPolicyReader()
 

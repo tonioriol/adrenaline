@@ -7,6 +7,7 @@ final class MenuBarController: NSObject {
         case preventDiskSleep
         case preventLidCloseSleep
         case playLidEventSounds
+        case overrideSystemVolumeForLidEventSounds
         case launchAtLogin
 
         init?(_ rowID: PreferenceMenuRowID) {
@@ -19,6 +20,8 @@ final class MenuBarController: NSObject {
                 self = .preventLidCloseSleep
             case .playLidEventSounds:
                 self = .playLidEventSounds
+            case .overrideSystemVolumeForLidEventSounds:
+                self = .overrideSystemVolumeForLidEventSounds
             }
         }
     }
@@ -94,6 +97,11 @@ final class MenuBarController: NSObject {
         )
         observers.append(
             center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
+                self?.refreshVisibleRows()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .preferencesOverrideSystemVolumeForLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.refreshVisibleRows()
             }
         )
@@ -328,7 +336,9 @@ final class MenuBarController: NSObject {
         case .preventLidCloseSleep:
             togglePreventLidCloseSleep()
         case .playLidEventSounds:
-            togglePlayLidEventSounds()
+            toggleLidEventSoundPreference(\.playLidEventSounds)
+        case .overrideSystemVolumeForLidEventSounds:
+            toggleLidEventSoundPreference(\.overrideSystemVolumeForLidEventSounds)
         }
     }
 
@@ -406,12 +416,12 @@ final class MenuBarController: NSObject {
         return alert.runModal() == .alertFirstButtonReturn
     }
 
-    private func togglePlayLidEventSounds() {
+    private func toggleLidEventSoundPreference(_ keyPath: ReferenceWritableKeyPath<PreferencesStore, Bool>) {
         guard preferences.preventLidCloseSleep else {
             refreshVisibleRows()
             return
         }
-        preferences.playLidEventSounds.toggle()
+        preferences[keyPath: keyPath].toggle()
         refreshVisibleRows()
     }
 

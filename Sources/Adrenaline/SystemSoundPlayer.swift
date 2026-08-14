@@ -3,21 +3,36 @@ import AdrenalineCore
 import AudioToolbox
 
 final class SystemSoundPlayer: LidSoundPlaying {
+    private let preferences: PreferencesProviding
+
+    init(preferences: PreferencesProviding) {
+        self.preferences = preferences
+    }
+
     func play(named soundName: String) {
         guard let sound = NSSound(named: NSSound.Name(soundName)) else { return }
 
-        let savedVolume = SystemVolume.getVolume()
-        let savedMute = SystemVolume.getMute()
+        let savedVolume: Float32?
+        let savedMute: Bool?
 
-        SystemVolume.setMute(false)
-        SystemVolume.setVolume(1.0)
+        if preferences.overrideSystemVolumeForLidEventSounds {
+            savedVolume = SystemVolume.getVolume()
+            savedMute = SystemVolume.getMute()
+            SystemVolume.setMute(false)
+            SystemVolume.setVolume(1.0)
+            sound.volume = 1.0
+        } else {
+            savedVolume = nil
+            savedMute = nil
+        }
 
-        sound.volume = 1.0
         sound.play()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + sound.duration + 0.05) {
-            SystemVolume.setVolume(savedVolume)
-            SystemVolume.setMute(savedMute)
+        if let savedVolume, let savedMute {
+            DispatchQueue.main.asyncAfter(deadline: .now() + sound.duration + 0.05) {
+                SystemVolume.setVolume(savedVolume)
+                SystemVolume.setMute(savedMute)
+            }
         }
     }
 }

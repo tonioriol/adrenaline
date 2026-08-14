@@ -43,6 +43,7 @@ final class PreferencesStoreTests: XCTestCase {
         XCTAssertFalse(store.preventLidCloseSleep)
         XCTAssertTrue(store.preventDiskSleep)
         XCTAssertTrue(store.playLidEventSounds)
+        XCTAssertTrue(store.overrideSystemVolumeForLidEventSounds)
         XCTAssertFalse(store.lidClosePreventionConfirmed)
     }
 
@@ -54,6 +55,7 @@ final class PreferencesStoreTests: XCTestCase {
         store.preventLidCloseSleep = true
         store.preventDiskSleep = false
         store.playLidEventSounds = false
+        store.overrideSystemVolumeForLidEventSounds = false
         store.lidClosePreventionConfirmed = true
 
         let reloaded = PreferencesStore(defaults: defaults)
@@ -61,6 +63,7 @@ final class PreferencesStoreTests: XCTestCase {
         XCTAssertTrue(reloaded.preventLidCloseSleep)
         XCTAssertFalse(reloaded.preventDiskSleep)
         XCTAssertFalse(reloaded.playLidEventSounds)
+        XCTAssertFalse(reloaded.overrideSystemVolumeForLidEventSounds)
         XCTAssertTrue(reloaded.lidClosePreventionConfirmed)
     }
 
@@ -88,12 +91,14 @@ final class PreferencesStoreTests: XCTestCase {
         store.preventLidCloseSleep = true
         store.preventDiskSleep = false
         store.playLidEventSounds = false
+        store.overrideSystemVolumeForLidEventSounds = false
 
         let snapshot = store.snapshot()
         XCTAssertFalse(snapshot.preventDisplaySleep)
         XCTAssertTrue(snapshot.preventLidCloseSleep)
         XCTAssertFalse(snapshot.preventDiskSleep)
         XCTAssertFalse(snapshot.playLidEventSounds)
+        XCTAssertFalse(snapshot.overrideSystemVolumeForLidEventSounds)
     }
 
     func testChangingEachPreferencePostsItsMatchingNotification() {
@@ -102,19 +107,22 @@ final class PreferencesStoreTests: XCTestCase {
         let displayDidChange = Notification.Name("Adrenaline.preferencesPreventDisplaySleepDidChange")
         let lidDidChange = Notification.Name("Adrenaline.preferencesPreventLidCloseSleepDidChange")
         let soundDidChange = Notification.Name("Adrenaline.preferencesPlayLidEventSoundsDidChange")
+        let volumeDidChange = Notification.Name("Adrenaline.preferencesOverrideSystemVolumeForLidEventSoundsDidChange")
 
         let counts = observeNotifications(
-            named: [displayDidChange, lidDidChange, soundDidChange],
+            named: [displayDidChange, lidDidChange, soundDidChange, volumeDidChange],
             from: store
         ) {
             store.preventDisplaySleep = false
             store.preventLidCloseSleep = true
             store.playLidEventSounds = false
+            store.overrideSystemVolumeForLidEventSounds = false
         }
 
         XCTAssertEqual(counts[displayDidChange], 1)
         XCTAssertEqual(counts[lidDidChange], 1)
         XCTAssertEqual(counts[soundDidChange], 1)
+        XCTAssertEqual(counts[volumeDidChange], 1)
     }
 
     func testSettingSamePreventLidCloseSleepValueDoesNotPostNotification() {

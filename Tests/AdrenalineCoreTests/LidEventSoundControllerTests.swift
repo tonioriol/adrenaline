@@ -38,6 +38,7 @@ private final class FakePreferencesStore: PreferencesProviding {
     var preventLidCloseSleep: Bool = false
     var preventDiskSleep: Bool = true
     var playLidEventSounds: Bool = true
+    var overrideSystemVolumeForLidEventSounds: Bool = true
     var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
 
@@ -46,7 +47,8 @@ private final class FakePreferencesStore: PreferencesProviding {
             preventDisplaySleep: preventDisplaySleep,
             preventLidCloseSleep: preventLidCloseSleep,
             preventDiskSleep: preventDiskSleep,
-            playLidEventSounds: playLidEventSounds
+            playLidEventSounds: playLidEventSounds,
+            overrideSystemVolumeForLidEventSounds: overrideSystemVolumeForLidEventSounds
         )
     }
 }

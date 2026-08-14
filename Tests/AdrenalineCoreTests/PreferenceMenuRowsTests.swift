@@ -6,7 +6,8 @@ final class PreferenceMenuRowsTests: XCTestCase {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: false,
             preventLidCloseSleep: true,
-            playLidEventSounds: false
+            playLidEventSounds: false,
+            overrideSystemVolumeForLidEventSounds: false
         )
 
         let rows = PreferenceMenuRows.rows(for: snapshot)
@@ -15,6 +16,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
             .preventDisplaySleep,
             .preventLidCloseSleep,
             .playLidEventSounds,
+            .overrideSystemVolumeForLidEventSounds,
         ])
 
         let row = rows.first { $0.id == .playLidEventSounds }
@@ -22,13 +24,20 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(row?.isOn, false)
         XCTAssertEqual(row?.isEnabled, true)
         XCTAssertEqual(row?.isChild, true)
+
+        let volumeRow = rows.first { $0.id == .overrideSystemVolumeForLidEventSounds }
+        XCTAssertEqual(volumeRow?.title, "Override system volume for lid event sounds")
+        XCTAssertEqual(volumeRow?.isOn, false)
+        XCTAssertEqual(volumeRow?.isEnabled, true)
+        XCTAssertEqual(volumeRow?.isChild, true)
     }
 
     func testPlayLidEventSoundsRowIsDisabledWhenLidClosePreventionIsOff() {
         let snapshot = PreferencesSnapshot(
             preventDisplaySleep: true,
             preventLidCloseSleep: false,
-            playLidEventSounds: true
+            playLidEventSounds: true,
+            overrideSystemVolumeForLidEventSounds: true
         )
 
         let row = PreferenceMenuRows.rows(for: snapshot)
@@ -37,6 +46,12 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(row?.isOn, true)
         XCTAssertEqual(row?.isEnabled, false)
         XCTAssertEqual(row?.isChild, true)
+
+        let volumeRow = PreferenceMenuRows.rows(for: snapshot)
+            .first { $0.id == .overrideSystemVolumeForLidEventSounds }
+        XCTAssertEqual(volumeRow?.isOn, true)
+        XCTAssertEqual(volumeRow?.isEnabled, false)
+        XCTAssertEqual(volumeRow?.isChild, true)
     }
 
     func testDiskSleepRowAppearsWhenShowDiskSleepIsTrue() {
@@ -44,7 +59,8 @@ final class PreferenceMenuRowsTests: XCTestCase {
             preventDisplaySleep: true,
             preventLidCloseSleep: false,
             preventDiskSleep: true,
-            playLidEventSounds: true
+            playLidEventSounds: true,
+            overrideSystemVolumeForLidEventSounds: true
         )
 
         let rows = PreferenceMenuRows.rows(for: snapshot, showDiskSleep: true)
@@ -54,6 +70,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
             .preventDiskSleep,
             .preventLidCloseSleep,
             .playLidEventSounds,
+            .overrideSystemVolumeForLidEventSounds,
         ])
 
         let row = rows.first { $0.id == .preventDiskSleep }
@@ -68,7 +85,8 @@ final class PreferenceMenuRowsTests: XCTestCase {
             preventDisplaySleep: true,
             preventLidCloseSleep: false,
             preventDiskSleep: true,
-            playLidEventSounds: true
+            playLidEventSounds: true,
+            overrideSystemVolumeForLidEventSounds: true
         )
 
         let rows = PreferenceMenuRows.rows(for: snapshot)
@@ -77,6 +95,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
             .preventDisplaySleep,
             .preventLidCloseSleep,
             .playLidEventSounds,
+            .overrideSystemVolumeForLidEventSounds,
         ])
     }
 }
