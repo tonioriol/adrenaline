@@ -19,6 +19,9 @@ h2 { font-size: 1.3em; margin-top: 1.2em; }
 h4 { font-size: 1em; margin-bottom: 0.3em; }
 ul { padding-left: 1.5em; }
 li { margin-bottom: 0.3em; }
+/* Sparkle injects 'sparkle-installed-version' class on the <section>
+   whose data-sparkle-version matches the installed app version.
+   Hide that section and all subsequent (older) sibling sections. */
 .sparkle-installed-version,
 .sparkle-installed-version ~ section { display: none; }
 section + section { border-top: 1px solid rgba(128,128,128,0.3);
@@ -27,6 +30,17 @@ section:first-child h2:first-child { margin-top: 0; }
 </style>
 </head>
 <body>
+<section data-sparkle-version="0.6.0">
+<h2><a href="https://github.com/tonioriol/adrenaline/compare/db659a8b8f71aa2289f30e27c2a42e6a92694d59..v0.6.0">v0.6.0</a> - 2026-08-14</h2>
+<h4>Features</h4>
+<ul>
+<li>make lid sound volume override configurable - (<a href="https://github.com/tonioriol/adrenaline/commit/db659a8b8f71aa2289f30e27c2a42e6a92694d59">db659a8</a>) - Toni Oriol</li>
+</ul>
+<h4>Miscellaneous Chores</h4>
+<ul>
+<li>(<strong>version</strong>) v0.6.0 - (<a href="https://github.com/tonioriol/adrenaline/commit/bea6a23aad48975d529fda23ace4bc4612ec90f3">bea6a23</a>) - github-actions[bot]</li>
+</ul>
+</section>
 <section data-sparkle-version="0.5.0">
 <h2><a href="https://github.com/tonioriol/adrenaline/compare/078a5bfcd2842151500b369fa44112833a779e7b..v0.5.0">v0.5.0</a> - 2026-05-27</h2>
 <h4>Features</h4>
