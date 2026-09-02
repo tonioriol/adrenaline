@@ -1,0 +1,16 @@
+{
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#147B1E",
+    "titleBar.inactiveBackground": "#147B1E",
+    "titleBar.activeForeground": "#FFFFFF",
+    "titleBar.inactiveForeground": "#E5E7EB",
+    "activityBar.background": "#147B1E",
+    "activityBar.foreground": "#FFFFFF",
+    "activityBar.inactiveForeground": "#E5E7EB",
+    "statusBar.background": "#147B1E",
+    "statusBar.foreground": "#FFFFFF",
+    "statusBar.noFolderBackground": "#147B1E",
+    "tab.activeBorderTop": "#ABEDB1",
+    "panelTitle.activeBorder": "#ABEDB1"
+  }
+}
