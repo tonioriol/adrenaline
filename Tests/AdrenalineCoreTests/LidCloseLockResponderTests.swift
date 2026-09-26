@@ -65,6 +65,11 @@ private final class FakeDisplayAwakeController: AwakeControlling {
     func disable() {}
 }
 
+private final class FakeDisplaySleeper: DisplaySleeping {
+    private(set) var sleepCount = 0
+    func sleepDisplayNow() { sleepCount += 1 }
+}
+
 private struct TestError: Error {}
 
 final class LidCloseLockResponderTests: XCTestCase {
@@ -244,6 +249,26 @@ final class LidCloseLockResponderTests: XCTestCase {
         XCTAssertEqual(forwardedStates, [.closed])
         XCTAssertEqual(policyReader.readCallCount, 1)
         XCTAssertEqual(locker.lockCallCount, 1)
+        _ = responder
+    }
+
+    func testLidCloseSleepsDisplayAndLidOpenDoesNot() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let sleeper = FakeDisplaySleeper()
+        let responder = LidCloseLockResponder(
+            state: state,
+            monitor: monitor,
+            screenLocker: FakeScreenLocker(),
+            preferences: FakePreferencesStore(),
+            policyReader: FakeLockPolicyReader(),
+            displaySleeper: sleeper
+        )
+
+        monitor.emit(.closed)
+        monitor.emit(.open)
+
+        XCTAssertEqual(sleeper.sleepCount, 1)
         _ = responder
     }
 

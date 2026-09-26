@@ -14,6 +14,7 @@ public final class LidCloseLockResponder {
     private let policyReader: MacOSLockPolicyReading
     private let awakeController: AwakeControlling?
     private let isStayingUnlocked: () -> Bool
+    private let displaySleeper: DisplaySleeping?
 
     public init(
         state: AppState,
@@ -22,7 +23,8 @@ public final class LidCloseLockResponder {
         preferences: PreferencesProviding,
         policyReader: MacOSLockPolicyReading,
         awakeController: AwakeControlling? = nil,
-        isStayingUnlocked: @escaping () -> Bool = { false }
+        isStayingUnlocked: @escaping () -> Bool = { false },
+        displaySleeper: DisplaySleeping? = nil
     ) {
         self.state = state
         self.monitor = monitor
@@ -31,6 +33,7 @@ public final class LidCloseLockResponder {
         self.policyReader = policyReader
         self.awakeController = awakeController
         self.isStayingUnlocked = isStayingUnlocked
+        self.displaySleeper = displaySleeper
 
         let existing = monitor.onLidStateChange
         monitor.onLidStateChange = { [weak self] lidState in
@@ -46,6 +49,8 @@ public final class LidCloseLockResponder {
         case .closed:
             setDisplaySleepPrevented(false)
             lockOnLidCloseIfNeeded()
+            // With system sleep disabled, closing the lid does not turn the panel off by itself.
+            displaySleeper?.sleepDisplayNow()
         case .open:
             setDisplaySleepPrevented(preferences.preventDisplaySleep)
         }
@@ -79,5 +84,21 @@ public final class LidCloseLockResponder {
                 error.localizedDescription
             )
         }
+    }
+}
+
+public protocol DisplaySleeping: AnyObject {
+    func sleepDisplayNow()
+}
+
+/// Turns the display off immediately via `pmset displaysleepnow` (no root needed).
+public final class PmsetDisplaySleeper: DisplaySleeping {
+    public init() {}
+
+    public func sleepDisplayNow() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
+        process.arguments = ["displaysleepnow"]
+        try? process.run()
     }
 }

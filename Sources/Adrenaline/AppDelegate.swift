@@ -49,7 +49,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             preferences: preferences,
             policyReader: lockPolicyReader,
             awakeController: awake,
-            isStayingUnlocked: { [weak stayUnlockedController] in stayUnlockedController?.isEngaged ?? false }
+            isStayingUnlocked: { [weak stayUnlockedController] in stayUnlockedController?.isEngaged ?? false },
+            displaySleeper: PmsetDisplaySleeper()
         )
 
         let updater = SparkleUpdaterController()
