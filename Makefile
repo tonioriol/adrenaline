@@ -8,8 +8,18 @@ MACOS_DIR := $(CONTENTS_DIR)/MacOS
 FRAMEWORKS_DIR := $(CONTENTS_DIR)/Frameworks
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
-SWIFT_BIN_DIR := .build/$(CONFIGURATION)
-SPARKLE_FRAMEWORK := $(SWIFT_BIN_DIR)/Sparkle.framework
+# Universal build: each architecture is built separately and merged with lipo.
+# The deployment target is forced via -Xswiftc because newer SDKs silently
+# raise the manifest's .macOS(.v10_13) to their own minimum (e.g. 12.0).
+ARM64_TRIPLE := arm64-apple-macosx11.0
+X86_64_TRIPLE := x86_64-apple-macosx10.13
+ARM64_BIN_DIR := .build/arm64-apple-macosx/$(CONFIGURATION)
+X86_64_BIN_DIR := .build/x86_64-apple-macosx/$(CONFIGURATION)
+SWIFT_BIN_DIR := $(BUILD_DIR)/universal-$(CONFIGURATION)
+SPARKLE_FRAMEWORK := $(ARM64_BIN_DIR)/Sparkle.framework
+# macOS < 10.14.4 has no Swift runtime in the OS; embed the toolchain's back-deployment copy.
+SWIFT_BACKDEPLOY_LIBS := $(shell dirname "$$(xcrun --find swift)")/../lib/swift-5.0/macosx
+INSTALLED_FRAMEWORKS_DIR := /Applications/Adrenaline.app/Contents/Frameworks
 TEAM_ID ?= B65K228Z97
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/B65K228Z97/ {print $$2; exit}')
 INSTALL_APP_DIR ?= /Applications/Adrenaline.app
@@ -21,7 +31,12 @@ test:
 	swift test
 
 build:
-	swift build $(SWIFT_BUILD_FLAGS)
+	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(ARM64_TRIPLE) -Xswiftc -target -Xswiftc $(ARM64_TRIPLE)
+	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(X86_64_TRIPLE) -Xswiftc -target -Xswiftc $(X86_64_TRIPLE)
+	mkdir -p $(SWIFT_BIN_DIR)
+	for product in Adrenaline AdrenalineHelper; do \
+		lipo -create $(ARM64_BIN_DIR)/$$product $(X86_64_BIN_DIR)/$$product -output $(SWIFT_BIN_DIR)/$$product; \
+	done
 
 generate-app-icon:
 	swift Scripts/generate-app-icon.swift Resources/Adrenaline/Adrenaline.icns
@@ -34,7 +49,15 @@ app: build
 	cp $(SWIFT_BIN_DIR)/Adrenaline $(MACOS_DIR)/Adrenaline
 	install_name_tool -add_rpath @executable_path/../Frameworks $(MACOS_DIR)/Adrenaline
 	cp $(SWIFT_BIN_DIR)/AdrenalineHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
+	# The blessed helper runs from /Library/PrivilegedHelperTools, so it finds the
+	# embedded Swift runtime through the installed app's Frameworks directory.
+	install_name_tool -add_rpath $(INSTALLED_FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
 	cp -R $(SPARKLE_FRAMEWORK) $(FRAMEWORKS_DIR)/Sparkle.framework
+	xcrun swift-stdlib-tool --copy --platform macosx \
+		--source-libraries "$(SWIFT_BACKDEPLOY_LIBS)" \
+		--scan-executable $(MACOS_DIR)/Adrenaline \
+		--scan-executable $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper \
+		--destination $(FRAMEWORKS_DIR)
 	$(MAKE) sign
 
 sign:
@@ -49,6 +72,9 @@ sign:
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Autoupdate"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Updater.app"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework"
+	for dylib in "$(FRAMEWORKS_DIR)/"libswift*.dylib; do \
+		[ -f "$$dylib" ] && codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$$dylib"; \
+	done
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(APP_DIR)"
 
