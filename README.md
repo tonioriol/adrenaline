@@ -12,6 +12,41 @@ Keep your Mac awake from the menu bar — even with the lid closed.
 | Play lid event sounds | ON | Sound on lid open/close |
 | Launch at login | OFF | Start with macOS |
 
+## Keeping it awake from other apps
+
+Other programs can keep Adrenaline on while they run, for example an agent harness during a long task. A request switches it on with your current settings, including lid-closed prevention if that option is enabled.
+
+Adrenaline listens on a Unix socket at `~/Library/Application Support/Adrenaline/adrenaline.sock`, which only your user can access. The protocol is newline-delimited JSON:
+
+| Request | Effect |
+|---|---|
+| `{"cmd":"hold","reason":"…"}` | Keep Adrenaline on while this connection stays open |
+| `{"cmd":"release"}` | Drop this connection's hold |
+| `{"cmd":"status"}` | Report `active`, `busy`, `holdDriven` and the current `holds` |
+
+Each request gets one JSON reply with an `ok` field. A hold belongs to its connection, so if the client exits or crashes, the hold goes away with it. When the last hold is released, Adrenaline turns off again, but only if a hold was what turned it on. If you had it on already, it stays on. If you switch it off yourself while something is holding it, it stays off until the next hold request.
+
+Node / Bun:
+
+```js
+import net from "node:net";
+import os from "node:os";
+
+const sock = net.connect(`${os.homedir()}/Library/Application Support/Adrenaline/adrenaline.sock`);
+sock.on("error", () => {}); // Adrenaline not running: carry on without it
+sock.write(JSON.stringify({ cmd: "hold", reason: "agent task" }) + "\n");
+// ... work ...
+sock.end(); // or just exit
+```
+
+From the shell, `adrenaline` wraps the same protocol. Homebrew puts it on your `PATH`; otherwise it's at `Adrenaline.app/Contents/Helpers/adrenaline`:
+
+```bash
+adrenaline hold -- npm run long-task   # awake while the command runs
+adrenaline hold --pid 4242             # awake until that process exits
+adrenaline status
+```
+
 ## Install
 
 ### Homebrew

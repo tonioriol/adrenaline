@@ -9,6 +9,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lidCloseLockResponder: LidCloseLockResponder?
     private var updater: SparkleUpdaterController?
     private var activeStateObserver: NSObjectProtocol?
+    private var holdController: HoldController?
+    private var holdSocketServer: HoldSocketServer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let preferences = PreferencesStore()
@@ -57,14 +59,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             diskTypeDetector: diskTypeDetector
         )
 
+        let holdController = HoldController(state: state, coordinator: coordinator)
+        let holdSocketServer = HoldSocketServer(holds: holdController, state: state)
+        do {
+            try holdSocketServer.start()
+        } catch {
+            NSLog("Adrenaline: hold socket unavailable: \(error.localizedDescription)")
+        }
+        self.holdController = holdController
+        self.holdSocketServer = holdSocketServer
+
         activeStateObserver = NotificationCenter.default.addObserver(
             forName: .appStateActiveDidChange,
             object: state,
             queue: .main
-        ) { [weak preferences, weak state] _ in
-            if let isActive = state?.isActive {
-                preferences?.wasActive = isActive
-            }
+        ) { [weak preferences, weak state, weak holdController] _ in
+            guard let isActive = state?.isActive else { return }
+            // Don't remember activations made on behalf of external holds.
+            if isActive, holdController?.isHoldDriven == true { return }
+            preferences?.wasActive = isActive
         }
 
         if preferences.wasActive {

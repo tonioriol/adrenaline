@@ -16,6 +16,7 @@ cask "adrenaline" do
   depends_on macos: ">= :high_sierra"
 
   app "Adrenaline.app"
+  binary "#{appdir}/Adrenaline.app/Contents/Helpers/adrenaline"
 
   zap trash: [
     "~/Library/Caches/com.tonioriol.adrenaline",

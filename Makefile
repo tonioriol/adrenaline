@@ -8,6 +8,7 @@ MACOS_DIR := $(CONTENTS_DIR)/MacOS
 FRAMEWORKS_DIR := $(CONTENTS_DIR)/Frameworks
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
+HELPERS_DIR := $(CONTENTS_DIR)/Helpers
 # Universal build: each architecture is built separately and merged with lipo.
 # The deployment target is forced via -Xswiftc because newer SDKs silently
 # raise the manifest's .macOS(.v10_13) to their own minimum (e.g. 12.0).
@@ -43,12 +44,13 @@ generate-app-icon:
 
 app: build
 	rm -rf $(APP_DIR)
-	mkdir -p $(MACOS_DIR) $(FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR) $(RESOURCES_DIR)
+	mkdir -p $(MACOS_DIR) $(FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR) $(RESOURCES_DIR) $(HELPERS_DIR)
 	cp Resources/Adrenaline/Info.plist $(CONTENTS_DIR)/Info.plist
 	cp Resources/Adrenaline/Adrenaline.icns $(RESOURCES_DIR)/Adrenaline.icns
 	cp $(SWIFT_BIN_DIR)/Adrenaline $(MACOS_DIR)/Adrenaline
 	install_name_tool -add_rpath @executable_path/../Frameworks $(MACOS_DIR)/Adrenaline
 	cp $(SWIFT_BIN_DIR)/AdrenalineHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
+	cp $(SWIFT_BIN_DIR)/AdrenalineCLI $(HELPERS_DIR)/adrenaline
 	# The blessed helper runs from /Library/PrivilegedHelperTools, so it finds the
 	# embedded Swift runtime through the installed app's Frameworks directory.
 	install_name_tool -add_rpath $(INSTALLED_FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
@@ -76,6 +78,7 @@ sign:
 		[ -f "$$dylib" ] && codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$$dylib"; \
 	done
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper"
+	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(HELPERS_DIR)/adrenaline"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(APP_DIR)"
 
 migration-pkg: app

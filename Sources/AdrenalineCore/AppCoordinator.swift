@@ -37,7 +37,7 @@ public enum AppCoordinatorError: Error, LocalizedError, Equatable {
     }
 }
 
-public final class AppCoordinator {
+public final class AppCoordinator: HoldActivating {
     private let state: AppState
     private let awakeController: AwakeControlling
     private let lidCloseController: LidCloseControlling
@@ -46,6 +46,9 @@ public final class AppCoordinator {
     private var isTransitioning = false
     private var pendingShutdownDone: (() -> Void)?
     private var lidCloseEngagedThisSession = false
+
+    /// Called whenever an accepted transition finishes (not during shutdown).
+    public var onTransitionEnd: (() -> Void)?
 
     public init(
         state: AppState,
@@ -67,13 +70,16 @@ public final class AppCoordinator {
         }
     }
 
-    public func turnOn() {
+    /// Returns false when the request was dropped because another transition is in flight.
+    @discardableResult
+    public func turnOn() -> Bool {
         runTransition { [weak self] done in
             self?.performTurnOn(done: done) ?? done()
         }
     }
 
-    public func turnOff() {
+    @discardableResult
+    public func turnOff() -> Bool {
         runTransition { [weak self] done in
             self?.performTurnOff(force: false, done: done) ?? done()
         }
@@ -106,8 +112,9 @@ public final class AppCoordinator {
         }
     }
 
-    private func runTransition(_ operation: @escaping (@escaping () -> Void) -> Void) {
-        guard !shutdownRequested, !state.isBusy, !isTransitioning else { return }
+    @discardableResult
+    private func runTransition(_ operation: @escaping (@escaping () -> Void) -> Void) -> Bool {
+        guard !shutdownRequested, !state.isBusy, !isTransitioning else { return false }
         isTransitioning = true
         operation { [weak self] in
             guard let self else { return }
@@ -115,8 +122,13 @@ public final class AppCoordinator {
             if let shutdownDone = self.pendingShutdownDone {
                 self.pendingShutdownDone = nil
                 self.performTurnOff(force: true, done: shutdownDone)
+                return
+            }
+            if !self.shutdownRequested {
+                self.onTransitionEnd?()
             }
         }
+        return true
     }
 
     // MARK: - Turn On

@@ -7,6 +7,7 @@ let package = Package(
     products: [
         .executable(name: "Adrenaline", targets: ["Adrenaline"]),
         .executable(name: "AdrenalineHelper", targets: ["AdrenalineHelper"]),
+        .executable(name: "AdrenalineCLI", targets: ["AdrenalineCLI"]),
         .library(name: "AdrenalineCore", targets: ["AdrenalineCore"]),
     ],
     dependencies: [
@@ -49,6 +50,10 @@ let package = Package(
                     "-Xlinker", "Resources/AdrenalineHelper/launchd.plist",
                 ]),
             ]
+        ),
+        .executableTarget(
+            name: "AdrenalineCLI",
+            dependencies: ["AdrenalineCore"]
         ),
         .testTarget(
             name: "AdrenalineCoreTests",
