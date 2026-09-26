@@ -42,6 +42,15 @@ final class CheckboxMenuItemView: NSView {
         checkbox.isEnabled = isEnabled
     }
 
+    /// Reached when the mouse is released over the row without the checkbox
+    /// having tracked the press — e.g. after long-pressing the status item and
+    /// dragging onto this row. A normal click on the checkbox is handled by the
+    /// checkbox's own tracking and never arrives here.
+    override func mouseUp(with event: NSEvent) {
+        guard checkbox.isEnabled else { return }
+        toggle()
+    }
+
     @objc
     private func toggle() {
         onToggle?()

@@ -63,7 +63,7 @@ final class MenuBarController: NSObject {
         guard let button = statusItem.button else { return }
         button.target = self
         button.action = #selector(statusItemClicked(_:))
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.sendAction(on: [.leftMouseDown, .rightMouseUp])
     }
 
     private func bindState() {
@@ -258,7 +258,25 @@ final class MenuBarController: NSObject {
             return
         }
 
+        if isLongPress() {
+            showMenu()
+            return
+        }
+
         coordinator.toggle()
+    }
+
+    /// Waits for the left mouse button to be released. Returns true if it is
+    /// still held after `longPressDuration`.
+    private func isLongPress() -> Bool {
+        let longPressDuration: TimeInterval = 0.5
+        let mouseUp = NSApp.nextEvent(
+            matching: .leftMouseUp,
+            until: Date(timeIntervalSinceNow: longPressDuration),
+            inMode: .eventTracking,
+            dequeue: true
+        )
+        return mouseUp == nil
     }
 
     private func showMenu() {
@@ -278,6 +296,17 @@ final class MenuBarController: NSObject {
             menu.addItem(errorItem)
             menu.addItem(NSMenuItem.separator())
         }
+
+        let toggleItem = NSMenuItem(
+            title: state.isActive ? "Disable Adrenaline" : "Enable Adrenaline",
+            action: #selector(toggleActive),
+            keyEquivalent: ""
+        )
+        toggleItem.target = self
+        toggleItem.isEnabled = !state.isBusy
+        menu.addItem(toggleItem)
+
+        menu.addItem(NSMenuItem.separator())
 
         let aboutItem = NSMenuItem(title: "About Adrenaline", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
@@ -441,6 +470,11 @@ final class MenuBarController: NSObject {
             aboutWindowController = AboutWindowController(updater: updater)
         }
         aboutWindowController?.showWindow()
+    }
+
+    @objc
+    private func toggleActive() {
+        coordinator.toggle()
     }
 
     @objc
