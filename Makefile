@@ -35,7 +35,7 @@ build:
 	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(ARM64_TRIPLE) -Xswiftc -target -Xswiftc $(ARM64_TRIPLE)
 	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(X86_64_TRIPLE) -Xswiftc -target -Xswiftc $(X86_64_TRIPLE)
 	mkdir -p $(SWIFT_BIN_DIR)
-	for product in Adrenaline AdrenalineHelper; do \
+	for product in Adrenaline AdrenalineHelper AdrenalineCLI; do \
 		lipo -create $(ARM64_BIN_DIR)/$$product $(X86_64_BIN_DIR)/$$product -output $(SWIFT_BIN_DIR)/$$product; \
 	done
 
@@ -51,6 +51,7 @@ app: build
 	install_name_tool -add_rpath @executable_path/../Frameworks $(MACOS_DIR)/Adrenaline
 	cp $(SWIFT_BIN_DIR)/AdrenalineHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
 	cp $(SWIFT_BIN_DIR)/AdrenalineCLI $(HELPERS_DIR)/adrenaline
+	install_name_tool -add_rpath @executable_path/../Frameworks $(HELPERS_DIR)/adrenaline
 	# The blessed helper runs from /Library/PrivilegedHelperTools, so it finds the
 	# embedded Swift runtime through the installed app's Frameworks directory.
 	install_name_tool -add_rpath $(INSTALLED_FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
@@ -59,6 +60,7 @@ app: build
 		--source-libraries "$(SWIFT_BACKDEPLOY_LIBS)" \
 		--scan-executable $(MACOS_DIR)/Adrenaline \
 		--scan-executable $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper \
+		--scan-executable $(HELPERS_DIR)/adrenaline \
 		--destination $(FRAMEWORKS_DIR)
 	$(MAKE) sign
 
