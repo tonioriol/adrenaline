@@ -16,6 +16,8 @@ pre_bump_hooks = [
 ]
 
 [commit_types]
+# Keep internal housekeeping out of the public changelog and release notes.
+chore = { changelog_title = "Miscellaneous Chores", omit_from_changelog = true }
 # Recognise one historical "refine" commit (525bef1) as a refactor so cog
 # doesn't fail compliance checks on the existing history. New commits should
 # use standard conventional types.
