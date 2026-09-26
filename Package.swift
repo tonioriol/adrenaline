@@ -36,10 +36,10 @@ let package = Package(
         ),
         .executableTarget(
             name: "AdrenalineHelper",
-            dependencies: ["AdrenalineCore"],
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
+                .linkedFramework("Security"),
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",

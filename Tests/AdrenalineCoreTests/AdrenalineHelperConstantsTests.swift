@@ -53,4 +53,24 @@ final class AdrenalineHelperConstantsTests: XCTestCase {
 
         XCTAssertEqual(clients.first, expectedAppRequirement)
     }
+
+    /// The helper is Objective-C (no Swift runtime on old macOS), so it cannot import
+    /// `AdrenalineHelperConstants`; its mirrored copies must match.
+    func testObjectiveCHelperMirrorsSwiftConstants() throws {
+        let projectRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let source = try String(
+            contentsOf: projectRoot.appendingPathComponent("Sources/AdrenalineHelper/main.m"),
+            encoding: .utf8
+        )
+        let escapedRequirement = AdrenalineHelperConstants.appCodeSigningRequirement
+            .replacingOccurrences(of: "\"", with: "\\\"")
+
+        XCTAssertTrue(source.contains("kHelperMachServiceName = @\"\(AdrenalineHelperConstants.helperBundleIdentifier)\";"))
+        XCTAssertTrue(source.contains("kAppCodeSigningRequirement = @\"\(escapedRequirement)\";"))
+        XCTAssertTrue(source.contains("kHelperVersion = \(AdrenalineHelperConstants.helperVersion);"))
+    }
 }

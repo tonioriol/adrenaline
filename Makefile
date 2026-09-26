@@ -10,7 +10,7 @@ LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
 HELPERS_DIR := $(CONTENTS_DIR)/Helpers
 # Universal build: each architecture is built separately and merged with lipo.
-# The deployment target is forced via -Xswiftc because newer SDKs silently
+# The deployment target is forced via -Xswiftc/-Xcc because newer SDKs silently
 # raise the manifest's .macOS(.v10_13) to their own minimum (e.g. 12.0).
 ARM64_TRIPLE := arm64-apple-macosx11.0
 X86_64_TRIPLE := x86_64-apple-macosx10.13
@@ -20,7 +20,6 @@ SWIFT_BIN_DIR := $(BUILD_DIR)/universal-$(CONFIGURATION)
 SPARKLE_FRAMEWORK := $(ARM64_BIN_DIR)/Sparkle.framework
 # macOS < 10.14.4 has no Swift runtime in the OS; embed the toolchain's back-deployment copy.
 SWIFT_BACKDEPLOY_LIBS := $(shell dirname "$$(xcrun --find swift)")/../lib/swift-5.0/macosx
-INSTALLED_FRAMEWORKS_DIR := /Applications/Adrenaline.app/Contents/Frameworks
 TEAM_ID ?= B65K228Z97
 CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'"' '/B65K228Z97/ {print $$2; exit}')
 INSTALL_APP_DIR ?= /Applications/Adrenaline.app
@@ -32,8 +31,8 @@ test:
 	swift test
 
 build:
-	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(ARM64_TRIPLE) -Xswiftc -target -Xswiftc $(ARM64_TRIPLE)
-	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(X86_64_TRIPLE) -Xswiftc -target -Xswiftc $(X86_64_TRIPLE)
+	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(ARM64_TRIPLE) -Xswiftc -target -Xswiftc $(ARM64_TRIPLE) -Xcc -target -Xcc $(ARM64_TRIPLE)
+	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(X86_64_TRIPLE) -Xswiftc -target -Xswiftc $(X86_64_TRIPLE) -Xcc -target -Xcc $(X86_64_TRIPLE)
 	mkdir -p $(SWIFT_BIN_DIR)
 	for product in Adrenaline AdrenalineHelper AdrenalineCLI; do \
 		lipo -create $(ARM64_BIN_DIR)/$$product $(X86_64_BIN_DIR)/$$product -output $(SWIFT_BIN_DIR)/$$product; \
@@ -52,14 +51,12 @@ app: build
 	cp $(SWIFT_BIN_DIR)/AdrenalineHelper $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
 	cp $(SWIFT_BIN_DIR)/AdrenalineCLI $(HELPERS_DIR)/adrenaline
 	install_name_tool -add_rpath @executable_path/../Frameworks $(HELPERS_DIR)/adrenaline
-	# The blessed helper runs from /Library/PrivilegedHelperTools, so it finds the
-	# embedded Swift runtime through the installed app's Frameworks directory.
-	install_name_tool -add_rpath $(INSTALLED_FRAMEWORKS_DIR) $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper
 	cp -R $(SPARKLE_FRAMEWORK) $(FRAMEWORKS_DIR)/Sparkle.framework
+	# The privileged helper is Objective-C and needs no Swift runtime; only the
+	# executables that stay inside the bundle load the embedded copy.
 	xcrun swift-stdlib-tool --copy --platform macosx \
 		--source-libraries "$(SWIFT_BACKDEPLOY_LIBS)" \
 		--scan-executable $(MACOS_DIR)/Adrenaline \
-		--scan-executable $(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper \
 		--scan-executable $(HELPERS_DIR)/adrenaline \
 		--destination $(FRAMEWORKS_DIR)
 	$(MAKE) sign
