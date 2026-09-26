@@ -6,9 +6,10 @@ Keep your Mac awake from the menu bar — even with the lid closed.
 
 | Option | Default | |
 |---|---|---|
-| Prevent display sleep | ON | Also keeps the display awake |
+| Prevent display sleep while lid is open | ON | Also keeps the display awake. With the lid closed the display always sleeps |
 | Prevent disk sleep | ON | Keeps mechanical drives spinning (only shown when HDD detected) |
 | Prevent sleep with lid closed | OFF | Requires one-time admin authorization |
+| Stay unlocked when lid is closed | OFF | No lock screen when you reopen the lid. Asks once for your login password (kept in the Keychain), turns off the macOS "Require password" setting while Adrenaline is on and puts yours back when it turns off |
 | Play lid event sounds | ON | Sound on lid open/close |
 | Launch at login | OFF | Start with macOS |
 

@@ -30,6 +30,7 @@ private final class FakePreferencesStore: PreferencesProviding {
     var preventDiskSleep: Bool = true
     var playLidEventSounds: Bool = true
     var overrideSystemVolumeForLidEventSounds: Bool = true
+    var stayUnlockedWithLidClosed: Bool = false
     var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
 
@@ -54,6 +55,14 @@ private final class FakeLockPolicyReader: MacOSLockPolicyReading {
         if let error { throw error }
         return policy
     }
+}
+
+private final class FakeDisplayAwakeController: AwakeControlling {
+    private(set) var displayCalls: [Bool] = []
+    func enable() throws {}
+    func enable(preventDisplaySleep: Bool) throws {}
+    func setPreventDisplaySleep(_ enabled: Bool) throws { displayCalls.append(enabled) }
+    func disable() {}
 }
 
 private struct TestError: Error {}
@@ -99,13 +108,59 @@ final class LidCloseLockResponderTests: XCTestCase {
         _ = setup.responder
     }
 
-    func testPreventDisplaySleepOnDoesNotReadPolicyOrLock() {
+    func testPreventDisplaySleepOnStillLocksOnLidClose() {
         let setup = makeResponder(isActive: true, preventDisplaySleep: true, preventLid: true)
         setup.monitor.emit(.closed)
 
-        XCTAssertEqual(setup.policyReader.readCallCount, 0)
-        XCTAssertEqual(setup.locker.lockCallCount, 0)
+        XCTAssertEqual(setup.policyReader.readCallCount, 1)
+        XCTAssertEqual(setup.locker.lockCallCount, 1)
         _ = setup.responder
+    }
+
+    func testStayingUnlockedSkipsLock() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let locker = FakeScreenLocker()
+        let policyReader = FakeLockPolicyReader()
+        let responder = LidCloseLockResponder(
+            state: state,
+            monitor: monitor,
+            screenLocker: locker,
+            preferences: FakePreferencesStore(),
+            policyReader: policyReader,
+            isStayingUnlocked: { true }
+        )
+
+        monitor.emit(.closed)
+
+        XCTAssertEqual(policyReader.readCallCount, 0)
+        XCTAssertEqual(locker.lockCallCount, 0)
+        _ = responder
+    }
+
+    func testLidCloseReleasesDisplayAssertionAndOpenRestoresPreference() {
+        let state = AppState(isActive: true)
+        let monitor = FakeLidStateMonitor()
+        let awake = FakeDisplayAwakeController()
+        let prefs = FakePreferencesStore()
+        prefs.preventDisplaySleep = true
+        let responder = LidCloseLockResponder(
+            state: state,
+            monitor: monitor,
+            screenLocker: FakeScreenLocker(),
+            preferences: prefs,
+            policyReader: FakeLockPolicyReader(),
+            awakeController: awake
+        )
+
+        monitor.emit(.closed)
+        monitor.emit(.open)
+        prefs.preventDisplaySleep = false
+        monitor.emit(.closed)
+        monitor.emit(.open)
+
+        XCTAssertEqual(awake.displayCalls, [false, true, false, false])
+        _ = responder
     }
 
     func testRequirePasswordEnabledLocksImmediatelyWhenLidClosePreventionIsOff() {

@@ -20,6 +20,7 @@ let package = Package(
                 .linkedFramework("Foundation"),
                 .linkedFramework("IOKit"),
                 .linkedFramework("ServiceManagement"),
+                .linkedFramework("Security"),
             ]
         ),
         .executableTarget(

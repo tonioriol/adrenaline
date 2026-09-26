@@ -39,6 +39,7 @@ private final class FakePreferencesStore: PreferencesProviding {
     var preventDiskSleep: Bool = true
     var playLidEventSounds: Bool = true
     var overrideSystemVolumeForLidEventSounds: Bool = true
+    var stayUnlockedWithLidClosed: Bool = false
     var lidClosePreventionConfirmed: Bool = false
     var wasActive: Bool = false
 

@@ -6,19 +6,22 @@ public struct PreferencesSnapshot: Equatable {
     public var preventDiskSleep: Bool
     public var playLidEventSounds: Bool
     public var overrideSystemVolumeForLidEventSounds: Bool
+    public var stayUnlockedWithLidClosed: Bool
 
     public init(
         preventDisplaySleep: Bool,
         preventLidCloseSleep: Bool,
         preventDiskSleep: Bool = true,
         playLidEventSounds: Bool,
-        overrideSystemVolumeForLidEventSounds: Bool = true
+        overrideSystemVolumeForLidEventSounds: Bool = true,
+        stayUnlockedWithLidClosed: Bool = false
     ) {
         self.preventDisplaySleep = preventDisplaySleep
         self.preventLidCloseSleep = preventLidCloseSleep
         self.preventDiskSleep = preventDiskSleep
         self.playLidEventSounds = playLidEventSounds
         self.overrideSystemVolumeForLidEventSounds = overrideSystemVolumeForLidEventSounds
+        self.stayUnlockedWithLidClosed = stayUnlockedWithLidClosed
     }
 }
 
@@ -28,6 +31,7 @@ public extension Notification.Name {
     static let preferencesPreventDiskSleepDidChange = Notification.Name("Adrenaline.preferencesPreventDiskSleepDidChange")
     static let preferencesPlayLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesPlayLidEventSoundsDidChange")
     static let preferencesOverrideSystemVolumeForLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesOverrideSystemVolumeForLidEventSoundsDidChange")
+    static let preferencesStayUnlockedWithLidClosedDidChange = Notification.Name("Adrenaline.preferencesStayUnlockedWithLidClosedDidChange")
 }
 
 public protocol PreferencesProviding: AnyObject {
@@ -36,6 +40,7 @@ public protocol PreferencesProviding: AnyObject {
     var preventDiskSleep: Bool { get set }
     var playLidEventSounds: Bool { get set }
     var overrideSystemVolumeForLidEventSounds: Bool { get set }
+    var stayUnlockedWithLidClosed: Bool { get set }
     var lidClosePreventionConfirmed: Bool { get set }
     var wasActive: Bool { get set }
 
@@ -49,6 +54,7 @@ public final class PreferencesStore: PreferencesProviding {
         public static let preventDiskSleep = "Adrenaline.preventDiskSleep"
         public static let playLidEventSounds = "Adrenaline.playLidEventSounds"
         public static let overrideSystemVolumeForLidEventSounds = "Adrenaline.overrideSystemVolumeForLidEventSounds"
+        public static let stayUnlockedWithLidClosed = "Adrenaline.stayUnlockedWithLidClosed"
         public static let lidClosePreventionConfirmed = "Adrenaline.lidClosePreventionConfirmed"
         public static let wasActive = "Adrenaline.wasActive"
     }
@@ -100,6 +106,15 @@ public final class PreferencesStore: PreferencesProviding {
         }
     }
 
+    public var stayUnlockedWithLidClosed: Bool {
+        didSet {
+            defaults.set(stayUnlockedWithLidClosed, forKey: Key.stayUnlockedWithLidClosed)
+            if stayUnlockedWithLidClosed != oldValue {
+                NotificationCenter.default.post(name: .preferencesStayUnlockedWithLidClosedDidChange, object: self)
+            }
+        }
+    }
+
     public var lidClosePreventionConfirmed: Bool {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
@@ -115,6 +130,7 @@ public final class PreferencesStore: PreferencesProviding {
         self.preventDiskSleep = Self.readBool(from: defaults, key: Key.preventDiskSleep, default: true)
         self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
         self.overrideSystemVolumeForLidEventSounds = Self.readBool(from: defaults, key: Key.overrideSystemVolumeForLidEventSounds, default: true)
+        self.stayUnlockedWithLidClosed = Self.readBool(from: defaults, key: Key.stayUnlockedWithLidClosed, default: false)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
         self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
     }
@@ -125,7 +141,8 @@ public final class PreferencesStore: PreferencesProviding {
             preventLidCloseSleep: preventLidCloseSleep,
             preventDiskSleep: preventDiskSleep,
             playLidEventSounds: playLidEventSounds,
-            overrideSystemVolumeForLidEventSounds: overrideSystemVolumeForLidEventSounds
+            overrideSystemVolumeForLidEventSounds: overrideSystemVolumeForLidEventSounds,
+            stayUnlockedWithLidClosed: stayUnlockedWithLidClosed
         )
     }
 

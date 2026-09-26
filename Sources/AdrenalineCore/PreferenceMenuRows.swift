@@ -4,6 +4,7 @@ public enum PreferenceMenuRowID: Hashable {
     case preventLidCloseSleep
     case playLidEventSounds
     case overrideSystemVolumeForLidEventSounds
+    case stayUnlockedWithLidClosed
 }
 
 public struct PreferenceMenuRow: Equatable {
@@ -27,7 +28,7 @@ public enum PreferenceMenuRows {
         var result: [PreferenceMenuRow] = [
             PreferenceMenuRow(
                 id: .preventDisplaySleep,
-                title: "Prevent display sleep",
+                title: "Prevent display sleep while lid is open",
                 isOn: snapshot.preventDisplaySleep,
                 isEnabled: true),
         ]
@@ -47,6 +48,12 @@ public enum PreferenceMenuRows {
                 : "Prevent system sleep with lid closed",
             isOn: snapshot.preventLidCloseSleep,
             isEnabled: true))
+        result.append(PreferenceMenuRow(
+            id: .stayUnlockedWithLidClosed,
+            title: "Stay unlocked when lid is closed",
+            isOn: snapshot.stayUnlockedWithLidClosed,
+            isEnabled: snapshot.preventLidCloseSleep,
+            isChild: true))
         result.append(PreferenceMenuRow(
             id: .playLidEventSounds,
             title: "Play lid event sounds",

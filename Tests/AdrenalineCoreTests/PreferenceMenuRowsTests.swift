@@ -15,6 +15,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(rows.map(\.id), [
             .preventDisplaySleep,
             .preventLidCloseSleep,
+            .stayUnlockedWithLidClosed,
             .playLidEventSounds,
             .overrideSystemVolumeForLidEventSounds,
         ])
@@ -69,6 +70,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
             .preventDisplaySleep,
             .preventDiskSleep,
             .preventLidCloseSleep,
+            .stayUnlockedWithLidClosed,
             .playLidEventSounds,
             .overrideSystemVolumeForLidEventSounds,
         ])
@@ -94,6 +96,7 @@ final class PreferenceMenuRowsTests: XCTestCase {
         XCTAssertEqual(rows.map(\.id), [
             .preventDisplaySleep,
             .preventLidCloseSleep,
+            .stayUnlockedWithLidClosed,
             .playLidEventSounds,
             .overrideSystemVolumeForLidEventSounds,
         ])

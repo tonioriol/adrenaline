@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var coordinator: AppCoordinator?
     private var lidEventSoundController: LidEventSoundController?
     private var lidCloseLockResponder: LidCloseLockResponder?
+    private var stayUnlockedController: StayUnlockedController?
     private var updater: SparkleUpdaterController?
     private var activeStateObserver: NSObjectProtocol?
     private var holdController: HoldController?
@@ -34,12 +35,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             soundPlayer: soundPlayer,
             preferences: preferences
         )
+        let stayUnlockedController = StayUnlockedController(
+            state: state,
+            preferences: preferences,
+            setting: SysadminctlScreenLockSetting(),
+            passwordStore: KeychainPasswordStore(),
+            requestPassword: LoginPasswordPrompt.run
+        )
         let lidCloseLockResponder = LidCloseLockResponder(
             state: state,
             monitor: lidStateMonitor,
             screenLocker: screenLocker,
             preferences: preferences,
-            policyReader: lockPolicyReader
+            policyReader: lockPolicyReader,
+            awakeController: awake,
+            isStayingUnlocked: { [weak stayUnlockedController] in stayUnlockedController?.isEngaged ?? false }
         )
 
         let updater = SparkleUpdaterController()
@@ -49,6 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.coordinator = coordinator
         self.lidEventSoundController = lidEventSoundController
         self.lidCloseLockResponder = lidCloseLockResponder
+        self.stayUnlockedController = stayUnlockedController
         self.updater = updater
         self.menuBarController = MenuBarController(
             state: state,
@@ -82,6 +93,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if preferences.wasActive {
             coordinator.turnOn()
+        } else {
+            // Puts back a lock setting left changed by a crash.
+            stayUnlockedController.apply()
         }
     }
 

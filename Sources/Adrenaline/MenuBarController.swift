@@ -8,6 +8,7 @@ final class MenuBarController: NSObject {
         case preventLidCloseSleep
         case playLidEventSounds
         case overrideSystemVolumeForLidEventSounds
+        case stayUnlockedWithLidClosed
         case launchAtLogin
 
         init?(_ rowID: PreferenceMenuRowID) {
@@ -22,6 +23,8 @@ final class MenuBarController: NSObject {
                 self = .playLidEventSounds
             case .overrideSystemVolumeForLidEventSounds:
                 self = .overrideSystemVolumeForLidEventSounds
+            case .stayUnlockedWithLidClosed:
+                self = .stayUnlockedWithLidClosed
             }
         }
     }
@@ -97,6 +100,11 @@ final class MenuBarController: NSObject {
         )
         observers.append(
             center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
+                self?.refreshVisibleRows()
+            }
+        )
+        observers.append(
+            center.addObserver(forName: .preferencesStayUnlockedWithLidClosedDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.refreshVisibleRows()
             }
         )
@@ -368,6 +376,8 @@ final class MenuBarController: NSObject {
             toggleLidEventSoundPreference(\.playLidEventSounds)
         case .overrideSystemVolumeForLidEventSounds:
             toggleLidEventSoundPreference(\.overrideSystemVolumeForLidEventSounds)
+        case .stayUnlockedWithLidClosed:
+            toggleLidEventSoundPreference(\.stayUnlockedWithLidClosed)
         }
     }
 
