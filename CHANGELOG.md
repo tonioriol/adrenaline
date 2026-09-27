@@ -9,6 +9,19 @@ All notable changes to Adrenaline are documented here. The format follows [Conve
 - (**version**) v0.6.0 - ([bea6a23](https://github.com/tonioriol/adrenaline/commit/bea6a23aad48975d529fda23ace4bc4612ec90f3)) - github-actions[bot]
 
 - - -
+## [v0.7.0](https://github.com/tonioriol/adrenaline/compare/c2c3c2fa15a953f2febcd829d81aa0e8aaf86cd3..v0.7.0) - 2026-09-26
+#### Features
+- stay unlocked with the lid closed and let the display sleep - ([c3db587](https://github.com/tonioriol/adrenaline/commit/c3db587684690979283934ceb87ddf333e142e55)) - Toni Oriol
+- let other apps keep Adrenaline awake over a local socket - ([3aeba01](https://github.com/tonioriol/adrenaline/commit/3aeba01f9c96e47b0df1d007725dc93ed3ebb854)) - Toni Oriol
+- support Intel Macs on macOS 10.13 High Sierra and later - ([6ce856f](https://github.com/tonioriol/adrenaline/commit/6ce856f0790ae1feab766e29c585f5fb4e0af8c3)) - Toni Oriol
+- open menu on long press of the status item - ([362e165](https://github.com/tonioriol/adrenaline/commit/362e16585f0264a2483d6395944c5d36d317b7aa)) - Toni Oriol
+#### Bug Fixes
+- turn the display off when the lid closes with system sleep disabled - ([b547996](https://github.com/tonioriol/adrenaline/commit/b5479965a078826beb65ea405c0f00e0e03eb1e1)) - Toni Oriol
+- make lid-close sleep prevention work on Intel Macs running macOS 10.13 - ([f93f93c](https://github.com/tonioriol/adrenaline/commit/f93f93c7b46ba22a3baa739b22780301a4f1754c)) - Toni Oriol
+- include the command-line tool in the Intel and Apple Silicon build - ([bff01a1](https://github.com/tonioriol/adrenaline/commit/bff01a1c32168f4d14c22581b317fc8a338f1dfd)) - Toni Oriol
+
+- - -
+
 
 ## [v0.5.0](https://github.com/tonioriol/adrenaline/compare/078a5bfcd2842151500b369fa44112833a779e7b..v0.5.0) - 2026-05-27
 #### Features
