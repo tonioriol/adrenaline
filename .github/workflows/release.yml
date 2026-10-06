@@ -49,9 +49,11 @@ jobs:
   release:
     needs: decide
     if: needs.decide.outputs.will_release == 'true'
-    runs-on: macos-14
+    # Xcode 16.4 is the last Xcode that deploys to macOS 10.13.
+    runs-on: macos-15
     env:
       NEXT_VERSION: ${{ needs.decide.outputs.next_version }}
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,6 +120,7 @@ jobs:
           set -euo pipefail
           make release-zip CONFIGURATION=release CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"
           codesign --verify --deep --strict --verbose=2 build/Adrenaline.app
+          make verify-deployment-target CONFIGURATION=release
 
       - name: Notarize app zip
         env:

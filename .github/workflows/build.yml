@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Same toolchain as the release job: Xcode 16.4 deploys to macOS 10.13.
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test
+        run: make test
+
+      - name: Build universal release binaries
+        run: make build verify-helper-sections verify-deployment-target CONFIGURATION=release
