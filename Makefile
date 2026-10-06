@@ -1,6 +1,9 @@
 SHELL := /bin/zsh
 CONFIGURATION ?= debug
-SWIFT_BUILD_FLAGS := -c $(CONFIGURATION)
+# Universal build. The deployment target comes from Package.swift (.macOS(.v10_13));
+# SDKs that can't deploy that far back (Xcode 26+) raise it to their own minimum,
+# so release builds for macOS 10.13 come from CI on Xcode 16.4.
+SWIFT_BUILD_FLAGS := -c $(CONFIGURATION) --arch arm64 --arch x86_64
 BUILD_DIR := build
 APP_DIR := $(BUILD_DIR)/Adrenaline.app
 CONTENTS_DIR := $(APP_DIR)/Contents
@@ -9,15 +12,9 @@ FRAMEWORKS_DIR := $(CONTENTS_DIR)/Frameworks
 LAUNCH_SERVICES_DIR := $(CONTENTS_DIR)/Library/LaunchServices
 RESOURCES_DIR := $(CONTENTS_DIR)/Resources
 HELPERS_DIR := $(CONTENTS_DIR)/Helpers
-# Universal build: each architecture is built separately and merged with lipo.
-# The deployment target is forced via -Xswiftc/-Xcc because newer SDKs silently
-# raise the manifest's .macOS(.v10_13) to their own minimum (e.g. 12.0).
-ARM64_TRIPLE := arm64-apple-macosx11.0
-X86_64_TRIPLE := x86_64-apple-macosx10.13
-ARM64_BIN_DIR := .build/arm64-apple-macosx/$(CONFIGURATION)
-X86_64_BIN_DIR := .build/x86_64-apple-macosx/$(CONFIGURATION)
-SWIFT_BIN_DIR := $(BUILD_DIR)/universal-$(CONFIGURATION)
-SPARKLE_FRAMEWORK := $(ARM64_BIN_DIR)/Sparkle.framework
+# The products directory differs between toolchains, so ask SwiftPM for it.
+SWIFT_BIN_DIR := $(shell swift build $(SWIFT_BUILD_FLAGS) --show-bin-path)
+SPARKLE_FRAMEWORK := $(SWIFT_BIN_DIR)/Sparkle.framework
 # macOS < 10.14.4 has no Swift runtime in the OS; embed the toolchain's back-deployment copy.
 SWIFT_BACKDEPLOY_LIBS := $(shell dirname "$$(xcrun --find swift)")/../lib/swift-5.0/macosx
 TEAM_ID ?= B65K228Z97
@@ -25,18 +22,13 @@ CODE_SIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | awk -F'
 INSTALL_APP_DIR ?= /Applications/Adrenaline.app
 RELEASE_ZIP ?= $(BUILD_DIR)/Adrenaline.zip
 
-.PHONY: test build generate-app-icon app sign migration-pkg release-zip reinstall run clean verify-helper-sections
+.PHONY: test build generate-app-icon app sign migration-pkg release-zip reinstall run clean verify-helper-sections verify-deployment-target
 
 test:
 	swift test
 
 build:
-	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(ARM64_TRIPLE) -Xswiftc -target -Xswiftc $(ARM64_TRIPLE) -Xcc -target -Xcc $(ARM64_TRIPLE)
-	swift build $(SWIFT_BUILD_FLAGS) --build-system native --triple $(X86_64_TRIPLE) -Xswiftc -target -Xswiftc $(X86_64_TRIPLE) -Xcc -target -Xcc $(X86_64_TRIPLE)
-	mkdir -p $(SWIFT_BIN_DIR)
-	for product in Adrenaline AdrenalineHelper AdrenalineCLI; do \
-		lipo -create $(ARM64_BIN_DIR)/$$product $(X86_64_BIN_DIR)/$$product -output $(SWIFT_BIN_DIR)/$$product; \
-	done
+	swift build $(SWIFT_BUILD_FLAGS)
 
 generate-app-icon:
 	swift Scripts/generate-app-icon.swift Resources/Adrenaline/Adrenaline.icns
@@ -73,9 +65,9 @@ sign:
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Autoupdate"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework/Versions/B/Updater.app"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(FRAMEWORKS_DIR)/Sparkle.framework"
-	for dylib in "$(FRAMEWORKS_DIR)/"libswift*.dylib; do \
-		[ -f "$$dylib" ] && codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$$dylib"; \
-	done
+	# The Swift runtime is only embedded when deploying below macOS 10.14.4.
+	find "$(FRAMEWORKS_DIR)" -maxdepth 1 -name 'libswift*.dylib' \
+		-exec codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" {} \;
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(LAUNCH_SERVICES_DIR)/com.tonioriol.adrenaline.helper"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(HELPERS_DIR)/adrenaline"
 	codesign --force --options runtime --sign "$(CODE_SIGN_IDENTITY)" "$(APP_DIR)"
@@ -99,6 +91,14 @@ reinstall: app
 verify-helper-sections:
 	otool -s __TEXT __info_plist $(SWIFT_BIN_DIR)/AdrenalineHelper >/dev/null
 	otool -s __TEXT __launchd_plist $(SWIFT_BIN_DIR)/AdrenalineHelper >/dev/null
+
+# Release builds must run on macOS 10.13 Intel Macs.
+verify-deployment-target:
+	for product in Adrenaline AdrenalineHelper AdrenalineCLI; do \
+		lipo -info $(SWIFT_BIN_DIR)/$$product; \
+		vtool -arch x86_64 -show-build $(SWIFT_BIN_DIR)/$$product | grep 'minos 10.13$$' \
+			|| { echo "$$product: x86_64 slice does not target macOS 10.13"; exit 1; }; \
+	done
 
 run: app
 	open $(APP_DIR)
