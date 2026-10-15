@@ -96,7 +96,9 @@ verify-helper-sections:
 verify-deployment-target:
 	for product in Adrenaline AdrenalineHelper AdrenalineCLI; do \
 		lipo -info $(SWIFT_BIN_DIR)/$$product; \
-		vtool -arch x86_64 -show-build $(SWIFT_BIN_DIR)/$$product | grep 'minos 10.13$$' \
+		build_version=$$(vtool -arch x86_64 -show-build $(SWIFT_BIN_DIR)/$$product) || exit 1; \
+		printf '%s\n' "$$build_version"; \
+		printf '%s\n' "$$build_version" | grep -Eq '^[[:space:]]*(minos|version) 10\.13$$' \
 			|| { echo "$$product: x86_64 slice does not target macOS 10.13"; exit 1; }; \
 	done
 
