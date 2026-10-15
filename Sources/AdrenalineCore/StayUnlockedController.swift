@@ -19,6 +19,9 @@ public final class StayUnlockedController {
     /// Returns nil when the user cancels.
     private let requestPassword: (_ retry: Bool) -> String?
     private var observers: [NSObjectProtocol] = []
+    /// Set once the app is quitting: a prompt then can't be answered before logout or
+    /// restart kills the app, and the persisted original is put back on the next launch.
+    private var isTerminating = false
 
     public init(
         state: AppState,
@@ -54,6 +57,11 @@ public final class StayUnlockedController {
     }
 
     public var isEngaged: Bool { savedDelay != nil }
+
+    /// Stops asking for the password from now on. Call before quitting.
+    public func prepareForTermination() {
+        isTerminating = true
+    }
 
     /// Brings the macOS setting in line with the current state. Safe to call repeatedly.
     public func apply() {
@@ -107,6 +115,7 @@ public final class StayUnlockedController {
         var password = passwordStore.read()
         for _ in 0..<Self.maxPasswordAttempts {
             if password == nil {
+                guard !isTerminating else { throw ScreenLockSettingError.passwordMissing }
                 password = requestPassword(retry)
             }
             guard let candidate = password else { throw ScreenLockSettingError.passwordMissing }

@@ -187,6 +187,20 @@ final class StayUnlockedControllerTests: XCTestCase {
         XCTAssertFalse(relaunched.isEngaged)
     }
 
+    func testQuittingNeverPromptsAndKeepsOriginalForNextLaunch() {
+        let (state, _, setting, store, controller, retries) = make()
+        state.setActive(true)
+        XCTAssertEqual(setting.delay, .off)
+
+        store.password = nil
+        controller.prepareForTermination()
+        state.setActive(false)
+
+        XCTAssertEqual(retries(), [])
+        XCTAssertEqual(setting.delay, .off)
+        XCTAssertTrue(controller.isEngaged)
+    }
+
     func testStatusOutputParsing() {
         XCTAssertEqual(ScreenLockDelay.parse(statusOutput: "2026-09-26 sysadminctl[1:2] screenLock delay is immediate"), .immediate)
         XCTAssertEqual(ScreenLockDelay.parse(statusOutput: "2026-09-26 sysadminctl[1:2] screenLock is off"), .off)

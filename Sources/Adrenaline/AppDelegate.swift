@@ -102,6 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let coordinator else { return .terminateNow }
+        stayUnlockedController?.prepareForTermination()
         coordinator.shutdownCleanup {
             NSApp.reply(toApplicationShouldTerminate: true)
         }
