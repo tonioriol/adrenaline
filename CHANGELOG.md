@@ -9,6 +9,14 @@ All notable changes to Adrenaline are documented here. The format follows [Conve
 - (**version**) v0.6.0 - ([bea6a23](https://github.com/tonioriol/adrenaline/commit/bea6a23aad48975d529fda23ace4bc4612ec90f3)) - github-actions[bot]
 
 - - -
+## [v0.7.1](https://github.com/tonioriol/adrenaline/compare/c11a1cfa0d83587889059dcdc4910dad249fc18a..v0.7.1) - 2026-10-15
+#### Bug Fixes
+- recognize legacy macOS deployment target load commands - ([c8f8744](https://github.com/tonioriol/adrenaline/commit/c8f874402c3c3d22fdf99d0aee7e9668be2ab96d)) - Toni Oriol
+#### Build system
+- build macOS 10.13 releases with Xcode 16.4 and a standard universal SwiftPM build - ([c11a1cf](https://github.com/tonioriol/adrenaline/commit/c11a1cfa0d83587889059dcdc4910dad249fc18a)) - Toni Oriol
+
+- - -
+
 ## [v0.7.0](https://github.com/tonioriol/adrenaline/compare/c2c3c2fa15a953f2febcd829d81aa0e8aaf86cd3..v0.7.0) - 2026-09-26
 #### Features
 - stay unlocked with the lid closed and let the display sleep - ([c3db587](https://github.com/tonioriol/adrenaline/commit/c3db587684690979283934ceb87ddf333e142e55)) - Toni Oriol
