@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adrenaline 0.7.1</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  padding: 1em;
+  color-scheme: light dark;
+  color: -apple-system-label;
+  background: transparent;
+}
+a { color: #0066cc; }
+@media (prefers-color-scheme: dark) {
+  a { color: #5ac8fa; }
+}
+h2 { font-size: 1.3em; margin-top: 1.2em; }
+h4 { font-size: 1em; margin-bottom: 0.3em; }
+ul { padding-left: 1.5em; }
+li { margin-bottom: 0.3em; }
+/* Sparkle injects 'sparkle-installed-version' class on the <section>
+   whose data-sparkle-version matches the installed app version.
+   Hide that section and all subsequent (older) sibling sections. */
+.sparkle-installed-version,
+.sparkle-installed-version ~ section { display: none; }
+section + section { border-top: 1px solid rgba(128,128,128,0.3);
+                    padding-top: 1.5em; margin-top: 1.5em; }
+section:first-child h2:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+<h2><a href="https://github.com/tonioriol/adrenaline/releases/tag/v0.7.1">v0.7.1</a> - 2026-11-06</h2>
+<h4>Bug Fixes</h4>
+<ul>
+<li>Never ask for the login password while quitting for restart or logout</li>
+</ul>
+</body>
+</html>
