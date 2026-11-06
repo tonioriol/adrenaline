@@ -4,6 +4,14 @@ All notable changes to Adrenaline are documented here. Adrenaline follows [Seman
 
 - - -
 
+## [v0.7.1](https://github.com/tonioriol/adrenaline/releases/tag/v0.7.1) - 2026-11-06
+
+#### Bug Fixes
+- Never ask for the login password while quitting for restart or logout
+
+- - -
+
+
 ## [v0.7.0](https://github.com/tonioriol/adrenaline/compare/v0.6.0...v0.7.0) - 2026-09-27
 
 #### Features
