@@ -16,16 +16,23 @@ pre_bump_hooks = [
 ]
 
 [commit_types]
-# Keep internal housekeeping out of the public changelog and release notes.
+# Release notes are for users: list only features, fixes, performance work
+# and reverts. Internal changes stay out of the changelog.
 chore = { changelog_title = "Miscellaneous Chores", omit_from_changelog = true }
+docs = { changelog_title = "Documentation", omit_from_changelog = true }
+test = { changelog_title = "Tests", omit_from_changelog = true }
+refactor = { changelog_title = "Refactoring", omit_from_changelog = true }
+build = { changelog_title = "Build system", omit_from_changelog = true }
+ci = { changelog_title = "Continuous Integration", omit_from_changelog = true }
+style = { changelog_title = "Style", omit_from_changelog = true }
 # Recognise one historical "refine" commit (525bef1) as a refactor so cog
 # doesn't fail compliance checks on the existing history. New commits should
 # use standard conventional types.
-refine = { changelog_title = "Refinements" }
+refine = { changelog_title = "Refinements", omit_from_changelog = true }
 
 [changelog]
 path = "CHANGELOG.md"
-template = "remote"
+template = ".cog/changelog.tera"
 remote = "github.com"
 owner = "tonioriol"
 repository = "adrenaline"

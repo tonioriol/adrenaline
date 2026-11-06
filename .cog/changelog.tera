@@ -1,0 +1,17 @@
+
+{% if version.tag and from.tag -%}
+## [{{ version.tag }}]({{ repository_url }}/compare/{{ from.tag }}...{{ version.tag }}) - {{ date | date(format="%Y-%m-%d") }}
+{% elif version.tag -%}
+## [{{ version.tag }}]({{ repository_url }}/releases/tag/{{ version.tag }}) - {{ date | date(format="%Y-%m-%d") }}
+{% else -%}
+## Unreleased
+{% endif -%}
+{% set groups = commits | group_by(attribute="type") -%}
+{% for title in ["Features", "Bug Fixes", "Performance Improvements", "Revert"] -%}
+{% if groups[title] %}
+#### {{ title }}
+{% for commit in groups[title] -%}
+- {{ commit.summary | upper_first }}
+{% endfor -%}
+{% endif -%}
+{% endfor -%}
