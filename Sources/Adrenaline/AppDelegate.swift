@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lidCloseLockResponder: LidCloseLockResponder?
     private var stayUnlockedController: StayUnlockedController?
     private var updater: SparkleUpdaterController?
-    private var activeStateObserver: NSObjectProtocol?
+    private var activeStateRecorder: ActiveStateRecorder?
     private var holdController: HoldController?
     private var holdSocketServer: HoldSocketServer?
 
@@ -81,16 +81,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.holdController = holdController
         self.holdSocketServer = holdSocketServer
 
-        activeStateObserver = NotificationCenter.default.addObserver(
-            forName: .appStateActiveDidChange,
-            object: state,
-            queue: .main
-        ) { [weak preferences, weak state, weak holdController] _ in
-            guard let isActive = state?.isActive else { return }
-            // Don't remember activations made on behalf of external holds.
-            if isActive, holdController?.isHoldDriven == true { return }
-            preferences?.wasActive = isActive
-        }
+        activeStateRecorder = ActiveStateRecorder(
+            state: state,
+            preferences: preferences,
+            coordinator: coordinator,
+            isHoldDriven: { [weak holdController] in holdController?.isHoldDriven == true }
+        )
 
         if preferences.wasActive {
             coordinator.turnOn()

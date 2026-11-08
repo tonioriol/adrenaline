@@ -47,6 +47,8 @@ public final class AppCoordinator: HoldActivating {
     private var pendingShutdownDone: (() -> Void)?
     private var lidCloseEngagedThisSession = false
 
+    public var isShuttingDown: Bool { shutdownRequested }
+
     /// Called whenever an accepted transition finishes (not during shutdown).
     public var onTransitionEnd: (() -> Void)?
 

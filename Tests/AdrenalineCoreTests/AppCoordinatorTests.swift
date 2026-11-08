@@ -363,6 +363,49 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertNil(state.lastErrorMessage)
     }
 
+    func testRecorderKeepsWasActiveThroughShutdownCleanup() {
+        for lidClose in [false, true] {
+            let state = AppState()
+            let prefs = FakePreferencesStore()
+            prefs.preventLidCloseSleep = lidClose
+            let coordinator = AppCoordinator(state: state, awakeController: FakeAwakeController(), lidCloseController: FakeLidCloseController(), preferences: prefs)
+            let recorder = ActiveStateRecorder(state: state, preferences: prefs, coordinator: coordinator, isHoldDriven: { false })
+
+            coordinator.turnOn()
+            XCTAssertTrue(prefs.wasActive)
+            coordinator.shutdownCleanup { }
+
+            XCTAssertFalse(state.isActive)
+            XCTAssertTrue(prefs.wasActive, "lidClose: \(lidClose)")
+            withExtendedLifetime(recorder) {}
+        }
+    }
+
+    func testRecorderRemembersUserTurnOff() {
+        let state = AppState()
+        let prefs = FakePreferencesStore()
+        let coordinator = AppCoordinator(state: state, awakeController: FakeAwakeController(), lidCloseController: FakeLidCloseController(), preferences: prefs)
+        let recorder = ActiveStateRecorder(state: state, preferences: prefs, coordinator: coordinator, isHoldDriven: { false })
+
+        coordinator.turnOn()
+        coordinator.turnOff()
+
+        XCTAssertFalse(prefs.wasActive)
+        withExtendedLifetime(recorder) {}
+    }
+
+    func testRecorderIgnoresHoldDrivenActivation() {
+        let state = AppState()
+        let prefs = FakePreferencesStore()
+        let coordinator = AppCoordinator(state: state, awakeController: FakeAwakeController(), lidCloseController: FakeLidCloseController(), preferences: prefs)
+        let recorder = ActiveStateRecorder(state: state, preferences: prefs, coordinator: coordinator, isHoldDriven: { true })
+
+        coordinator.turnOn()
+
+        XCTAssertFalse(prefs.wasActive)
+        withExtendedLifetime(recorder) {}
+    }
+
     func testShutdownCleanupRecordsErrorAndEndsInactiveIdleWhenLidCloseRemainsActive() {
         let state = AppState()
         let awake = FakeAwakeController()
