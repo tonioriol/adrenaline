@@ -7,7 +7,7 @@ Sources:
 - Git: `git status`, `git log origin/main..main` / `main..origin/main` (unpushed or unpulled commits).
 - CI and releases: `gh run list -L 5`, `gh release list -L 3`, `gh pr list` (GitHub Actions: Build, Release).
 - Installed app: `/Applications/Adrenaline.app` version vs latest release; `adrenaline status` holds.
-- Disk: `df -h /`.
+- Disk: Finder's "available for important usage" (swift one-liner in ~/.agents/AGENTS.md, "Free disk space"); never `df`.
 
 No Slack, mail, Linear or tracker for this project.
 
