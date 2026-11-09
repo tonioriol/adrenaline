@@ -6,6 +6,9 @@ build/
 # Local development docs
 docs/
 
+# Local upstream reference repositories
+upstreams/
+
 # Local secrets and signing material
 .secrets/
 *.p12

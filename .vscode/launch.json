@@ -39,6 +39,26 @@
             "target": "AdrenalineHelper",
             "configuration": "release",
             "preLaunchTask": "swift: Build Release AdrenalineHelper"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Debug AdrenalineCLI",
+            "target": "AdrenalineCLI",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug AdrenalineCLI"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:adrenaline}",
+            "name": "Release AdrenalineCLI",
+            "target": "AdrenalineCLI",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release AdrenalineCLI"
         }
     ]
 }
