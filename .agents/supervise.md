@@ -1,4 +1,4 @@
-# Oversee — adrenaline
+# Supervise — adrenaline
 
 Scope: root agents whose workspace is /Users/tr0n/Code/adrenaline (excluding [TRIAGE] agents and the master triager).
 
