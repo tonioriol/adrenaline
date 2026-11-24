@@ -31,6 +31,10 @@ final class MenuBarController: NSObject {
 
     private let state: AppState
     private let coordinator: AppCoordinator
+    private let holds: HoldController
+    private weak var visibleMenu: NSMenu?
+    private var holdItems: [NSMenuItem] = []
+    private let holdHeading = NSMenuItem(title: "Held by", action: nil, keyEquivalent: "")
     private let preferences: PreferencesStore
     private let launchAtLoginController: LaunchAtLoginControlling
     private let updater: Updating
@@ -45,6 +49,7 @@ final class MenuBarController: NSObject {
         state: AppState,
         coordinator: AppCoordinator,
         preferences: PreferencesStore,
+        holds: HoldController,
         launchAtLoginController: LaunchAtLoginControlling,
         updater: Updating,
         diskTypeDetector: DiskTypeDetecting
@@ -52,6 +57,7 @@ final class MenuBarController: NSObject {
         self.state = state
         self.coordinator = coordinator
         self.preferences = preferences
+        self.holds = holds
         self.launchAtLoginController = launchAtLoginController
         self.updater = updater
         self.diskTypeDetector = diskTypeDetector
@@ -66,11 +72,18 @@ final class MenuBarController: NSObject {
         guard let button = statusItem.button else { return }
         button.target = self
         button.action = #selector(statusItemClicked(_:))
-        button.sendAction(on: [.leftMouseDown, .rightMouseUp])
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
 
     private func bindState() {
         let center = NotificationCenter.default
+
+        observers.append(
+            center.addObserver(forName: .holdStateDidChange, object: holds, queue: .main) { [weak self] _ in
+                self?.render()
+                self?.refreshHoldItems()
+            }
+        )
 
         observers.append(
             center.addObserver(forName: .appStateActiveDidChange, object: state, queue: .main) { [weak self] _ in
@@ -136,7 +149,7 @@ final class MenuBarController: NSObject {
             return symbolImage(named: "exclamationmark.triangle")
         }
 
-        return pillImage(filled: state.isActive)
+        return StatusPill.image(filled: holds.mode == .on || holds.isAutoHeld, badged: holds.mode == .auto)
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
@@ -179,112 +192,36 @@ final class MenuBarController: NSObject {
         return image
     }
 
-    private func pillImage(filled: Bool) -> NSImage {
-        let pillScale: CGFloat = 1.2
-        let size = NSSize(width: 21, height: 17)
-
-        let image = NSImage(size: size, flipped: false) { rect in
-            guard let context = NSGraphicsContext.current?.cgContext else { return false }
-
-            context.saveGState()
-            defer { context.restoreGState() }
-
-            context.setAllowsAntialiasing(true)
-            context.setShouldAntialias(true)
-
-            context.translateBy(x: rect.midX, y: rect.midY)
-            context.rotate(by: .pi / 6)
-
-            let pillWidth: CGFloat = 13.2 * pillScale
-            let pillHeight: CGFloat = 6.5 * pillScale
-            let pillRect = CGRect(
-                x: -pillWidth / 2,
-                y: -pillHeight / 2,
-                width: pillWidth,
-                height: pillHeight
-            )
-            let radius = pillRect.height / 2
-            let pillPath = CGPath(
-                roundedRect: pillRect,
-                cornerWidth: radius,
-                cornerHeight: radius,
-                transform: nil
-            )
-
-            context.setStrokeColor(NSColor.black.cgColor)
-            context.setFillColor(NSColor.black.cgColor)
-
-            if filled {
-                context.addPath(pillPath)
-                context.fillPath()
-
-                context.setBlendMode(.clear)
-                let splitWidth: CGFloat = 1.9 * pillScale
-                let splitInset: CGFloat = 1.75 * pillScale
-                let splitRect = CGRect(
-                    x: -splitWidth / 2,
-                    y: pillRect.minY - splitInset,
-                    width: splitWidth,
-                    height: pillRect.height + (splitInset * 2)
-                )
-                context.fill(splitRect)
-            } else {
-                context.setLineWidth(1.6)
-                context.addPath(pillPath)
-                context.strokePath()
-
-                context.setLineWidth(1.25)
-                let seamOvershoot: CGFloat = 0.9 * pillScale
-                context.move(to: CGPoint(x: 0, y: pillRect.minY - seamOvershoot))
-                context.addLine(to: CGPoint(x: 0, y: pillRect.maxY + seamOvershoot))
-                context.strokePath()
-            }
-
-            return true
+    private var tooltipText: String {
+        let status: String
+        if state.isBusy {
+            status = "Changing sleep prevention state"
+        } else if let error = state.lastErrorMessage {
+            status = error
+        } else if state.isActive {
+            status = preferences.preventLidCloseSleep
+                ? "Preventing sleep, including lid-close sleep"
+                : "Preventing sleep"
+        } else {
+            status = holds.mode == .auto ? "Waiting for a hold" : "Not preventing sleep"
         }
-
-        image.isTemplate = true
-        return image
+        var lines = ["Adrenaline — \(holds.mode.rawValue.capitalized)", status]
+        if !holds.holds.isEmpty {
+            lines.append("Held by: " + holds.holds.map { holdLabel($0, includePID: false) }.joined(separator: ", "))
+        }
+        return lines.joined(separator: "\n")
     }
 
-    private var tooltipText: String {
-        if state.isBusy { return "Adrenaline is changing sleep prevention state" }
-        if state.isActive {
-            return preferences.preventLidCloseSleep
-                ? "Adrenaline is preventing sleep, including lid-close sleep"
-                : "Adrenaline is preventing sleep"
-        }
-        if let error = state.lastErrorMessage { return "Adrenaline is off: \(error)" }
-        return "Adrenaline is off"
+    private func holdLabel(_ hold: Hold, includePID: Bool) -> String {
+        let reason = hold.reason?.split(whereSeparator: \.isWhitespace).joined(separator: " ") ?? ""
+        guard !reason.isEmpty else { return hold.pid.map { "PID \($0)" } ?? "Unknown program" }
+        if includePID, let pid = hold.pid { return "\(reason) (PID \(pid))" }
+        return reason
     }
 
     @objc
     private func statusItemClicked(_ sender: NSStatusBarButton) {
-        guard let event = NSApp.currentEvent else { return }
-        if event.type == .rightMouseUp || event.modifierFlags.contains(.control) {
-            showMenu()
-            return
-        }
-
-        if isLongPress() {
-            showMenu()
-            return
-        }
-
-        coordinator.toggle()
-    }
-
-    /// Waits for the left mouse button to be released. Returns true if it is
-    /// still held after `longPressDuration`.
-    private func isLongPress() -> Bool {
-        let longPressDuration: TimeInterval = 0.5
-        let mouseUp = NSApp.nextEvent(
-            matching: .leftMouseUp,
-            until: Date(timeIntervalSinceNow: longPressDuration),
-            inMode: .eventTracking,
-            dequeue: true
-        )
-        return mouseUp == nil
+        showMenu()
     }
 
     private func showMenu() {
@@ -305,16 +242,19 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
-        let toggleItem = NSMenuItem(
-            title: state.isActive ? "Disable Adrenaline" : "Enable Adrenaline",
-            action: #selector(toggleActive),
-            keyEquivalent: ""
-        )
-        toggleItem.target = self
-        toggleItem.isEnabled = !state.isBusy
-        menu.addItem(toggleItem)
+        for mode in ActivationMode.allCases {
+            let item = NSMenuItem(title: mode.rawValue.capitalized, action: #selector(selectMode(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = mode.rawValue
+            item.state = mode == holds.mode ? .on : .off
+            menu.addItem(item)
+        }
 
         menu.addItem(NSMenuItem.separator())
+        holdHeading.isEnabled = false
+        menu.addItem(holdHeading)
+        visibleMenu = menu
+        refreshHoldItems()
 
         let aboutItem = NSMenuItem(title: "About Adrenaline", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
@@ -355,7 +295,27 @@ final class MenuBarController: NSObject {
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
+        menu.removeItem(holdHeading)
+        visibleMenu = nil
+        holdItems = []
         visibleRows = [:]
+    }
+
+    private func refreshHoldItems() {
+        guard let menu = visibleMenu else { return }
+        for item in holdItems { menu.removeItem(item) }
+        holdHeading.isHidden = holds.holds.isEmpty
+        holdItems = holds.holds.map { hold in
+            let item = NSMenuItem(title: holdLabel(hold, includePID: true), action: nil, keyEquivalent: "")
+            item.isEnabled = false
+            item.indentationLevel = 1
+            return item
+        }
+        if !holdItems.isEmpty { holdItems.append(.separator()) }
+        let start = menu.index(of: holdHeading) + 1
+        for (offset, item) in holdItems.enumerated() {
+            menu.insertItem(item, at: start + offset)
+        }
     }
 
     private var lidCloseTitle: String {
@@ -483,8 +443,10 @@ final class MenuBarController: NSObject {
     }
 
     @objc
-    private func toggleActive() {
-        coordinator.toggle()
+    private func selectMode(_ item: NSMenuItem) {
+        guard let rawValue = item.representedObject as? String, let mode = ActivationMode(rawValue: rawValue) else { return }
+        preferences.activationMode = mode
+        holds.setMode(mode)
     }
 
     @objc

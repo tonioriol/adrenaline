@@ -165,10 +165,11 @@ public final class HoldSocketServer {
 
         switch command {
         case "hold":
-            if let id = connection.holdID { holds.release(id) }
             let pid = (request["pid"] as? NSNumber)?.int32Value ?? connection.peerPID
-            let id = holds.acquire(reason: request["reason"] as? String, pid: pid)
-            connection.holdID = id
+            connection.holdID = holds.acquire(reason: request["reason"] as? String, pid: pid, replacing: connection.holdID)
+            guard let id = connection.holdID else {
+                return ["ok": false, "error": "Adrenaline is in Off mode"]
+            }
             return ["ok": true, "id": id]
         case "release":
             if let id = connection.holdID { holds.release(id) }
@@ -184,6 +185,7 @@ public final class HoldSocketServer {
     private func status() -> [String: Any] {
         var response: [String: Any] = [
             "ok": true,
+            "mode": holds.mode.rawValue,
             "active": state.isActive,
             "busy": state.isBusy,
             "holdDriven": holds.isHoldDriven,

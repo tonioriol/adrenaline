@@ -2,7 +2,15 @@
 
 Keep your Mac awake from the menu bar — even with the lid closed.
 
-**Left-click** the icon to toggle sleep prevention on/off. **Right-click** for options:
+**Click** the menu bar icon to choose a mode:
+
+| Mode | Behavior | Icon |
+|---|---|---|
+| Off | Never prevent sleep; external holds are refused | Outlined pill |
+| Auto | Prevent sleep only while at least one external hold is active | Outlined pill with a dot while waiting; filled pill with a dot while held |
+| On | Always prevent sleep, regardless of external holds | Filled pill |
+
+Adrenaline remembers your mode. On upgrade, the previous enabled setting becomes On; the previous disabled setting becomes Auto so existing integrations still work. The menu also has these options:
 
 | Option | Default | |
 |---|---|---|
@@ -15,17 +23,17 @@ Keep your Mac awake from the menu bar — even with the lid closed.
 
 ## Keeping it awake from other apps
 
-Other programs can keep Adrenaline on while they run, for example an agent harness during a long task. A request switches it on with your current settings, including lid-closed prevention if that option is enabled.
+Other programs can keep Adrenaline on while they run, for example an agent harness during a long task. In Auto, a hold switches it on with your current settings, including lid-closed prevention if enabled. The tooltip names the holders; the menu also shows their PIDs when available.
 
 Adrenaline listens on a Unix socket at `~/Library/Application Support/Adrenaline/adrenaline.sock`, which only your user can access. The protocol is newline-delimited JSON:
 
 | Request | Effect |
 |---|---|
-| `{"cmd":"hold","reason":"…"}` | Keep Adrenaline on while this connection stays open |
+| `{"cmd":"hold","reason":"…"}` | Request a hold while this connection stays open (refused in Off) |
 | `{"cmd":"release"}` | Drop this connection's hold |
-| `{"cmd":"status"}` | Report `active`, `busy`, `holdDriven` and the current `holds` |
+| `{"cmd":"status"}` | Report `mode`, `active`, `busy`, `holdDriven` and the current `holds` |
 
-Each request gets one JSON reply with an `ok` field. A hold belongs to its connection, so if the client exits or crashes, the hold goes away with it. When the last hold is released, Adrenaline turns off again, but only if a hold was what turned it on. If you had it on already, it stays on. If you switch it off yourself while something is holding it, it stays off until the next hold request.
+Each request gets one JSON reply with an `ok` field. A hold belongs to its connection, so if the client exits or crashes, the hold goes away with it. In Auto, the last release turns sleep prevention off. On stays active without holds. Switching to Off drops existing holds and refuses new ones; switch back to Auto and have the client request a new hold to let it keep the Mac awake again.
 
 Node / Bun:
 

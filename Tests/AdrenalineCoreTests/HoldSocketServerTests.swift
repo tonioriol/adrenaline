@@ -12,7 +12,7 @@ final class HoldSocketServerTests: XCTestCase {
         path = "/tmp/adr-\(UUID().uuidString.prefix(8)).sock"
         state = AppState()
         let coordinator = FakeHoldCoordinator(state: state)
-        holds = HoldController(state: state, coordinator: coordinator)
+        holds = HoldController(state: state, coordinator: coordinator, mode: .auto)
         server = HoldSocketServer(path: path, holds: holds, state: state)
         try server.start()
     }
@@ -73,6 +73,17 @@ final class HoldSocketServerTests: XCTestCase {
         _ = try call(client, ["cmd": "release"])
         XCTAssertTrue(holds.holds.isEmpty)
         XCTAssertFalse(state.isActive)
+    }
+
+    func testOffModeRefusesHoldsWithoutReportingAHolder() throws {
+        holds.setMode(.off)
+        let client = try HoldSocketClient(path: path)
+        let response = try call(client, ["cmd": "hold", "reason": "background job"])
+        XCTAssertEqual(response["ok"] as? Bool, false)
+        let status = try call(client, ["cmd": "status"])
+        XCTAssertEqual(status["mode"] as? String, "off")
+        XCTAssertEqual(status["active"] as? Bool, false)
+        XCTAssertTrue(try XCTUnwrap(status["holds"] as? [[String: Any]]).isEmpty)
     }
 
     func testBadRequestsGetErrors() throws {

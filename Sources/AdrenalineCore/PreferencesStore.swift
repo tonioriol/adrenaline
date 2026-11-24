@@ -42,7 +42,6 @@ public protocol PreferencesProviding: AnyObject {
     var overrideSystemVolumeForLidEventSounds: Bool { get set }
     var stayUnlockedWithLidClosed: Bool { get set }
     var lidClosePreventionConfirmed: Bool { get set }
-    var wasActive: Bool { get set }
 
     func snapshot() -> PreferencesSnapshot
 }
@@ -56,7 +55,8 @@ public final class PreferencesStore: PreferencesProviding {
         public static let overrideSystemVolumeForLidEventSounds = "Adrenaline.overrideSystemVolumeForLidEventSounds"
         public static let stayUnlockedWithLidClosed = "Adrenaline.stayUnlockedWithLidClosed"
         public static let lidClosePreventionConfirmed = "Adrenaline.lidClosePreventionConfirmed"
-        public static let wasActive = "Adrenaline.wasActive"
+        public static let activationMode = "Adrenaline.activationMode"
+        fileprivate static let wasActive = "Adrenaline.wasActive"
     }
 
     private let defaults: UserDefaults
@@ -119,8 +119,8 @@ public final class PreferencesStore: PreferencesProviding {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
 
-    public var wasActive: Bool {
-        didSet { defaults.set(wasActive, forKey: Key.wasActive) }
+    public var activationMode: ActivationMode {
+        didSet { defaults.set(activationMode.rawValue, forKey: Key.activationMode) }
     }
 
     public init(defaults: UserDefaults = .standard) {
@@ -132,7 +132,12 @@ public final class PreferencesStore: PreferencesProviding {
         self.overrideSystemVolumeForLidEventSounds = Self.readBool(from: defaults, key: Key.overrideSystemVolumeForLidEventSounds, default: true)
         self.stayUnlockedWithLidClosed = Self.readBool(from: defaults, key: Key.stayUnlockedWithLidClosed, default: false)
         self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
-        self.wasActive = Self.readBool(from: defaults, key: Key.wasActive, default: false)
+        if let saved = defaults.string(forKey: Key.activationMode), let mode = ActivationMode(rawValue: saved) {
+            self.activationMode = mode
+        } else {
+            self.activationMode = defaults.bool(forKey: Key.wasActive) ? .on : .auto
+            defaults.set(activationMode.rawValue, forKey: Key.activationMode)
+        }
     }
 
     public func snapshot() -> PreferencesSnapshot {

@@ -32,7 +32,6 @@ private final class FakePreferencesStore: PreferencesProviding {
     var overrideSystemVolumeForLidEventSounds: Bool = true
     var stayUnlockedWithLidClosed: Bool = false
     var lidClosePreventionConfirmed: Bool = false
-    var wasActive: Bool = false
 
     func snapshot() -> PreferencesSnapshot {
         PreferencesSnapshot(

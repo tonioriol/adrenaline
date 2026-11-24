@@ -9,7 +9,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lidCloseLockResponder: LidCloseLockResponder?
     private var stayUnlockedController: StayUnlockedController?
     private var updater: SparkleUpdaterController?
-    private var activeStateRecorder: ActiveStateRecorder?
     private var holdController: HoldController?
     private var holdSocketServer: HoldSocketServer?
 
@@ -62,16 +61,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.lidCloseLockResponder = lidCloseLockResponder
         self.stayUnlockedController = stayUnlockedController
         self.updater = updater
+        let holdController = HoldController(state: state, coordinator: coordinator, mode: preferences.activationMode)
         self.menuBarController = MenuBarController(
             state: state,
             coordinator: coordinator,
             preferences: preferences,
+            holds: holdController,
             launchAtLoginController: LaunchAtLoginController(),
             updater: updater,
             diskTypeDetector: diskTypeDetector
         )
 
-        let holdController = HoldController(state: state, coordinator: coordinator)
         let holdSocketServer = HoldSocketServer(holds: holdController, state: state)
         do {
             try holdSocketServer.start()
@@ -81,16 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.holdController = holdController
         self.holdSocketServer = holdSocketServer
 
-        activeStateRecorder = ActiveStateRecorder(
-            state: state,
-            preferences: preferences,
-            coordinator: coordinator,
-            isHoldDriven: { [weak holdController] in holdController?.isHoldDriven == true }
-        )
-
-        if preferences.wasActive {
-            coordinator.turnOn()
-        } else {
+        if preferences.activationMode != .on {
             // Puts back a lock setting left changed by a crash.
             stayUnlockedController.apply()
         }

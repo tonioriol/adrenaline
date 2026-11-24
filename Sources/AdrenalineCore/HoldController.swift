@@ -19,90 +19,82 @@ public struct Hold: Equatable {
     }
 }
 
-/// Keeps Adrenaline on while at least one external client holds it.
-///
-/// Holds only switch Adrenaline off again if holds switched it on. If the user
-/// already had it on, releasing the last hold leaves it on. If the user turns it
-/// off while holds exist, or turning on fails, holds yield until a new hold arrives.
-/// Must be used from the main queue.
+public enum ActivationMode: String, CaseIterable {
+    case off, auto, on
+}
+
+public extension Notification.Name {
+    static let holdStateDidChange = Notification.Name("Adrenaline.holdStateDidChange")
+}
+
+/// Applies the selected activation policy. Must be used from the main queue.
 public final class HoldController {
     private let state: AppState
     private let coordinator: HoldActivating
-    private var observer: NSObjectProtocol?
     private var nextID = 1
-    private var awaitingOwnTurnOn = false
-    private var yieldedUntilNextHold = false
+    private var requestedActive: Bool?
 
+    public private(set) var mode: ActivationMode
     public private(set) var holds: [Hold] = []
-    /// True while the current activation was started by holds rather than the user.
-    public private(set) var ownsActivation = false
+    public var isAutoHeld: Bool { mode == .auto && !holds.isEmpty }
+    public var isHoldDriven: Bool { isAutoHeld && (state.isActive || requestedActive == true) }
 
-    public var isHoldDriven: Bool { ownsActivation || awaitingOwnTurnOn }
-
-    public init(state: AppState, coordinator: HoldActivating) {
+    public init(state: AppState, coordinator: HoldActivating, mode: ActivationMode) {
         self.state = state
         self.coordinator = coordinator
+        self.mode = mode
         coordinator.onTransitionEnd = { [weak self] in self?.transitionEnded() }
-        observer = NotificationCenter.default.addObserver(
-            forName: .appStateActiveDidChange,
-            object: state,
-            queue: nil
-        ) { [weak self] _ in
-            self?.activeChanged()
-        }
+        reconcile()
     }
 
-    deinit {
-        if let observer { NotificationCenter.default.removeObserver(observer) }
+    public func setMode(_ mode: ActivationMode) {
+        let changed = self.mode != mode
+        self.mode = mode
+        if mode == .off { holds.removeAll() }
+        if changed { notify() }
+        reconcile()
     }
 
     @discardableResult
-    public func acquire(reason: String?, pid: Int32?) -> Int {
+    public func acquire(reason: String?, pid: Int32?, replacing previousID: Int? = nil) -> Int? {
+        guard mode != .off else { return nil }
+        if let previousID { holds.removeAll { $0.id == previousID } }
         let id = nextID
         nextID += 1
         holds.append(Hold(id: id, reason: reason, pid: pid))
-        yieldedUntilNextHold = false
+        notify()
         reconcile()
         return id
     }
 
     public func release(_ id: Int) {
-        let count = holds.count
-        holds.removeAll { $0.id == id }
-        guard holds.count != count else { return }
+        guard let index = holds.firstIndex(where: { $0.id == id }) else { return }
+        holds.remove(at: index)
+        notify()
         reconcile()
+    }
+
+    private var wantsActive: Bool { mode == .on || isAutoHeld }
+
+    private func notify() {
+        NotificationCenter.default.post(name: .holdStateDidChange, object: self)
     }
 
     private func transitionEnded() {
-        if awaitingOwnTurnOn {
-            awaitingOwnTurnOn = false
-            ownsActivation = state.isActive
-            if !state.isActive { yieldedUntilNextHold = true }
-        }
-        reconcile()
-    }
-
-    private func activeChanged() {
-        // The user (or an error) switched Adrenaline off under our holds.
-        if !state.isActive, ownsActivation {
-            ownsActivation = false
-            if !holds.isEmpty { yieldedUntilNextHold = true }
-        }
+        let completedTarget = requestedActive
+        requestedActive = nil
+        // A failed transition must not immediately retry itself. Still apply a
+        // different target if the mode or holds changed mid-transition.
+        if completedTarget != wantsActive { reconcile() }
     }
 
     private func reconcile() {
-        if !holds.isEmpty {
-            guard !state.isActive, !yieldedUntilNextHold, !awaitingOwnTurnOn else { return }
-            awaitingOwnTurnOn = true
-            if !coordinator.turnOn() {
-                // Busy; retried when the running transition ends.
-                awaitingOwnTurnOn = false
-            }
-        } else if ownsActivation, state.isActive {
-            ownsActivation = false
-            if !coordinator.turnOff() {
-                ownsActivation = true
-            }
+        let target = wantsActive
+        guard requestedActive == nil, target != state.isActive else { return }
+        requestedActive = target
+        if !(target ? coordinator.turnOn() : coordinator.turnOff()) {
+            // Busy with an unrelated operation; its completion reconciles again.
+            requestedActive = nil
         }
     }
 }

@@ -29,11 +29,6 @@ final class FakeHoldCoordinator: HoldActivating {
         return true
     }
 
-    /// Simulates the user clicking the menu bar icon.
-    func userToggle() {
-        if state.isActive { _ = turnOff() } else { _ = turnOn() }
-    }
-
     func finishPending() {
         let work = pending
         pending = nil
@@ -57,76 +52,91 @@ final class HoldControllerTests: XCTestCase {
     override func setUp() {
         state = AppState()
         coordinator = FakeHoldCoordinator(state: state)
-        holds = HoldController(state: state, coordinator: coordinator)
+        holds = HoldController(state: state, coordinator: coordinator, mode: .auto)
     }
 
-    func testFirstHoldTurnsOnAndLastReleaseTurnsOff() {
-        let a = holds.acquire(reason: "a", pid: nil)
-        let b = holds.acquire(reason: "b", pid: nil)
+    func testAutoActivatesForFirstHoldAndDeactivatesAfterLastRelease() throws {
+        XCTAssertFalse(state.isActive)
+        let a = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        let b = try XCTUnwrap(holds.acquire(reason: "b", pid: nil))
         XCTAssertTrue(state.isActive)
+        XCTAssertTrue(holds.isAutoHeld)
         XCTAssertEqual(coordinator.turnOnCount, 1)
-        XCTAssertTrue(holds.isHoldDriven)
 
         holds.release(a)
         XCTAssertTrue(state.isActive)
         holds.release(b)
         XCTAssertFalse(state.isActive)
+        XCTAssertFalse(holds.isAutoHeld)
         XCTAssertEqual(coordinator.turnOffCount, 1)
     }
 
-    func testReleasingDoesNotTurnOffWhenUserHadItOn() {
-        coordinator.userToggle()
-        let id = holds.acquire(reason: nil, pid: nil)
+    func testOffClearsAndRefusesHoldsEvenDuringTurnOn() throws {
+        coordinator.deferTransitions = true
+        let id = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        holds.setMode(.off)
+        XCTAssertNil(holds.acquire(reason: "b", pid: nil))
+        XCTAssertTrue(holds.holds.isEmpty)
+        coordinator.finishPending()
+        coordinator.finishPending()
+        XCTAssertFalse(state.isActive)
+        holds.release(id)
+        holds.setMode(.auto)
+        XCTAssertFalse(state.isActive)
+    }
+
+    func testOnAtLaunchAndReleaseDoesNotDeactivate() throws {
+        holds = HoldController(state: state, coordinator: coordinator, mode: .on)
+        XCTAssertTrue(state.isActive)
+        let id = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
         XCTAssertFalse(holds.isHoldDriven)
         holds.release(id)
         XCTAssertTrue(state.isActive)
-        XCTAssertEqual(coordinator.turnOffCount, 0)
-    }
-
-    func testUserTurningOffYieldsUntilNextHold() {
-        _ = holds.acquire(reason: nil, pid: nil)
-        coordinator.userToggle()
+        holds.setMode(.auto)
         XCTAssertFalse(state.isActive)
-        XCTAssertEqual(coordinator.turnOnCount, 1, "must not fight the user")
-
-        _ = holds.acquire(reason: nil, pid: nil)
-        XCTAssertTrue(state.isActive)
-        XCTAssertEqual(coordinator.turnOnCount, 2)
     }
 
-    func testUserTakingOverKeepsItOnAfterRelease() {
-        let id = holds.acquire(reason: nil, pid: nil)
-        coordinator.userToggle() // off
-        coordinator.userToggle() // user turns it back on themselves
+    func testChangingBetweenAutoHeldAndOnDoesNotCyclePower() throws {
+        let id = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        holds.setMode(.on)
+        XCTAssertFalse(holds.isAutoHeld)
+        holds.setMode(.auto)
+        XCTAssertTrue(holds.isAutoHeld)
+        XCTAssertEqual(coordinator.turnOnCount, 1)
+        XCTAssertEqual(coordinator.turnOffCount, 0)
         holds.release(id)
+        XCTAssertFalse(state.isActive)
+    }
+
+    func testHoldNotificationsExposeChangesWhileActivationIsUnchanged() throws {
+        holds.setMode(.on)
+        let notified = expectation(description: "add, replace, remove")
+        notified.expectedFulfillmentCount = 3
+        let observer = NotificationCenter.default.addObserver(forName: .holdStateDidChange, object: holds, queue: nil) { _ in
+            notified.fulfill()
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+        let a = try XCTUnwrap(holds.acquire(reason: "first", pid: 41))
+        let b = try XCTUnwrap(holds.acquire(reason: "replacement", pid: 42, replacing: a))
+        XCTAssertEqual(holds.holds, [Hold(id: b, reason: "replacement", pid: 42)])
+        holds.release(b)
+        wait(for: [notified], timeout: 0.2)
         XCTAssertTrue(state.isActive)
     }
 
     func testFailedTurnOnIsNotRetriedInALoop() {
         coordinator.failTurnOn = true
-        _ = holds.acquire(reason: nil, pid: nil)
+        holds.acquire(reason: nil, pid: nil)
         XCTAssertFalse(state.isActive)
         XCTAssertEqual(coordinator.turnOnCount, 1)
         XCTAssertFalse(holds.isHoldDriven)
     }
 
-    func testHoldArrivingDuringTransitionIsAppliedAfterIt() {
+    func testReleaseDuringOwnTurnOnTurnsOffAfterwards() throws {
         coordinator.deferTransitions = true
-        coordinator.userToggle() // user turn-on in flight
-        let id = holds.acquire(reason: nil, pid: nil)
+        let id = try XCTUnwrap(holds.acquire(reason: nil, pid: nil))
+        holds.release(id)
         coordinator.finishPending()
-        XCTAssertTrue(state.isActive)
-        XCTAssertFalse(holds.isHoldDriven, "user started this activation")
-
-        holds.release(id)
-        XCTAssertEqual(coordinator.turnOffCount, 0)
-    }
-
-    func testReleaseDuringOwnTurnOnTurnsOffAfterwards() {
-        coordinator.deferTransitions = true
-        let id = holds.acquire(reason: nil, pid: nil)
-        holds.release(id)
-        coordinator.finishPending() // turn-on lands, then reconcile turns off
         coordinator.finishPending()
         XCTAssertFalse(state.isActive)
         XCTAssertEqual(coordinator.turnOffCount, 1)
