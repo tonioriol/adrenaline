@@ -42,7 +42,11 @@ The installed app is live infrastructure. Other agents' harnesses hold it on thr
 during long tasks, and `make reinstall` kills it — dropping every hold, so the Mac can sleep
 mid-task — then replaces it with a bundle of whatever the shared tree holds right now.
 
-- Run `make reinstall` only when the user asks for an installed build.
+- Run `make reinstall` only when the user asks for an installed build of unreleased work.
+- To install a released version, wait for the Release run, `gh release download` its zip, check it
+  with `spctl -a` and `xcrun stapler validate`, quit the app, replace the bundle and `open -g` it.
+  `make reinstall` would install a local build still carrying the old version, which Sparkle then
+  offers to "update".
 - Before it, run `/Applications/Adrenaline.app/Contents/Helpers/adrenaline status`; if `holds` is
   non-empty, tell the user who is holding it and let them decide.
 - Leave the privileged helper (`/Library/PrivilegedHelperTools/com.tonioriol.adrenaline.helper`)
