@@ -4,6 +4,14 @@ All notable changes to Adrenaline are documented here. Adrenaline follows [Seman
 
 - - -
 
+## [v0.9.0](https://github.com/tonioriol/adrenaline/releases/tag/v0.9.0) - 2026-11-26
+
+#### Features
+- Per-mode settings for Auto and On, click the icon to cycle modes
+
+- - -
+
+
 ## [v0.8.0](https://github.com/tonioriol/adrenaline/releases/tag/v0.8.0) - 2026-11-24
 
 #### Features
