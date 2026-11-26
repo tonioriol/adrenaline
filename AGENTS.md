@@ -44,7 +44,9 @@ mid-task — then replaces it with a bundle of whatever the shared tree holds ri
 
 - Run `make reinstall` only when the user asks for an installed build of unreleased work.
 - To install a released version, wait for the Release run, `gh release download` its zip, check it
-  with `spctl -a` and `xcrun stapler validate`, quit the app, replace the bundle and `open -g` it.
+  with `spctl -a` and `xcrun stapler validate`, quit the app, `trash /Applications/Adrenaline.app`,
+  `ditto` the release app into `/Applications/` and `open -g` it. Run each as its own command:
+  Decode's command check refuses `mv` of the bundle, and `trash` chained after `cd`.
   `make reinstall` would install a local build still carrying the old version, which Sparkle then
   offers to "update".
 - Before it, run `/Applications/Adrenaline.app/Contents/Helpers/adrenaline status`; if `holds` is
