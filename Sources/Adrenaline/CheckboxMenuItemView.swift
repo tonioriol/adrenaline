@@ -12,8 +12,12 @@ final class CheckboxMenuItemView: NSView {
     private let checkbox: NSButton
     var onToggle: (() -> Void)?
 
-    init(title: String, isOn: Bool, isEnabled: Bool = true, isChild: Bool = false) {
-        self.checkbox = NSButton(checkboxWithTitle: title, target: nil, action: nil)
+    /// A row whose control toggles without closing the menu: a checkbox, or a
+    /// radio button for one choice out of several.
+    init(title: String, isOn: Bool, isEnabled: Bool = true, isChild: Bool = false, radio: Bool = false) {
+        self.checkbox = radio
+            ? NSButton(radioButtonWithTitle: title, target: nil, action: nil)
+            : NSButton(checkboxWithTitle: title, target: nil, action: nil)
         super.init(frame: NSRect(x: 0, y: 0, width: Metrics.width, height: Metrics.height))
 
         checkbox.target = self

@@ -35,6 +35,8 @@ final class MenuBarController: NSObject {
     private weak var visibleMenu: NSMenu?
     private var holdItems: [NSMenuItem] = []
     private let holdHeading = NSMenuItem(title: "Held by", action: nil, keyEquivalent: "")
+    private let presetHeading = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+    private var modeRows: [ActivationMode: CheckboxMenuItemView] = [:]
     private let preferences: PreferencesStore
     private let launchAtLoginController: LaunchAtLoginControlling
     private let updater: Updating
@@ -72,7 +74,7 @@ final class MenuBarController: NSObject {
         guard let button = statusItem.button else { return }
         button.target = self
         button.action = #selector(statusItemClicked(_:))
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.sendAction(on: [.leftMouseDown, .rightMouseUp])
     }
 
     private func bindState() {
@@ -82,6 +84,7 @@ final class MenuBarController: NSObject {
             center.addObserver(forName: .holdStateDidChange, object: holds, queue: .main) { [weak self] _ in
                 self?.render()
                 self?.refreshHoldItems()
+                self?.refreshModeRows()
             }
         )
 
@@ -215,7 +218,7 @@ final class MenuBarController: NSObject {
         if !holds.holds.isEmpty {
             lines.append("Held by: " + holds.holds.map { holdLabel($0, includePID: false) }.joined(separator: ", "))
         }
-        lines.append("Click for \(holds.nextMode.rawValue.capitalized) · right-click for the menu")
+        lines.append("Click for \(holds.nextMode.rawValue.capitalized) · right-click or hold for the menu")
         return lines.joined(separator: "\n")
     }
 
@@ -228,13 +231,27 @@ final class MenuBarController: NSObject {
 
     @objc
     private func statusItemClicked(_ sender: NSStatusBarButton) {
-        // A click cycles the mode; a right-click or control-click opens the menu.
-        guard let event = NSApp.currentEvent,
-              event.type == .rightMouseUp || event.modifierFlags.contains(.control) else {
-            setMode(holds.nextMode)
+        // A click cycles the mode; a long press, right-click or control-click opens the menu.
+        if let event = NSApp.currentEvent,
+           event.type == .rightMouseUp || event.modifierFlags.contains(.control) || isLongPress() {
+            showMenu()
             return
         }
-        showMenu()
+        setMode(holds.nextMode)
+    }
+
+    /// Waits for the left mouse button to be released. Returns true if it is
+    /// still held after `longPressDuration`, so the menu opens under the held
+    /// button and releasing over a row picks it.
+    private func isLongPress() -> Bool {
+        let longPressDuration: TimeInterval = 0.5
+        let mouseUp = NSApp.nextEvent(
+            matching: .leftMouseUp,
+            until: Date(timeIntervalSinceNow: longPressDuration),
+            inMode: .eventTracking,
+            dequeue: true
+        )
+        return mouseUp == nil
     }
 
     private func showMenu() {
@@ -255,12 +272,15 @@ final class MenuBarController: NSObject {
             menu.addItem(NSMenuItem.separator())
         }
 
+        // View rows, so picking a mode leaves the menu open.
+        modeRows = [:]
         for mode in ActivationMode.allCases {
-            let item = NSMenuItem(title: mode.rawValue.capitalized, action: #selector(selectMode(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = mode.rawValue
-            item.state = mode == holds.mode ? .on : .off
+            let item = NSMenuItem()
+            let row = CheckboxMenuItemView(title: mode.rawValue.capitalized, isOn: mode == holds.mode, radio: true)
+            row.onToggle = { [weak self] in self?.setMode(mode) }
+            item.view = row
             menu.addItem(item)
+            modeRows[mode] = row
         }
 
         menu.addItem(NSMenuItem.separator())
@@ -275,7 +295,7 @@ final class MenuBarController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
-        let presetHeading = NSMenuItem(title: "When \(preferences.preset.rawValue.capitalized)", action: nil, keyEquivalent: "")
+        presetHeading.title = presetHeadingTitle
         presetHeading.isEnabled = false
         menu.addItem(presetHeading)
 
@@ -313,9 +333,22 @@ final class MenuBarController: NSObject {
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
         menu.removeItem(holdHeading)
+        menu.removeItem(presetHeading)
         visibleMenu = nil
         holdItems = []
         visibleRows = [:]
+        modeRows = [:]
+    }
+
+    private var presetHeadingTitle: String {
+        "When \(preferences.preset.rawValue.capitalized)"
+    }
+
+    private func refreshModeRows() {
+        for (mode, row) in modeRows {
+            row.update(title: mode.rawValue.capitalized, isOn: mode == holds.mode, isEnabled: true)
+        }
+        presetHeading.title = presetHeadingTitle
     }
 
     private func refreshHoldItems() {
@@ -457,12 +490,6 @@ final class MenuBarController: NSObject {
             aboutWindowController = AboutWindowController(updater: updater)
         }
         aboutWindowController?.showWindow()
-    }
-
-    @objc
-    private func selectMode(_ item: NSMenuItem) {
-        guard let rawValue = item.representedObject as? String, let mode = ActivationMode(rawValue: rawValue) else { return }
-        setMode(mode)
     }
 
     private func setMode(_ mode: ActivationMode) {

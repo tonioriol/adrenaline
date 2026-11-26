@@ -50,52 +50,37 @@ enum StatusPill {
             context.setStrokeColor(NSColor.black.cgColor)
             context.setFillColor(NSColor.black.cgColor)
 
+            // Each half is the pill cut at a gap in the middle. A filled half and an
+            // outlined half have the same outer edge: the outline is drawn inside the
+            // half's shape, never over it. The rotation lifts the pill's right end, so
+            // the left half is the lower one.
             let splitWidth: CGFloat = 1.9 * pillScale
-            let splitInset: CGFloat = 1.75 * pillScale
-            let splitRect = CGRect(
-                x: -splitWidth / 2,
-                y: pillRect.minY - splitInset,
-                width: splitWidth,
-                height: pillRect.height + (splitInset * 2)
-            )
+            let lineWidth: CGFloat = 1.5
+            let bounds = pillRect.insetBy(dx: -2, dy: -2)
+            let lower = CGRect(x: bounds.minX, y: bounds.minY, width: bounds.midX - splitWidth / 2 - bounds.minX, height: bounds.height)
+            let upper = CGRect(x: splitWidth / 2, y: bounds.minY, width: bounds.maxX - splitWidth / 2, height: bounds.height)
 
-            switch fill {
-            case .full:
-                context.addPath(pillPath)
-                context.fillPath()
-                context.setBlendMode(.clear)
-                context.fill(splitRect)
-            case .half:
-                // The rotation lifts the pill's right end, so its left half is the lower one:
-                // fill it up to the seam gap, and outline the other half as a closed shape.
-                let lineWidth: CGFloat = 1.6
-                let bounds = pillRect.insetBy(dx: -2, dy: -2)
+            func drawHalf(_ half: CGRect, seamX: CGFloat, filled: Bool) {
                 context.saveGState()
-                context.clip(to: CGRect(x: bounds.minX, y: bounds.minY, width: splitRect.minX - bounds.minX, height: bounds.height))
+                defer { context.restoreGState() }
+                context.clip(to: half)
                 context.addPath(pillPath)
-                context.fillPath()
-                context.restoreGState()
-
-                let seamEdge = splitRect.maxX + lineWidth / 2
-                context.saveGState()
-                context.clip(to: CGRect(x: splitRect.maxX, y: bounds.minY, width: bounds.maxX - splitRect.maxX, height: bounds.height))
-                context.setLineWidth(lineWidth)
+                if filled {
+                    context.fillPath()
+                    return
+                }
+                context.clip()
+                // Clipped to the half's shape, a stroke twice as wide leaves exactly
+                // lineWidth inside it.
+                context.setLineWidth(lineWidth * 2)
                 context.addPath(pillPath)
-                context.move(to: CGPoint(x: seamEdge, y: pillRect.minY))
-                context.addLine(to: CGPoint(x: seamEdge, y: pillRect.maxY))
-                context.strokePath()
-                context.restoreGState()
-            case .none:
-                context.setLineWidth(1.6)
-                context.addPath(pillPath)
-                context.strokePath()
-
-                context.setLineWidth(1.25)
-                let seamOvershoot: CGFloat = 0.9 * pillScale
-                context.move(to: CGPoint(x: 0, y: pillRect.minY - seamOvershoot))
-                context.addLine(to: CGPoint(x: 0, y: pillRect.maxY + seamOvershoot))
+                context.move(to: CGPoint(x: seamX, y: bounds.minY))
+                context.addLine(to: CGPoint(x: seamX, y: bounds.maxY))
                 context.strokePath()
             }
+
+            drawHalf(lower, seamX: lower.maxX, filled: fill != .none)
+            drawHalf(upper, seamX: upper.minX, filled: fill == .full)
 
             return true
         }

@@ -2,7 +2,7 @@
 
 Keep your Mac awake from the menu bar — even with the lid closed.
 
-**Click** the menu bar icon to cycle Off → Auto → On. **Right-click** (or Control-click) it to open the menu, which also lists the three modes:
+**Click** the menu bar icon to cycle Off → Auto → On. **Hold** it, **right-click** or Control-click it to open the menu; holding lets you drag down and release on a row. Picking a mode or a setting keeps the menu open until you click outside it or on the icon. The menu lists the three modes:
 
 | Mode | Behavior | Icon |
 |---|---|---|
