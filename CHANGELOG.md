@@ -4,6 +4,14 @@ All notable changes to Adrenaline are documented here. Adrenaline follows [Seman
 
 - - -
 
+## [v0.9.1](https://github.com/tonioriol/adrenaline/releases/tag/v0.9.1) - 2026-11-26
+
+#### Bug Fixes
+- Even pill outlines, hold to open the menu, keep it open after picking
+
+- - -
+
+
 ## [v0.9.0](https://github.com/tonioriol/adrenaline/releases/tag/v0.9.0) - 2026-11-26
 
 #### Features
