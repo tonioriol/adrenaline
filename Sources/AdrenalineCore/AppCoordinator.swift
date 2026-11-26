@@ -46,7 +46,22 @@ public final class AppCoordinator: HoldActivating {
     private var isTransitioning = false
     private var pendingShutdownDone: (() -> Void)?
     private var lidCloseEngagedThisSession = false
+    /// The sleep settings in force while active; nil while off.
+    private var applied: AppliedSettings?
 
+    private struct AppliedSettings: Equatable {
+        var display: Bool
+        var disk: Bool
+        var lidClose: Bool
+    }
+
+    private var wanted: AppliedSettings {
+        AppliedSettings(
+            display: preferences.preventDisplaySleep,
+            disk: preferences.preventDiskSleep,
+            lidClose: preferences.preventLidCloseSleep
+        )
+    }
 
     /// Called whenever an accepted transition finishes (not during shutdown).
     public var onTransitionEnd: (() -> Void)?
@@ -83,6 +98,18 @@ public final class AppCoordinator: HoldActivating {
     public func turnOff() -> Bool {
         runTransition { [weak self] done in
             self?.performTurnOff(force: false, done: done) ?? done()
+        }
+    }
+
+    /// Turns off and on again in one transition when the settings in force differ from the
+    /// preferences (another mode's preset); does nothing while off or when they match.
+    @discardableResult
+    public func reapply() -> Bool {
+        runTransition { [weak self] done in
+            guard let self, self.state.isActive, self.applied != self.wanted else { done(); return }
+            self.performTurnOff(force: false) { [weak self] in
+                self?.performTurnOn(done: done) ?? done()
+            }
         }
     }
 
@@ -196,6 +223,7 @@ public final class AppCoordinator: HoldActivating {
             rollbackForShutdown(done: done)
             return
         }
+        applied = wanted
         state.setActive(true)
         state.setBusy(false)
         done()
@@ -218,6 +246,7 @@ public final class AppCoordinator: HoldActivating {
         guard force || !state.isBusy else { done(); return }
         state.setBusy(true)
         awakeController.disable()
+        applied = nil
 
         let needsLidCloseDisable = lidCloseEngagedThisSession
         lidCloseEngagedThisSession = false
@@ -261,6 +290,7 @@ public final class AppCoordinator: HoldActivating {
 
         do {
             try awakeController.setPreventDisplaySleep(enabled)
+            applied?.display = enabled
         } catch {
             preferences.preventDisplaySleep = previous
             state.recordErrorWhileActive(error.localizedDescription)
@@ -275,6 +305,7 @@ public final class AppCoordinator: HoldActivating {
 
         do {
             try awakeController.setPreventDiskSleep(enabled)
+            applied?.disk = enabled
         } catch {
             preferences.preventDiskSleep = previous
             state.recordErrorWhileActive(error.localizedDescription)
@@ -303,7 +334,7 @@ public final class AppCoordinator: HoldActivating {
                     guard let self else { done(); return }
                     switch result {
                     case .success(let active) where active:
-                        break // success
+                        self.applied?.lidClose = true
                     case .success:
                         self.lidCloseController.disable { _ in }
                         self.lidCloseEngagedThisSession = false
@@ -337,6 +368,7 @@ public final class AppCoordinator: HoldActivating {
                         )
                     }
                     self.lidCloseEngagedThisSession = false
+                    self.applied?.lidClose = false
                     done()
                 }
             }

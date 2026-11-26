@@ -2,15 +2,17 @@
 
 Keep your Mac awake from the menu bar — even with the lid closed.
 
-**Click** the menu bar icon to choose a mode:
+**Click** the menu bar icon to cycle Off → Auto → On. **Right-click** (or Control-click) it to open the menu, which also lists the three modes:
 
 | Mode | Behavior | Icon |
 |---|---|---|
 | Off | Never prevent sleep; external holds are refused | Outlined pill |
-| Auto | Prevent sleep only while at least one external hold is active | Outlined pill with a dot while waiting; filled pill with a dot while held |
+| Auto | Prevent sleep only while at least one external hold is active | Lower half filled; a dot while a hold keeps it on |
 | On | Always prevent sleep, regardless of external holds | Filled pill |
 
-Adrenaline remembers your mode. On upgrade, the previous enabled setting becomes On; the previous disabled setting becomes Auto so existing integrations still work. The menu also has these options:
+Adrenaline remembers your mode. On upgrade, the previous enabled setting becomes On; the previous disabled setting becomes Auto so existing integrations still work.
+
+Auto and On each keep their own settings, so for example Auto can let the display sleep while On keeps it awake. The menu edits the current mode's settings (in Off, On's), under a "When Auto" or "When On" heading; switching mode while awake applies the new mode's settings at once. Your settings from before this split start as both. The options are:
 
 | Option | Default | |
 |---|---|---|
@@ -19,11 +21,11 @@ Adrenaline remembers your mode. On upgrade, the previous enabled setting becomes
 | Prevent sleep with lid closed | OFF | Requires one-time admin authorization |
 | Stay unlocked when lid is closed | OFF | No lock screen when you reopen the lid. Asks once for your login password (kept in the Keychain), turns off the macOS "Require password" setting while Adrenaline is on and puts yours back when it turns off |
 | Play lid event sounds | ON | Sound on lid open/close |
-| Launch at login | OFF | Start with macOS |
+| Launch at login | OFF | Start with macOS (one setting for all modes) |
 
 ## Keeping it awake from other apps
 
-Other programs can keep Adrenaline on while they run, for example an agent harness during a long task. In Auto, a hold switches it on with your current settings, including lid-closed prevention if enabled. The tooltip names the holders; the menu also shows their PIDs when available.
+Other programs can keep Adrenaline on while they run, for example an agent harness during a long task. In Auto, a hold switches it on with your Auto settings, including lid-closed prevention if enabled. The tooltip names the holders; the menu also shows their PIDs when available.
 
 Adrenaline listens on a Unix socket at `~/Library/Application Support/Adrenaline/adrenaline.sock`, which only your user can access. The protocol is newline-delimited JSON:
 

@@ -4,6 +4,8 @@ public protocol HoldActivating: AnyObject {
     /// Returns false when the request was dropped because another transition is in flight.
     @discardableResult func turnOn() -> Bool
     @discardableResult func turnOff() -> Bool
+    /// Re-applies the current preferences while active; a no-op when they are already in force.
+    @discardableResult func reapply() -> Bool
     var onTransitionEnd: (() -> Void)? { get set }
 }
 
@@ -33,6 +35,8 @@ public final class HoldController {
     private let coordinator: HoldActivating
     private var nextID = 1
     private var requestedActive: Bool?
+    /// The mode changed while active, so the new mode's preset still has to be applied.
+    private var reapplyPending = false
 
     public private(set) var mode: ActivationMode
     public private(set) var holds: [Hold] = []
@@ -51,8 +55,17 @@ public final class HoldController {
         let changed = self.mode != mode
         self.mode = mode
         if mode == .off { holds.removeAll() }
-        if changed { notify() }
+        if changed {
+            if wantsActive { reapplyPending = true }
+            notify()
+        }
         reconcile()
+    }
+
+    /// The next mode in the click cycle: Off → Auto → On → Off.
+    public var nextMode: ActivationMode {
+        let all = ActivationMode.allCases
+        return all[(all.firstIndex(of: mode)! + 1) % all.count]
     }
 
     @discardableResult
@@ -85,16 +98,25 @@ public final class HoldController {
         requestedActive = nil
         // A failed transition must not immediately retry itself. Still apply a
         // different target if the mode or holds changed mid-transition.
-        if completedTarget != wantsActive { reconcile() }
+        if completedTarget != wantsActive || reapplyPending { reconcile() }
     }
 
     private func reconcile() {
+        guard requestedActive == nil else { return }
         let target = wantsActive
-        guard requestedActive == nil, target != state.isActive else { return }
-        requestedActive = target
-        if !(target ? coordinator.turnOn() : coordinator.turnOff()) {
-            // Busy with an unrelated operation; its completion reconciles again.
-            requestedActive = nil
+        // Cleared before the call, which may finish synchronously and reconcile again.
+        // Turning on reads the current preset and turning off needs none, so either settles it.
+        let pending = reapplyPending
+        reapplyPending = false
+        if target != state.isActive {
+            requestedActive = target
+            if !(target ? coordinator.turnOn() : coordinator.turnOff()) {
+                // Busy with an unrelated operation; its completion reconciles again.
+                requestedActive = nil
+                reapplyPending = pending
+            }
+        } else if pending, target, !coordinator.reapply() {
+            reapplyPending = true
         }
     }
 }

@@ -138,4 +138,62 @@ final class PreferencesStoreTests: XCTestCase {
 
         XCTAssertEqual(counts[lidDidChange], 1)
     }
+
+    func testAutoAndOnKeepSeparatePresetsAndOffEditsOn() {
+        let defaults = makeIsolatedDefaults()
+        let store = PreferencesStore(defaults: defaults)
+
+        store.activationMode = .auto
+        store.preventDisplaySleep = false
+        store.activationMode = .on
+        XCTAssertTrue(store.preventDisplaySleep)
+        store.activationMode = .off
+        store.preventLidCloseSleep = true
+        store.activationMode = .on
+        XCTAssertTrue(store.preventLidCloseSleep)
+        store.activationMode = .auto
+        XCTAssertFalse(store.preventDisplaySleep)
+        XCTAssertFalse(store.preventLidCloseSleep)
+
+        let reloaded = PreferencesStore(defaults: defaults)
+        XCTAssertFalse(reloaded.preventDisplaySleep)
+        reloaded.activationMode = .on
+        XCTAssertTrue(reloaded.preventDisplaySleep)
+        XCTAssertTrue(reloaded.preventLidCloseSleep)
+    }
+
+    func testLegacySingleKeySeedsBothPresets() {
+        let defaults = makeIsolatedDefaults()
+        defaults.set(false, forKey: "Adrenaline.preventDisplaySleep")
+        defaults.set(true, forKey: "Adrenaline.stayUnlockedWithLidClosed")
+        defaults.set(true, forKey: "Adrenaline.on.stayUnlockedWithLidClosed")
+        defaults.set(false, forKey: "Adrenaline.auto.stayUnlockedWithLidClosed")
+        let store = PreferencesStore(defaults: defaults)
+
+        for mode in [ActivationMode.auto, .on] {
+            store.activationMode = mode
+            XCTAssertFalse(store.preventDisplaySleep, "\(mode)")
+            XCTAssertTrue(store.preventDiskSleep, "\(mode)")
+        }
+        XCTAssertTrue(store.stayUnlockedWithLidClosed)
+        store.activationMode = .auto
+        XCTAssertFalse(store.stayUnlockedWithLidClosed)
+    }
+
+    func testSwitchingModePostsOnlyForSettingsThatDiffer() {
+        let defaults = makeIsolatedDefaults()
+        let store = PreferencesStore(defaults: defaults)
+        store.activationMode = .on
+        store.playLidEventSounds = false
+        let soundDidChange = Notification.Name.preferencesPlayLidEventSoundsDidChange
+        let displayDidChange = Notification.Name.preferencesPreventDisplaySleepDidChange
+
+        let counts = observeNotifications(named: [soundDidChange, displayDidChange], from: store) {
+            store.activationMode = .off
+            store.activationMode = .auto
+        }
+
+        XCTAssertEqual(counts[soundDidChange], 1)
+        XCTAssertEqual(counts[displayDidChange], 0)
+    }
 }

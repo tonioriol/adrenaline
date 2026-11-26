@@ -162,6 +162,38 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertFalse(prefs.preventDisplaySleep)
     }
 
+    func testReapplyRestartsWithChangedPreferences() {
+        let state = AppState()
+        let awake = FakeAwakeController()
+        let lid = FakeLidCloseController()
+        let prefs = FakePreferencesStore()
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
+
+        coordinator.turnOn()
+        prefs.preventDisplaySleep = false // another mode's preset, changed behind the coordinator
+        XCTAssertTrue(coordinator.reapply())
+
+        XCTAssertTrue(state.isActive)
+        XCTAssertEqual(awake.disableCallCount, 1)
+        XCTAssertEqual(awake.enableCallCount, 2)
+        XCTAssertEqual(awake.lastPreventDisplaySleep, false)
+    }
+
+    func testReapplySkipsWhenSettingsInForceMatch() {
+        let state = AppState()
+        let awake = FakeAwakeController()
+        let lid = FakeLidCloseController()
+        let prefs = FakePreferencesStore()
+        let coordinator = AppCoordinator(state: state, awakeController: awake, lidCloseController: lid, preferences: prefs)
+
+        coordinator.turnOn()
+        coordinator.setPreventDisplaySleep(false) // applied live, so already in force
+        coordinator.reapply()
+
+        XCTAssertEqual(awake.disableCallCount, 0)
+        XCTAssertEqual(awake.enableCallCount, 1)
+    }
+
     func testSetPreventDisplaySleepWhileOffJustPersists() {
         let state = AppState()
         let awake = FakeAwakeController()

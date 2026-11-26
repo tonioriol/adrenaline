@@ -149,7 +149,13 @@ final class MenuBarController: NSObject {
             return symbolImage(named: "exclamationmark.triangle")
         }
 
-        return StatusPill.image(filled: holds.mode == .on || holds.isAutoHeld, badged: holds.mode == .auto)
+        let fill: StatusPill.Fill
+        switch holds.mode {
+        case .off: fill = .none
+        case .auto: fill = .half
+        case .on: fill = .full
+        }
+        return StatusPill.image(fill: fill, badged: holds.isAutoHeld)
     }
 
     private func symbolImage(named symbolName: String) -> NSImage? {
@@ -209,6 +215,7 @@ final class MenuBarController: NSObject {
         if !holds.holds.isEmpty {
             lines.append("Held by: " + holds.holds.map { holdLabel($0, includePID: false) }.joined(separator: ", "))
         }
+        lines.append("Click for \(holds.nextMode.rawValue.capitalized) · right-click for the menu")
         return lines.joined(separator: "\n")
     }
 
@@ -221,6 +228,12 @@ final class MenuBarController: NSObject {
 
     @objc
     private func statusItemClicked(_ sender: NSStatusBarButton) {
+        // A click cycles the mode; a right-click or control-click opens the menu.
+        guard let event = NSApp.currentEvent,
+              event.type == .rightMouseUp || event.modifierFlags.contains(.control) else {
+            setMode(holds.nextMode)
+            return
+        }
         showMenu()
     }
 
@@ -261,6 +274,10 @@ final class MenuBarController: NSObject {
         menu.addItem(aboutItem)
 
         menu.addItem(NSMenuItem.separator())
+
+        let presetHeading = NSMenuItem(title: "When \(preferences.preset.rawValue.capitalized)", action: nil, keyEquivalent: "")
+        presetHeading.isEnabled = false
+        menu.addItem(presetHeading)
 
         for row in PreferenceMenuRows.rows(for: preferences.snapshot(), showDiskSleep: diskTypeDetector.hasNonSSDDrive) {
             guard let id = PreferenceRowID(row.id) else { continue }
@@ -445,6 +462,10 @@ final class MenuBarController: NSObject {
     @objc
     private func selectMode(_ item: NSMenuItem) {
         guard let rawValue = item.representedObject as? String, let mode = ActivationMode(rawValue: rawValue) else { return }
+        setMode(mode)
+    }
+
+    private func setMode(_ mode: ActivationMode) {
         preferences.activationMode = mode
         holds.setMode(mode)
     }

@@ -7,14 +7,24 @@ final class FakeHoldCoordinator: HoldActivating {
     var onTransitionEnd: (() -> Void)?
     var turnOnCount = 0
     var turnOffCount = 0
+    var reapplyCount = 0
     var failTurnOn = false
     var deferTransitions = false
+    /// Refuses every request, as when busy with a transition HoldController did not start.
+    var busyElsewhere = false
     private var pending: (() -> Void)?
 
     init(state: AppState) { self.state = state }
 
+    @discardableResult func reapply() -> Bool {
+        guard pending == nil, !busyElsewhere else { return false }
+        reapplyCount += 1
+        run {}
+        return true
+    }
+
     @discardableResult func turnOn() -> Bool {
-        guard pending == nil else { return false }
+        guard pending == nil, !busyElsewhere else { return false }
         turnOnCount += 1
         run { [self] in
             if failTurnOn { state.recordError("boom") } else { state.setActive(true) }
@@ -23,7 +33,7 @@ final class FakeHoldCoordinator: HoldActivating {
     }
 
     @discardableResult func turnOff() -> Bool {
-        guard pending == nil else { return false }
+        guard pending == nil, !busyElsewhere else { return false }
         turnOffCount += 1
         run { [self] in state.setActive(false) }
         return true
@@ -106,6 +116,50 @@ final class HoldControllerTests: XCTestCase {
         XCTAssertEqual(coordinator.turnOffCount, 0)
         holds.release(id)
         XCTAssertFalse(state.isActive)
+    }
+
+    func testModeChangeWhileActiveReappliesTheNewPreset() throws {
+        _ = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        holds.setMode(.on)
+        XCTAssertEqual(coordinator.reapplyCount, 1)
+        holds.setMode(.auto)
+        XCTAssertEqual(coordinator.reapplyCount, 2)
+        XCTAssertTrue(state.isActive)
+    }
+
+    func testModeChangeThatTurnsOnOrOffDoesNotReapply() {
+        holds.setMode(.on)
+        holds.setMode(.off)
+        XCTAssertEqual(coordinator.turnOnCount, 1)
+        XCTAssertEqual(coordinator.turnOffCount, 1)
+        XCTAssertEqual(coordinator.reapplyCount, 0)
+    }
+
+    func testReapplyRefusedWhileBusyRunsWhenThatTransitionEnds() throws {
+        _ = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        coordinator.busyElsewhere = true
+        holds.setMode(.on)
+        XCTAssertEqual(coordinator.reapplyCount, 0)
+        coordinator.busyElsewhere = false
+        coordinator.onTransitionEnd?()
+        XCTAssertEqual(coordinator.reapplyCount, 1)
+    }
+
+    func testModeChangeDuringTurnOnReappliesAfterIt() throws {
+        coordinator.deferTransitions = true
+        _ = try XCTUnwrap(holds.acquire(reason: "a", pid: 42))
+        holds.setMode(.on)
+        XCTAssertEqual(coordinator.reapplyCount, 0)
+        coordinator.finishPending()
+        XCTAssertEqual(coordinator.reapplyCount, 1)
+    }
+
+    func testNextModeCyclesOffAutoOn() {
+        XCTAssertEqual(holds.nextMode, .on)
+        holds.setMode(.on)
+        XCTAssertEqual(holds.nextMode, .off)
+        holds.setMode(.off)
+        XCTAssertEqual(holds.nextMode, .auto)
     }
 
     func testHoldNotificationsExposeChangesWhileActivationIsUnchanged() throws {

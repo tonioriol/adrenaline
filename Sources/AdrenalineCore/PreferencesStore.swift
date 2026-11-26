@@ -46,97 +46,127 @@ public protocol PreferencesProviding: AnyObject {
     func snapshot() -> PreferencesSnapshot
 }
 
+/// The settings Auto and On each keep their own copy of.
+public enum PresetSetting: String, CaseIterable {
+    case preventDisplaySleep
+    case preventLidCloseSleep
+    case preventDiskSleep
+    case playLidEventSounds
+    case overrideSystemVolumeForLidEventSounds
+    case stayUnlockedWithLidClosed
+
+    var defaultValue: Bool {
+        switch self {
+        case .preventDisplaySleep, .preventDiskSleep, .playLidEventSounds, .overrideSystemVolumeForLidEventSounds:
+            return true
+        case .preventLidCloseSleep, .stayUnlockedWithLidClosed:
+            return false
+        }
+    }
+
+    var didChange: Notification.Name {
+        switch self {
+        case .preventDisplaySleep: return .preferencesPreventDisplaySleepDidChange
+        case .preventLidCloseSleep: return .preferencesPreventLidCloseSleepDidChange
+        case .preventDiskSleep: return .preferencesPreventDiskSleepDidChange
+        case .playLidEventSounds: return .preferencesPlayLidEventSoundsDidChange
+        case .overrideSystemVolumeForLidEventSounds: return .preferencesOverrideSystemVolumeForLidEventSoundsDidChange
+        case .stayUnlockedWithLidClosed: return .preferencesStayUnlockedWithLidClosedDidChange
+        }
+    }
+
+    /// The single key all modes shared before presets; both presets start from it.
+    var legacyKey: String { "Adrenaline.\(rawValue)" }
+
+    func key(for preset: ActivationMode) -> String { "Adrenaline.\(preset.rawValue).\(rawValue)" }
+}
+
 public final class PreferencesStore: PreferencesProviding {
     public enum Key {
-        public static let preventDisplaySleep = "Adrenaline.preventDisplaySleep"
-        public static let preventLidCloseSleep = "Adrenaline.preventLidCloseSleep"
-        public static let preventDiskSleep = "Adrenaline.preventDiskSleep"
-        public static let playLidEventSounds = "Adrenaline.playLidEventSounds"
-        public static let overrideSystemVolumeForLidEventSounds = "Adrenaline.overrideSystemVolumeForLidEventSounds"
-        public static let stayUnlockedWithLidClosed = "Adrenaline.stayUnlockedWithLidClosed"
         public static let lidClosePreventionConfirmed = "Adrenaline.lidClosePreventionConfirmed"
         public static let activationMode = "Adrenaline.activationMode"
         fileprivate static let wasActive = "Adrenaline.wasActive"
     }
 
     private let defaults: UserDefaults
+    private var presets: [ActivationMode: [PresetSetting: Bool]] = [:]
 
-    public var preventDisplaySleep: Bool {
+    public var activationMode: ActivationMode {
         didSet {
-            defaults.set(preventDisplaySleep, forKey: Key.preventDisplaySleep)
-            if preventDisplaySleep != oldValue {
-                NotificationCenter.default.post(name: .preferencesPreventDisplaySleepDidChange, object: self)
+            defaults.set(activationMode.rawValue, forKey: Key.activationMode)
+            let previous = Self.preset(for: oldValue)
+            for setting in PresetSetting.allCases where presets[previous]?[setting] != presets[preset]?[setting] {
+                NotificationCenter.default.post(name: setting.didChange, object: self)
             }
         }
+    }
+
+    /// The preset the settings read and write: Auto's in Auto, On's in On and Off.
+    public var preset: ActivationMode { Self.preset(for: activationMode) }
+
+    public var preventDisplaySleep: Bool {
+        get { self[.preventDisplaySleep] }
+        set { self[.preventDisplaySleep] = newValue }
     }
 
     public var preventLidCloseSleep: Bool {
-        didSet {
-            defaults.set(preventLidCloseSleep, forKey: Key.preventLidCloseSleep)
-            if preventLidCloseSleep != oldValue {
-                NotificationCenter.default.post(name: .preferencesPreventLidCloseSleepDidChange, object: self)
-            }
-        }
+        get { self[.preventLidCloseSleep] }
+        set { self[.preventLidCloseSleep] = newValue }
     }
 
     public var preventDiskSleep: Bool {
-        didSet {
-            defaults.set(preventDiskSleep, forKey: Key.preventDiskSleep)
-            if preventDiskSleep != oldValue {
-                NotificationCenter.default.post(name: .preferencesPreventDiskSleepDidChange, object: self)
-            }
-        }
+        get { self[.preventDiskSleep] }
+        set { self[.preventDiskSleep] = newValue }
     }
 
     public var playLidEventSounds: Bool {
-        didSet {
-            defaults.set(playLidEventSounds, forKey: Key.playLidEventSounds)
-            if playLidEventSounds != oldValue {
-                NotificationCenter.default.post(name: .preferencesPlayLidEventSoundsDidChange, object: self)
-            }
-        }
+        get { self[.playLidEventSounds] }
+        set { self[.playLidEventSounds] = newValue }
     }
 
     public var overrideSystemVolumeForLidEventSounds: Bool {
-        didSet {
-            defaults.set(overrideSystemVolumeForLidEventSounds, forKey: Key.overrideSystemVolumeForLidEventSounds)
-            if overrideSystemVolumeForLidEventSounds != oldValue {
-                NotificationCenter.default.post(name: .preferencesOverrideSystemVolumeForLidEventSoundsDidChange, object: self)
-            }
-        }
+        get { self[.overrideSystemVolumeForLidEventSounds] }
+        set { self[.overrideSystemVolumeForLidEventSounds] = newValue }
     }
 
     public var stayUnlockedWithLidClosed: Bool {
-        didSet {
-            defaults.set(stayUnlockedWithLidClosed, forKey: Key.stayUnlockedWithLidClosed)
-            if stayUnlockedWithLidClosed != oldValue {
-                NotificationCenter.default.post(name: .preferencesStayUnlockedWithLidClosedDidChange, object: self)
-            }
-        }
+        get { self[.stayUnlockedWithLidClosed] }
+        set { self[.stayUnlockedWithLidClosed] = newValue }
     }
 
     public var lidClosePreventionConfirmed: Bool {
         didSet { defaults.set(lidClosePreventionConfirmed, forKey: Key.lidClosePreventionConfirmed) }
     }
 
-    public var activationMode: ActivationMode {
-        didSet { defaults.set(activationMode.rawValue, forKey: Key.activationMode) }
-    }
-
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        self.preventDisplaySleep = Self.readBool(from: defaults, key: Key.preventDisplaySleep, default: true)
-        self.preventLidCloseSleep = Self.readBool(from: defaults, key: Key.preventLidCloseSleep, default: false)
-        self.preventDiskSleep = Self.readBool(from: defaults, key: Key.preventDiskSleep, default: true)
-        self.playLidEventSounds = Self.readBool(from: defaults, key: Key.playLidEventSounds, default: true)
-        self.overrideSystemVolumeForLidEventSounds = Self.readBool(from: defaults, key: Key.overrideSystemVolumeForLidEventSounds, default: true)
-        self.stayUnlockedWithLidClosed = Self.readBool(from: defaults, key: Key.stayUnlockedWithLidClosed, default: false)
-        self.lidClosePreventionConfirmed = Self.readBool(from: defaults, key: Key.lidClosePreventionConfirmed, default: false)
+        self.lidClosePreventionConfirmed = defaults.object(forKey: Key.lidClosePreventionConfirmed) as? Bool ?? false
         if let saved = defaults.string(forKey: Key.activationMode), let mode = ActivationMode(rawValue: saved) {
             self.activationMode = mode
         } else {
             self.activationMode = defaults.bool(forKey: Key.wasActive) ? .on : .auto
             defaults.set(activationMode.rawValue, forKey: Key.activationMode)
+        }
+        for preset in [ActivationMode.auto, .on] {
+            var values: [PresetSetting: Bool] = [:]
+            for setting in PresetSetting.allCases {
+                values[setting] = defaults.object(forKey: setting.key(for: preset)) as? Bool
+                    ?? defaults.object(forKey: setting.legacyKey) as? Bool
+                    ?? setting.defaultValue
+            }
+            presets[preset] = values
+        }
+    }
+
+    public subscript(setting: PresetSetting) -> Bool {
+        get { presets[preset]?[setting] ?? setting.defaultValue }
+        set {
+            let previous = self[setting]
+            presets[preset, default: [:]][setting] = newValue
+            defaults.set(newValue, forKey: setting.key(for: preset))
+            if newValue != previous {
+                NotificationCenter.default.post(name: setting.didChange, object: self)
+            }
         }
     }
 
@@ -151,7 +181,7 @@ public final class PreferencesStore: PreferencesProviding {
         )
     }
 
-    private static func readBool(from defaults: UserDefaults, key: String, default defaultValue: Bool) -> Bool {
-        defaults.object(forKey: key) as? Bool ?? defaultValue
+    private static func preset(for mode: ActivationMode) -> ActivationMode {
+        mode == .auto ? .auto : .on
     }
 }
