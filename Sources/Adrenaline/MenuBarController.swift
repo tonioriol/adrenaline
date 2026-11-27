@@ -104,28 +104,8 @@ final class MenuBarController: NSObject {
             }
         )
         observers.append(
-            center.addObserver(forName: .preferencesPreventLidCloseSleepDidChange, object: preferences, queue: .main) { [weak self] _ in
+            center.addObserver(forName: .preferencesDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.render()
-                self?.refreshVisibleRows()
-            }
-        )
-        observers.append(
-            center.addObserver(forName: .preferencesPreventDiskSleepDidChange, object: preferences, queue: .main) { [weak self] _ in
-                self?.refreshVisibleRows()
-            }
-        )
-        observers.append(
-            center.addObserver(forName: .preferencesPlayLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
-                self?.refreshVisibleRows()
-            }
-        )
-        observers.append(
-            center.addObserver(forName: .preferencesStayUnlockedWithLidClosedDidChange, object: preferences, queue: .main) { [weak self] _ in
-                self?.refreshVisibleRows()
-            }
-        )
-        observers.append(
-            center.addObserver(forName: .preferencesOverrideSystemVolumeForLidEventSoundsDidChange, object: preferences, queue: .main) { [weak self] _ in
                 self?.refreshVisibleRows()
             }
         )

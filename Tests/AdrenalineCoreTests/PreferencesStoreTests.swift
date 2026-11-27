@@ -196,4 +196,22 @@ final class PreferencesStoreTests: XCTestCase {
         XCTAssertEqual(counts[soundDidChange], 1)
         XCTAssertEqual(counts[displayDidChange], 0)
     }
+
+    /// The open menu redraws its rows on `.preferencesDidChange`; a mode switch that swaps
+    /// presets must post it for every setting, display sleep included, or the rows keep
+    /// showing the other mode's values.
+    func testEverySettingThatDiffersAcrossModesPostsPreferencesDidChange() {
+        for setting in PresetSetting.allCases {
+            let store = PreferencesStore(defaults: makeIsolatedDefaults())
+            store.activationMode = .auto
+            store[setting].toggle()
+
+            let counts = observeNotifications(named: [.preferencesDidChange], from: store) {
+                store.activationMode = .on
+            }
+
+            XCTAssertEqual(counts[.preferencesDidChange], 1, "\(setting)")
+            XCTAssertEqual(store[setting], setting.defaultValue, "\(setting)")
+        }
+    }
 }

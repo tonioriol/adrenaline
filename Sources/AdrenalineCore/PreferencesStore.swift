@@ -32,6 +32,8 @@ public extension Notification.Name {
     static let preferencesPlayLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesPlayLidEventSoundsDidChange")
     static let preferencesOverrideSystemVolumeForLidEventSoundsDidChange = Notification.Name("Adrenaline.preferencesOverrideSystemVolumeForLidEventSoundsDidChange")
     static let preferencesStayUnlockedWithLidClosedDidChange = Notification.Name("Adrenaline.preferencesStayUnlockedWithLidClosedDidChange")
+    /// Posted once after any preset setting changes, including a mode switch that swaps presets.
+    static let preferencesDidChange = Notification.Name("Adrenaline.preferencesDidChange")
 }
 
 public protocol PreferencesProviding: AnyObject {
@@ -95,8 +97,12 @@ public final class PreferencesStore: PreferencesProviding {
         didSet {
             defaults.set(activationMode.rawValue, forKey: Key.activationMode)
             let previous = Self.preset(for: oldValue)
-            for setting in PresetSetting.allCases where presets[previous]?[setting] != presets[preset]?[setting] {
+            let changed = PresetSetting.allCases.filter { presets[previous]?[$0] != presets[preset]?[$0] }
+            for setting in changed {
                 NotificationCenter.default.post(name: setting.didChange, object: self)
+            }
+            if !changed.isEmpty {
+                NotificationCenter.default.post(name: .preferencesDidChange, object: self)
             }
         }
     }
@@ -166,6 +172,7 @@ public final class PreferencesStore: PreferencesProviding {
             defaults.set(newValue, forKey: setting.key(for: preset))
             if newValue != previous {
                 NotificationCenter.default.post(name: setting.didChange, object: self)
+                NotificationCenter.default.post(name: .preferencesDidChange, object: self)
             }
         }
     }
